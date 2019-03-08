@@ -34,7 +34,7 @@ object WikiDataBrowser {
     val neighboursList = entity.getConnectedStreets
       .map(claim => claim.mainsnak.datavalue)
       .map {
-        case EntityId(id) => getEntity(id)
+        case Some(EntityId(id)) => getEntity(id)
       }
       .zipWithIndex.map(p => (p._2 + 1, p._1))
 

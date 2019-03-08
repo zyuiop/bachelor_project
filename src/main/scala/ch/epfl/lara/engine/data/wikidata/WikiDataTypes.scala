@@ -20,7 +20,16 @@ object WikiDataTypes {
   // https://www.wikidata.org/wiki/Help:Data_type
 
 
-  case class Snak(snaktype: String, property: Property, datatype: String, datavalue: DataValue)
+  /**
+    * A snak, i.e. a container for a value
+    *
+    * @param snaktype the type of the snack ("value", "novalue" ..?)
+    * @param property a reminder of the name of the property
+    * @param datatype the type of data (redundent)
+    * @param datavalue the data value, if present
+    */
+  // TODO: We might want to erase this type while parsing.
+  case class Snak(snaktype: String, property: Property, datatype: String, datavalue: Option[DataValue] = None)
 
   case class Claim(mainsnak: Snak, `type`: String, qualifiers: Map[Property, Seq[Snak]] = Map(),
                    qualifiersOrder: Seq[Property] = Seq(), id: String, rank: String, references: Seq[Reference] = Seq())
