@@ -29,7 +29,7 @@ object WikiDataBrowser {
 
   private def explore(entity: Entity): Unit = {
 
-    println(s"You arrive at ${entity.labels(language).value}... ${entity.descriptions(language).value}")
+    println(s"You arrive at ${entity.labels(language)}... ${entity.descriptions(language)}")
 
     val neighboursList = entity.getConnectedStreets
       .map(claim => claim.mainsnak.datavalue)
@@ -41,7 +41,7 @@ object WikiDataBrowser {
     val neighbours = neighboursList.toMap
 
     println("Where do you want to go next? Options: ")
-    neighboursList.foreach { case (num, p) => println(s"$num: ${p.labels(language).value}")}
+    neighboursList.foreach { case (num, p) => println(s"$num: ${p.labels(language)}")}
 
     @tailrec def promptNum: Entity = {
       print("> ")

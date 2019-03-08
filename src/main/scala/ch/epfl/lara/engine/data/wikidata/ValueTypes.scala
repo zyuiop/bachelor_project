@@ -32,7 +32,9 @@ object ValueTypes {
     * @param language the language of the text
     * @param value the value of the text in that language
     */
-  case class MonolingualText(language: Language, value: String) extends DataValue
+  case class MonolingualText(language: Language, value: String) extends DataValue {
+    override def toString: Language = value
+  }
 
   /**
     * A value that is not supported
