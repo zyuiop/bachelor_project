@@ -2,6 +2,7 @@ package ch.epfl.lara.engine.data.wikidata
 
 import ch.epfl.lara.engine.data.wikidata.ValueTypes._
 import ch.epfl.lara.engine.data.wikidata.WikiDataTypes.{Claim, Entity, Language, Snak}
+import ch.epfl.lara.engine.data.wikidata.actions.Action
 import play.api.libs.json.Json
 
 import scala.annotation.tailrec
@@ -19,117 +20,150 @@ object WikiDataBrowser {
   def main(args: Array[String]): Unit = {
     println("Please provide a starting page")
     val page = StdIn.readLine()
-    val entity = getEntity(page)
-    explore(entity)
+    val entity = WikiData.getEntity(page)
+    ActionResolver.describeEntity(entity)
+    ActionResolver.actOnEntity(entity)
   }
 
-  private def getEntity(page: String) = {
-    if (!cache.contains(page))
-      cache.put(page, WikiData.getEntity(page))
-    cache(page)
-  }
-
-  private def explore(entity: Entity): Unit = {
-
-    println(s"You arrive at ${entity.labels(language)}... ${entity.descriptions(language)}")
-
-
-    actOn(entity)
-
-  }
-
-  private def actOn(entity: Entity): Unit = {
-    println("What do you want to do now? You can either [learn] about this place or [move] to an other place.")
-    val actions = Set("move", "learn")
-
-    @tailrec def promptAct: String = {
-      print("> ")
-      val act = StdIn.readLine().toLowerCase()
-
-      if (actions(act)) act
-      else {
-        println("Unknown action " + act)
-        promptAct
-      }
+  object ActionResolver extends WikiDataActionResolver {
+    override def describeEntity(entity: Entity): Unit = {
+      println(s"You arrive at ${entity.labels(language)}... ${entity.descriptions(language)}")
     }
 
-    val act = promptAct
+    implicit val qs: WikiDataQueryService = WikiData
+    implicit val ar: WikiDataActionResolver = this
 
-    if (act == "move") moveFrom(entity)
-    else if (act == "learn") learnAbout(entity)
-  }
+    private val actions: Map[String, Action] = Map(
+      "move" -> MoveAction,
+      "learn" -> LearnAction
+    )
 
-  private def learnAbout(entity: Entity) = {
-    println("What do you want to learn about this place? Here are the things I know about it:")
+    override def actOnEntity(entity: Entity): Unit = {
+      val availableActions = this.actions.filter(pair => pair._2.appliesTo(entity))
+      val actions = availableActions.keySet
 
-    val propsList = entity.claims.keys.map(p => getEntity(p)).toSeq
+      @tailrec def promptAct: String = {
+        val displayActions = actions.map(act => s"[$act]").mkString(" or ")
+        println(s"What do you want to do now? You can either $displayActions")
+        print("> ")
+        val act = StdIn.readLine().toLowerCase()
 
-    val requested = selectEntity(propsList)
-    val value = entity.claims(requested.id)
-
-    println(s"You wanted to learn ${requested.labels(language)} (${requested.descriptions(language)}). The answer is: ")
-    printClaim(value)
-
-    println()
-    actOn(entity)
-  }
-
-  private def printClaim(claim: Seq[Claim]): Unit = {
-    def printSnak(s: Snak, spaces: String): Unit = {
-      print(spaces + Console.CYAN)
-
-      s match {
-        case Snak(_, _, _, None) => println("(no data...)")
-        case Snak(_, _, _, Some(v)) =>
-          v match {
-            case EntityId(id) =>
-              println(getEntity(id).labels(language))
-
-            case GlobeCoordinate(latitude, longitude, altitude, precision, globe) =>
-              val globeName = globe.id.map(getEntity).map(_.labels(language)).getOrElse(Console.RED + "(unknown)" + Console.CYAN)
-              println(s"Globe coordinate: ($latitude, $longitude, $altitude) on globe $globeName")
-
-            case MonolingualText(lang, value) =>
-              if (lang == this.language)
-                println(value)
-
-            case WikiString(value) =>
-              println(s"$spaces$value")
-
-            case Quantity(amount, unitEntity) =>
-              val unit = unitEntity.id.map(getEntity).map(_.labels(language)).getOrElse("(unknown unit)")
-              println(spaces + s"$amount $unit")
-
-            case UnknownValue(json, t) =>
-              println(spaces + s"(unknown data type $t...) [raw: ${Json.prettyPrint(json)}]")
-
-            case _ =>
-              println(spaces + "(unknown data...)")
-          }
+        if (actions(act)) act
+        else {
+          println("Unknown action " + act)
+          promptAct
+        }
       }
 
-      print(Console.RESET)
+      availableActions(promptAct).applyTo(entity)
     }
-
-    def printSubClaim(c: Claim): Unit = {
-      printSnak(c.mainsnak, " ")
-
-      c.qualifiers.values.flatten.foreach(v => printSnak(v, "   "))
-    }
-
-    claim.foreach(c => printSubClaim(c))
   }
 
-  private def moveFrom(entity: Entity) = {
-    println("Where do you want to go next? Options: ")
+  object MoveAction extends Action {
+    /**
+      * Check if the current action can be applied to a given entity
+      *
+      * @param entity the entity for which we want to know if the action is appliable
+      * @return true if this action can be applied to the given entity
+      */
+    override def appliesTo(entity: Entity): Boolean = entity.hasConnectedStreets
 
-    val neighboursList = entity.getConnectedStreets
-      .map(claim => claim.mainsnak.datavalue)
-      .map {
-        case Some(EntityId(id)) => getEntity(id)
+    /**
+      * Apply the current action to the given entity
+      *
+      * @param entity the entity to apply the action on
+      * @param query  the wikidata service, used to query additional data if needed
+      */
+    override def applyTo(entity: Entity)(implicit query: WikiDataQueryService, resolver: WikiDataActionResolver): Unit = {
+      println("Where do you want to go next? Options: ")
+
+      val neighboursList = entity.getConnectedStreets
+        .map(claim => claim.mainsnak.datavalue)
+        .map {
+          case Some(EntityId(id)) => query.getEntity(id)
+        }
+
+      val selected = selectEntity(neighboursList)
+      resolver.describeEntity(selected)
+      resolver.actOnEntity(selected)
+    }
+  }
+
+  object LearnAction extends Action {
+    /**
+      * Check if the current action can be applied to a given entity
+      *
+      * @param entity the entity for which we want to know if the action is appliable
+      * @return true if this action can be applied to the given entity
+      */
+    override def appliesTo(entity: Entity): Boolean = true
+
+    /**
+      * Apply the current action to the given entity
+      *
+      * @param entity the entity to apply the action on
+      * @param query  the wikidata service, used to query additional data if needed
+      */
+    override def applyTo(entity: Entity)(implicit query: WikiDataQueryService, resolver: WikiDataActionResolver): Unit = {
+      println("What do you want to learn about this thing? Here are the things I know about it:")
+
+      val propsList = entity.claims.keys.map(p => query.getEntity(p)).toSeq
+
+      val requested = selectEntity(propsList)
+      val value = entity.claims(requested.id)
+
+      println(s"You wanted to learn ${requested.labels(language)} (${requested.descriptions(language)}). The answer is: ")
+      printClaim(value)
+
+      println()
+      resolver.actOnEntity(entity)
+    }
+
+    private def printClaim(claim: Seq[Claim]): Unit = {
+      def printSnak(s: Snak, spaces: String): Unit = {
+        print(spaces + Console.CYAN)
+
+        s match {
+          case Snak(_, _, _, None) => println("(no data...)")
+          case Snak(_, _, _, Some(v)) =>
+            v match {
+              case EntityId(id) =>
+                println(WikiData.getEntity(id).labels(language))
+
+              case GlobeCoordinate(latitude, longitude, altitude, precision, globe) =>
+                val globeName = globe.id.map(WikiData.getEntity).map(_.labels(language)).getOrElse(Console.RED + "(unknown)" + Console.CYAN)
+                println(s"Globe coordinate: ($latitude, $longitude, $altitude) on globe $globeName")
+
+              case MonolingualText(lang, value) =>
+                if (lang == language)
+                  println(value)
+
+              case WikiString(value) =>
+                println(s"$spaces$value")
+
+              case Quantity(amount, unitEntity) =>
+                val unit = unitEntity.id.map(WikiData.getEntity).map(_.labels(language)).getOrElse("(unknown unit)")
+                println(spaces + s"$amount $unit")
+
+              case UnknownValue(json, t) =>
+                println(spaces + s"(unknown data type $t...) [raw: ${Json.prettyPrint(json)}]")
+
+              case _ =>
+                println(spaces + "(unknown data...)")
+            }
+        }
+
+        print(Console.RESET)
       }
 
-    explore(selectEntity(neighboursList))
+      def printSubClaim(c: Claim): Unit = {
+        printSnak(c.mainsnak, " ")
+
+        c.qualifiers.values.flatten.foreach(v => printSnak(v, "   "))
+      }
+
+      claim.foreach(c => printSubClaim(c))
+    }
   }
 
   private def selectEntity(entities: Iterable[Entity]): Entity = {

@@ -40,6 +40,8 @@ object WikiDataTypes {
 
     def getConnectedStreets: Seq[Claim] = claims.withDefaultValue(Seq())("P47")
 
+    def hasConnectedStreets: Boolean = claims.contains("P47")
+
     def toString()(implicit lang: Language): String = {
       labels.get(lang).map(_.value).getOrElse(super.toString)
     }
