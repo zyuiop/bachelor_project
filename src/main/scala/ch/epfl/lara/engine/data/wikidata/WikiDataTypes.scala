@@ -17,7 +17,6 @@ object WikiDataTypes {
   case class Reference(hash: String, snaks: Map[Property, Seq[Snak]], snaksOrder: Seq[Property])
 
 
-  // https://www.wikidata.org/wiki/Help:Data_type
 
 
   /**
@@ -40,6 +39,10 @@ object WikiDataTypes {
                     claims: Map[Property, Seq[Claim]]) {
 
     def getConnectedStreets: Seq[Claim] = claims.withDefaultValue(Seq())("P47")
+
+    def toString()(implicit lang: Language): String = {
+      labels.get(lang).map(_.value).getOrElse(super.toString)
+    }
   }
 
   object WikiDataNaming extends JsonNaming {
