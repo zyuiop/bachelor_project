@@ -72,10 +72,6 @@ package object environment {
         }
       }
     }
-
-    def parseEither(orientation: String): Either[Throwable, Position] = {
-      Try(parse(orientation)).toEither
-    }
   }
 
   trait DoorType {

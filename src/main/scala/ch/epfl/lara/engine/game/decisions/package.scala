@@ -3,6 +3,8 @@ package ch.epfl.lara.engine.game
 import ch.epfl.lara.engine.game.environment.Position
 import ch.epfl.lara.engine.game.items.{Item, ItemRegistry}
 
+import scala.util.Try
+
 /**
   * @author Louis Vialar
   */
@@ -67,7 +69,7 @@ package object decisions {
 
   object Command {
     private def parsePosition(args: Array[String])(ifSuccess: Position => Command): Command = {
-      Position.parseEither(args.mkString("-")).fold(t => InvalidCommand(t.getMessage), ifSuccess)
+      Try(Position.parse(args.mkString("-"))).toEither.fold(t => InvalidCommand(t.getMessage), ifSuccess)
     }
 
     private def parseItem(args: Array[String])(implicit items: ItemRegistry): (Option[Item], Int) = {

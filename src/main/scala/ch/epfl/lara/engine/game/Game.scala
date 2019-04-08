@@ -1,15 +1,36 @@
 package ch.epfl.lara.engine.game
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.decisions._
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.ItemRegistry
 
+import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.io.StdIn
 
 /**
   * @author Louis Vialar
   */
 object Game {
+  val DefaultParser: ActionParser = ActionParser(
+    ActionUseDoor,
+    ActionMove
+  )
+
+  private val parserQueue: mutable.ArrayStack[ActionParser] = mutable.ArrayStack(DefaultParser)
+
+  def addParser(parser: ActionParser): Unit = {
+    parserQueue.push(parser)
+  }
+
+  def currentParser: ActionParser = parserQueue.top
+
+  def dequeueParser(): ActionParser = parserQueue.pop()
+
+  private implicit val printStream: PrintStream = Console.out
+
   def main(args: Array[String]): Unit = {
     val rooms = RoomRegistry(Seq(
       Room("street", "42nd Street", "The sun is rising. The crowd is moving between buildings.", Map()),
@@ -32,14 +53,27 @@ object Game {
 
     val items = ItemRegistry(Map())
 
-    val state = LevelState(Nil, Nil, rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms))(Console.out)
+    val state = LevelState(Nil, rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms))(Console.out)
 
     println(state.currentRoom.describe(state.map))
 
     loop(state)
   }
 
+  @tailrec
   def loop(state: LevelState): Unit = {
+    val nextStep = StdIn.readLine("> ").split(" ")
+    val action = currentParser(nextStep)
+
+    if (action.isSuccess) {
+      loop(action.get.execute(state))
+    } else {
+      println(action.failed.get.getMessage)
+      loop(state)
+    }
+  }
+
+  /*def loop(state: LevelState): Unit = {
     val nextStep = StdIn.readLine("> ")
     val action = Command.buildDecision(nextStep)(state.map.objects)
 
@@ -63,5 +97,5 @@ object Game {
         } else loop(state)
       case _ => loop(state.nextState(action))
     }
-  }
+  }*/
 }
