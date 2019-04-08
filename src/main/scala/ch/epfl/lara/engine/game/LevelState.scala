@@ -2,9 +2,13 @@ package ch.epfl.lara.engine.game
 
 import java.io.PrintStream
 
+import ch.epfl.lara.engine.game.Game.DefaultParser
 import ch.epfl.lara.engine.game.decisions._
 import ch.epfl.lara.engine.game.environment.{Center, Door, Position, Room}
 import ch.epfl.lara.engine.game.items.Item
+
+import scala.collection.immutable.Stack
+import scala.collection.mutable
 
 /**
   * @author Louis Vialar
@@ -14,38 +18,23 @@ case class LevelState(inventory: List[(Object, Int)],
                       currentPosition: Position,
                       currentUsedItem: Option[Item],
                       attributes: Map[String, String],
-                      map: LevelMap)(implicit out: PrintStream) {
-
-  @deprecated
-  def nextState(action: Command): LevelState = action match {
-    case MoveCommand(direction: Position) =>
-      LevelState(inventory, currentRoom, direction, None, attributes, map)
-
-    case ItemDropCommand(o: Item, quantity: Int) =>
-      ???
-
-    case ItemInteractCommand(o: Option[Item]) =>
-      ???
-
-    case ItemPickAllCommand =>
-      ???
-
-    case ItemPickOneCommand =>
-      ???
-
-    case ItemPickCommand(o: Item, quantity: Int) =>
-      ???
-
-    case ItemSeekCommand(direction: Option[Position]) =>
-      ???
-
-
-    case InvalidCommand(error: String) =>
-      out.println("This command is invalid: " + error)
-      this
-  }
+                      map: LevelMap,
+                      commandParsers: List[ActionParser]
+                     )
+                     (implicit out: PrintStream) {
 
   def getDoor(position: environment.Position) = {
     map.rooms.getDoors(currentRoom).get(position)
+  }
+
+  def addParser(parser: ActionParser): LevelState = {
+    copy(commandParsers = parser :: commandParsers)
+  }
+
+  def currentParser: ActionParser = commandParsers.head
+
+  def dequeueParser(): LevelState = {
+    if (commandParsers.tail.isEmpty) throw new IllegalStateException("cannot dequeue last parser")
+    else copy(commandParsers = commandParsers.tail)
   }
 }

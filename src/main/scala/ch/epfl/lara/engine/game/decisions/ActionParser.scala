@@ -42,4 +42,8 @@ object ActionParser {
 
   private def buildersToMap(builders: Seq[ActionBuilder[_ <: Action]]) = builders.flatMap(b => b.triggeringKeywords.map((_, b))).groupBy(_._1).mapValues(_.map(_._2))
 
+  val DefaultParser: ActionParser = ActionParser(
+    ActionUseDoor,
+    ActionMove
+  )
 }

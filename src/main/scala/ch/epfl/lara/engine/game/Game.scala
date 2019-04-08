@@ -14,20 +14,7 @@ import scala.io.StdIn
   * @author Louis Vialar
   */
 object Game {
-  val DefaultParser: ActionParser = ActionParser(
-    ActionUseDoor,
-    ActionMove
-  )
 
-  private val parserQueue: mutable.ArrayStack[ActionParser] = mutable.ArrayStack(DefaultParser)
-
-  def addParser(parser: ActionParser): Unit = {
-    parserQueue.push(parser)
-  }
-
-  def currentParser: ActionParser = parserQueue.top
-
-  def dequeueParser(): ActionParser = parserQueue.pop()
 
   private implicit val printStream: PrintStream = Console.out
 
@@ -53,7 +40,7 @@ object Game {
 
     val items = ItemRegistry(Map())
 
-    val state = LevelState(Nil, rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms))(Console.out)
+    val state = LevelState(Nil, rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms), List(ActionParser.DefaultParser))(Console.out)
 
     println(state.currentRoom.describe(state.map))
 
@@ -63,7 +50,7 @@ object Game {
   @tailrec
   def loop(state: LevelState): Unit = {
     val nextStep = StdIn.readLine("> ").split(" ")
-    val action = currentParser(nextStep)
+    val action = state.currentParser(nextStep)
 
     if (action.isSuccess) {
       loop(action.get.execute(state))
