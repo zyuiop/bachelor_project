@@ -8,7 +8,7 @@ import ch.epfl.lara.engine.game.LevelState
 trait TimedSchedulable extends Schedulable {
   val nextAction: (Int, (Int, LevelState) => Option[TimedSchedulable])
 
-  override def runTicks(startTime: Int, endTime: Int)(implicit state: LevelState): Option[TimedSchedulable.this.type] = {
+  override def runTicks(startTime: Int, endTime: Int)(implicit state: LevelState): Option[TimedSchedulable] = {
     if (startTime < nextAction._1 && endTime >= nextAction._1) nextAction._2(endTime, state)
     else Some(this)
 

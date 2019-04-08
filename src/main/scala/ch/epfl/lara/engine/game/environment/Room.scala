@@ -1,18 +1,29 @@
 package ch.epfl.lara.engine.game.environment
 
-import ch.epfl.lara.engine.game.{LevelState, InventoryHolder}
+import ch.epfl.lara.engine.game.{InventoryHolder, LevelMap, LevelState}
 import ch.epfl.lara.engine.game.decisions.Command
 
 /**
   * @author Louis Vialar
   */
-case class Room(doors: Map[Position, Door],
+case class Room(id: String,
+                name: String,
+                ambient: String,
                 objects: Map[Position, InventoryHolder]) {
 
-  def describe(): String = ???
+  def describe(implicit level: LevelMap): String = {
+    def describeDoors: String = {
+      level.rooms.getDoors(this).map {
+        case (pos, door) =>
+          val targetRoom = level.rooms.getRoom(door.getTargetRoom(this)).name
+          s"Facing $pos is a ${door.doorType.name} leading to $targetRoom"
+      }.mkString("\n")
+    }
 
-  def takeDoor(position: Position): Option[Door] =
-    doors.get(position)
+    s"""You are in: $name...
+       |$ambient
+       |$describeDoors""".stripMargin
+  }
 
   private def newInventory(decision: Command, inventory: List[(Object, Int)]) = ???
 }

@@ -66,6 +66,10 @@ package object decisions {
        */
 
   object Command {
+    private def parsePosition(args: Array[String])(ifSuccess: Position => Command): Command = {
+      Position.parseEither(args.mkString("-")).fold(t => InvalidCommand(t.getMessage), ifSuccess)
+    }
+
     private def parseItem(args: Array[String])(implicit items: ItemRegistry): (Option[Item], Int) = {
       if (args.head.forall(c => c.isDigit) || args.head.toLowerCase == "a" || args.head.toLowerCase == "all" || args.head.toLowerCase == "one") {
         val quantity =
@@ -89,20 +93,18 @@ package object decisions {
       val args = keywords.tail
 
       if (action == "go" || action == "move") {
-        val orientation = Position.parse(args.mkString("-"))
-        MoveCommand(orientation)
+        parsePosition(args)(MoveCommand)
       } else if (action == "pass" || action == "take" || (action == "use" && args.nonEmpty && args.head.toLowerCase == "door")) {
-        val orientationArg = if (action == "use") args.tail else args
-        val orientation = if (orientationArg.nonEmpty) Some(Position.parse(orientationArg.mkString("-"))) else None
+        val orientationArg = if (action == "use" || (args.nonEmpty && args.head.toLowerCase == "door")) args.tail else args
 
-        TakeDoorCommand(orientation)
+        if (orientationArg.nonEmpty) parsePosition(orientationArg)(o => TakeDoorCommand(Some(o)))
+        else TakeDoorCommand(None)
       } else if (action == "use" || action == "interact") {
         val item = if (args.nonEmpty) items.getItem(args.mkString(" ")) else None
         ItemInteractCommand(item)
       } else if (action == "seek") {
-        val orientation = if (args.nonEmpty) Some(Position.parse(args.mkString("-"))) else None
-
-        ItemSeekCommand(orientation)
+        if (args.nonEmpty) parsePosition(args)(o => ItemSeekCommand(Some(o)))
+        else ItemSeekCommand(None)
       } else if (action == "drop") {
         val (item, quantity) = parseItem(args)
 

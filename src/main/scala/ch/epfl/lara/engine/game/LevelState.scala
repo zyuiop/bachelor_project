@@ -9,40 +9,48 @@ import ch.epfl.lara.engine.game.items.Item
 /**
   * @author Louis Vialar
   */
-// TODO: rename to scenestate
-
 case class LevelState(tree: List[Command],
                       inventory: List[(Object, Int)],
                       currentRoom: Room,
                       currentPosition: Position,
                       currentUsedItem: Option[Item],
                       attributes: Map[String, String],
-                      map: SceneMap)(implicit out: PrintStream) {
+                      map: LevelMap)(implicit out: PrintStream) {
 
   def nextState(action: Command): LevelState = action match {
     case MoveCommand(direction: Position) =>
       LevelState(action :: tree, inventory, currentRoom, direction, None, attributes, map)
 
     case ItemDropCommand(o: Item, quantity: Int) =>
-
+      ???
 
     case ItemInteractCommand(o: Option[Item]) =>
+      ???
 
     case ItemPickAllCommand =>
+      ???
 
     case ItemPickOneCommand =>
+      ???
 
     case ItemPickCommand(o: Item, quantity: Int) =>
+      ???
 
     case ItemSeekCommand(direction: Option[Position]) =>
+      ???
 
 
     case TakeDoorCommand(direction: Option[Position]) =>
-      currentRoom.takeDoor(direction.getOrElse(currentPosition)) match {
+      takeDoor(direction.getOrElse(currentPosition)) match {
         case Some(door) =>
-          if (door.isOpen(this))
-            LevelState(action :: tree, inventory, door.use(currentRoom), Center, None, attributes, map)
-          else {
+          if (door.isOpen(this)) {
+            val (roomId, pos) = door.use(currentRoom)
+            val room = map.rooms.getRoom(roomId)
+
+            out.println(room.describe(map))
+
+            LevelState(action :: tree, inventory, room, pos, None, attributes, map)
+          } else {
             out.println(s"The door is locked...")
             this
           }
@@ -53,5 +61,11 @@ case class LevelState(tree: List[Command],
 
 
     case InvalidCommand(error: String) =>
+      out.println("This command is invalid: " + error)
+      this
+  }
+
+  private def takeDoor(position: environment.Position) = {
+    map.rooms.getDoors(currentRoom).get(position)
   }
 }
