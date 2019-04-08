@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.items.{Item, ItemRegistry}
   * @author Louis Vialar
   */
 package object decisions {
-  sealed trait Command
+  trait Command
 
   case class MoveCommand(direction: Position) extends Command
 

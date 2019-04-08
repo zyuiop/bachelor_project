@@ -10,12 +10,12 @@ import scala.io.StdIn
   */
 object Game {
   def main(args: Array[String]): Unit = {
-    val state = SceneState(Nil, Nil, ???, Center, None, Map(), ???)(Console.out)
+    val state = LevelState(Nil, Nil, ???, Center, None, Map(), ???)(Console.out)
 
     loop(state)
   }
 
-  def loop(state: SceneState): Unit = {
+  def loop(state: LevelState): Unit = {
     val nextStep = StdIn.readLine("> ")
     val action = Command.buildDecision(nextStep)(state.map.objects)
 

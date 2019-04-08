@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.environment
 
-import ch.epfl.lara.engine.game.{SceneState, InventoryHolder}
+import ch.epfl.lara.engine.game.{LevelState, InventoryHolder}
 import ch.epfl.lara.engine.game.decisions.Command
 
 /**

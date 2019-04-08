@@ -24,11 +24,11 @@ package object game {
   // Conditions to open?
 
 
-  case class Edge(source: Scene, target: Scene, activator: SceneState => Boolean)
+  case class Edge(source: Scene, target: Scene, activator: LevelState => Boolean)
 
   class ScenesGraph(vertices: Seq[Scene], edges: Seq[Edge]) {
 
-    def findNextScene(start: Scene, decisions: SceneState): Option[Scene] = {
+    def findNextScene(start: Scene, decisions: LevelState): Option[Scene] = {
       edges find (e => e.source == start && e.activator(decisions)) map (_.target)
     }
   }

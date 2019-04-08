@@ -10,7 +10,7 @@ import ch.epfl.lara.engine.game.decisions.Command
 package object environment {
 
 
-  case class Door(left: Room, right: Room, doorType: DoorType, isOpen: SceneState => Boolean = _ => true) {
+  case class Door(left: Room, right: Room, doorType: DoorType, isOpen: LevelState => Boolean = _ => true) {
     def use(from: Room)(implicit out: PrintStream): Room = {
       val leftToRight = from == left
       out.println(doorType.describe(leftToRight).capitalize + ".")

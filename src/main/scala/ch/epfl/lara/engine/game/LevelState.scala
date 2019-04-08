@@ -11,7 +11,7 @@ import ch.epfl.lara.engine.game.items.Item
   */
 // TODO: rename to scenestate
 
-case class SceneState(tree: List[Command],
+case class LevelState(tree: List[Command],
                       inventory: List[(Object, Int)],
                       currentRoom: Room,
                       currentPosition: Position,
@@ -19,9 +19,9 @@ case class SceneState(tree: List[Command],
                       attributes: Map[String, String],
                       map: SceneMap)(implicit out: PrintStream) {
 
-  def nextState(action: Command): SceneState = action match {
+  def nextState(action: Command): LevelState = action match {
     case MoveCommand(direction: Position) =>
-      SceneState(action :: tree, inventory, currentRoom, direction, None, attributes, map)
+      LevelState(action :: tree, inventory, currentRoom, direction, None, attributes, map)
 
     case ItemDropCommand(o: Item, quantity: Int) =>
 
@@ -41,7 +41,7 @@ case class SceneState(tree: List[Command],
       currentRoom.takeDoor(direction.getOrElse(currentPosition)) match {
         case Some(door) =>
           if (door.isOpen(this))
-            SceneState(action :: tree, inventory, door.use(currentRoom), Center, None, attributes, map)
+            LevelState(action :: tree, inventory, door.use(currentRoom), Center, None, attributes, map)
           else {
             out.println(s"The door is locked...")
             this
