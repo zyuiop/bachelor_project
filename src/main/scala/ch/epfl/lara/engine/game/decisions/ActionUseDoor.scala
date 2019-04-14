@@ -18,7 +18,8 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = {
+  override def apply(inState: LevelState, out: PrintStream): LevelState = {
+    implicit val ps: PrintStream = out
     inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
       case Some(door) =>
         if (door.isOpen(inState)) {

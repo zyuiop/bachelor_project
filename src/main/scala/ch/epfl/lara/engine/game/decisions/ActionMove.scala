@@ -18,8 +18,8 @@ case class ActionMove(position: Position) extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = {
-    inState.copy(currentPosition = position)
+  override def apply(inState: LevelState, out: PrintStream): LevelState = {
+    inState.copy(currentPosition = position)(out)
   }
 }
 

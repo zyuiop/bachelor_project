@@ -13,14 +13,9 @@ import scala.util.Try
   * @author Louis Vialar
   */
 class InventoryHolderItem(val name: String, initialItems: Inventory) extends Item with Interactable with Inventory {
-  private val actionParser: ActionParser = ActionParser {
-    InventoryHolderItem.leaveInventoryAction,
-    new ActionBuilder[Action] {
-      override def apply(input: Array[String]): Try[Action] = ???
+  private lazy val completeActionParser: ActionParser = ActionParser(InventoryHolderItem.leaveInventoryAction, super.actionParser)
 
-      override val triggeringKeywords: Set[String] = Set
-    }
-  }
+  override def actionParser: ActionParser = completeActionParser
 
   private val inventory = new MutableInventoryImpl(initialItems.getContent)
 
@@ -30,7 +25,9 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  override def interact(state: LevelState): LevelState = ???
+  override def interact(state: LevelState): LevelState = {
+    state.addParser(actionParser)
+  }
 
   override def take(o: Pickable, quantity: Int): Inventory = inventory.take(o, quantity)
 
@@ -39,16 +36,18 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
   override def canTake(o: Pickable, quantity: Int): Boolean = inventory.canTake(o, quantity)
 
   override def getContent: Map[Pickable, Int] = inventory.getContent
+
+  /**
+    * The name under which this item can be referenced from the command line
+    */
+  override val displayName: String = name.toLowerCase
 }
 
 object InventoryHolderItem {
   private val leaveInventoryAction: ActionBuilder[Action] = new ActionBuilder[Action] {
-    private val action: Action = new Action {
-      // TODO: print message
-      override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = inState.dequeueParser()
-    }
+    private val action: Action = (state, _) => state.dequeueParser()
 
-    override def apply(input: Array[String]): Try[Action] = ???
+    override def apply(input: Array[String]): Try[Action] = Try(action)
 
     override val triggeringKeywords: Set[String] = Set("leave", "quit", "exit", "back", "go", "close")
   }

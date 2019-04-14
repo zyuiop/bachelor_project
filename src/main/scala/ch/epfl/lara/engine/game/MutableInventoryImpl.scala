@@ -14,23 +14,20 @@ import scala.util.Try
   * @author Louis Vialar
   */
 class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory {
-
-  override val actionParser: ActionParser = ActionParser(
+  private lazy val completeActionParser: ActionParser = ActionParser(
     super.actionParser,
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
         val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, MutableInventoryImpl.this)
 
-        new Action {
-          override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = {
-            val (succ, _, right) = transferTo(inState.inventory, item, quantity)
+        (inState: LevelState, out: PrintStream) => {
+          val (succ, _, right) = transferTo(inState.inventory, item, quantity)
 
-            if (succ)
-              inState.copy(inventory = right)
-            else {
-              out.println("There are not enough items to " + input.head.toLowerCase)
-              inState
-            }
+          if (succ)
+            inState.copy(inventory = right)(out)
+          else {
+            out.println("There are not enough items to " + input.head.toLowerCase)
+            inState
           }
         }
       }
@@ -39,23 +36,21 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
     },
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
-        new Action {
-          override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = {
-            try {
-              val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, inState.inventory)
-              val (succ, left, _) = inState.inventory.transferTo(MutableInventoryImpl.this, item, quantity)
+        (inState: LevelState, out: PrintStream) => {
+          try {
+            val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, inState.inventory)
+            val (succ, left, _) = inState.inventory.transferTo(MutableInventoryImpl.this, item, quantity)
 
-              if (succ)
-                inState.copy(inventory = left)
-              else {
-                out.println("There are not enough items to " + input.head.toLowerCase)
-                inState
-              }
-            } catch {
-              case e: IllegalArgumentException =>
-                out.println(e.getMessage)
-                inState
+            if (succ)
+              inState.copy(inventory = left)(out)
+            else {
+              out.println("There are not enough items to " + input.head.toLowerCase)
+              inState
             }
+          } catch {
+            case e: IllegalArgumentException =>
+              out.println(e.getMessage)
+              inState
           }
         }
       }
@@ -64,7 +59,9 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
     }
   )
 
-  private val content = mutable.Map(initialContent.toList:_*)
+  override def actionParser = completeActionParser
+
+  private val content = mutable.Map(initialContent.toList: _*)
 
   def take(o: Pickable, quantity: Int): MutableInventoryImpl = {
     if (quantity < 0)
@@ -75,7 +72,7 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
 
     content
       .transform((pickable, amount) => if (pickable == o) amount - quantity else amount)
-        .retain((_, amount) => amount > 0)
+      .retain((_, amount) => amount > 0)
 
     this
   }
@@ -87,7 +84,7 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
     if (content.contains(o))
       content
         .transform((pickable, amount) => if (pickable == o) amount + quantity else amount)
-    else content put (o, quantity)
+    else content put(o, quantity)
 
     this
   }

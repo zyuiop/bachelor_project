@@ -41,7 +41,7 @@ object Game {
 
     val items = ItemRegistry(Map())
 
-    val state = LevelState(Nil, rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms), List(ActionParser.DefaultParser))(Console.out)
+    val state = LevelState(new ImmutableInventoryImpl(Map()), rooms.getRoom("street"), Center, None, Map(), LevelMap(items, rooms), List(ActionParser.DefaultParser))(Console.out)
 
     println(state.currentRoom.describe(state.map))
 

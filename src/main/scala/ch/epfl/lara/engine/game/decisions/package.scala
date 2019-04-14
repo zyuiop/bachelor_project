@@ -67,7 +67,7 @@ package object decisions {
 
        */
 
-  object Command {
+  /*object Command {
     private def parsePosition(args: Array[String])(ifSuccess: Position => Command): Command = {
       Try(Position.parse(args.mkString("-"))).toEither.fold(t => InvalidCommand(t.getMessage), ifSuccess)
     }
@@ -137,7 +137,7 @@ package object decisions {
     }
 
 
-  }
+  }*/
 
 
 }

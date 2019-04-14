@@ -11,20 +11,20 @@ import scala.util.Try
   * @author Louis Vialar
   */
 trait Inventory {
-  val actionParser: ActionParser = ActionParser(
+  private lazy val basicActionParser = ActionParser(
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
-        new Action {
-          override def execute(inState: LevelState)(implicit out: PrintStream): LevelState = {
-            printContent
-            inState
-          }
+        (inState, out) => {
+          printContent(out)
+          inState
         }
       }
 
       override val triggeringKeywords: Set[String] = Set("list", "search", "probe")
     }
   )
+
+  def actionParser: ActionParser = basicActionParser
 
   def printContent(implicit printStream: PrintStream): Unit = {
     for ((item, quantity) <- getContent)
