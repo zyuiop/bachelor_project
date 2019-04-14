@@ -33,6 +33,8 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder[_ <: Action]]]) ex
 
     new ActionParser(nActions)
   }
+
+  def union(other: ActionParser): ActionParser = addBuilders(other)
 }
 
 object ActionParser {

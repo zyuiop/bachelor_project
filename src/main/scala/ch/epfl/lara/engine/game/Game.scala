@@ -7,13 +7,14 @@ import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.ItemRegistry
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.io.StdIn
 
 /**
   * @author Louis Vialar
   */
 object Game {
+
+  private var running: Boolean = true
 
 
   private implicit val printStream: PrintStream = Console.out
@@ -47,10 +48,28 @@ object Game {
     loop(state)
   }
 
+  private val systemActionsParser = ActionParser(
+    ActionSaveGame // TODO: add quit, ...
+  )
+
+  def saveGame(state: LevelState) = ???
+
+  def loadGame(): LevelState = ???
+
+  def quitGame(): Unit = {
+    running = false
+  }
+
   @tailrec
   def loop(state: LevelState): Unit = {
+    if (!running) {
+      printStream.println("Good bye!")
+      return
+    }
+
     val nextStep = StdIn.readLine("> ").split(" ")
-    val action = state.currentParser(nextStep)
+    val parser = state.currentParser.union(systemActionsParser)
+    val action = parser(nextStep)
 
     if (action.isSuccess) {
       loop(action.get.execute(state))
