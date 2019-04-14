@@ -11,5 +11,5 @@ trait Interactable {
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  def interact(state: LevelState): (LevelState, Interactable)
+  def interact(state: LevelState): LevelState
 }

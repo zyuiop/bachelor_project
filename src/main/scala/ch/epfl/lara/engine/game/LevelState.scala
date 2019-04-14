@@ -5,17 +5,19 @@ import java.io.PrintStream
 import ch.epfl.lara.engine.game.decisions._
 import ch.epfl.lara.engine.game.environment.{Position, Room}
 import ch.epfl.lara.engine.game.items.Item
+import ch.epfl.lara.engine.game.scheduler.Scheduler
 
 /**
   * @author Louis Vialar
   */
-case class LevelState(inventory: List[(Object, Int)],
+case class LevelState(inventory: Inventory,
                       currentRoom: Room,
                       currentPosition: Position,
                       currentUsedItem: Option[Item],
                       attributes: Map[String, String],
                       map: LevelMap,
-                      commandParsers: List[ActionParser]
+                      commandParsers: List[ActionParser],
+                      scheduler: Scheduler = Scheduler(0, Nil)
                      )
                      (implicit out: PrintStream) {
 

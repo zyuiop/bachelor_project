@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.environment
 
-import ch.epfl.lara.engine.game.{InventoryHolder, LevelMap, LevelState}
+import ch.epfl.lara.engine.game.{ImmutableInventoryImpl, LevelMap, LevelState}
 import ch.epfl.lara.engine.game.decisions.Command
 
 /**
@@ -9,7 +9,7 @@ import ch.epfl.lara.engine.game.decisions.Command
 case class Room(id: String,
                 name: String,
                 ambient: String,
-                objects: Map[Position, InventoryHolder]) {
+                objects: Map[Position, ImmutableInventoryImpl]) {
 
   def describe(implicit level: LevelMap): String = {
     def describeDoors: String = {
@@ -20,7 +20,7 @@ case class Room(id: String,
       }.mkString("\n")
     }
 
-    s"""You are in: $name...
+    s"""You are in: $name.
        |$ambient
        |$describeDoors""".stripMargin
   }

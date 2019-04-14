@@ -5,14 +5,7 @@ package ch.epfl.lara.engine.game.items
   */
 trait Item {
   /**
-    * Check if this item can be picked up and stored in player's inventory
-    * @return
+    * The name under which this item can be referenced from the command line
     */
-  def canPick: Boolean
-
-  /**
-    * Check if this item can be interacted with by the player
-    * @return
-    */
-  def canInteract: Boolean
+  val displayName: String
 }
