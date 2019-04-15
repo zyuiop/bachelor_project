@@ -2,8 +2,9 @@ package ch.epfl.lara.engine.game.actions
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.{GameState, CharacterState}
+import ch.epfl.lara.engine.game.{CharacterState, GameState}
 import ch.epfl.lara.engine.game.environment.Position
+import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
 
 import scala.util.Try
 
@@ -22,11 +23,11 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
 
           val prev = inState.currentRoom
 
-          room ! (Console.YELLOW + inState.name + " enters the room.")
+          room ! RoomMovement(inState.name, entering = true)
 
           inState.currentRoom = room
 
-          prev ! (Console.YELLOW + inState.name + " leaves the room.")
+          prev ! RoomMovement(inState.name, entering = false)
 
           inState.currentPosition = pos
 

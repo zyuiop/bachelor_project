@@ -4,6 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
+import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
 import scala.collection.mutable
@@ -50,7 +51,16 @@ class CharacterState(startRoom: Room,
     else parsers.pop()
   }
 
-  def handle(message: Message): Unit = out.println(Console.CYAN + message + Console.RESET)
+  def handle(message: Message): Unit = message match {
+    case TalkingMessage(sentBy, content) =>
+      out.println(Console.CYAN + sentBy + ": " + content + Console.RESET)
+
+    case RoomMovement(sentBy, entering) =>
+      out.println(Console.YELLOW + sentBy + " " + (if (entering) "enters" else "leaves") + " the room.")
+
+  }
+
+    //
 }
 
 

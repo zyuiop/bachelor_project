@@ -1,6 +1,7 @@
 package ch.epfl.lara.engine.game.actions
 
 import ch.epfl.lara.engine.game.CharacterState
+import ch.epfl.lara.engine.game.messaging.Message.TalkingMessage
 
 import scala.util.Try
 
@@ -9,7 +10,7 @@ import scala.util.Try
   */
 case class ActionSay(what: String) extends Action {
   override def apply(inState: CharacterState): Int = {
-    inState.currentRoom ! (inState.name + ": " + what)
+    inState.currentRoom ! TalkingMessage(inState.name, what)
 
     what.split(" ").length / 3
   }

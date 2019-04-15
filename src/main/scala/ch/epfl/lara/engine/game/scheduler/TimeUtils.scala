@@ -12,5 +12,15 @@ object TimeUtils {
     val hours = (timestamp / 3600) % 24
 
     val days = timestamp / (3600 * 24)
+
+    val timeString = {
+      def prependZero(time: Int) = {
+        if (time < 10) "0" + time
+        else "" + time
+      }
+
+      // TODO: improve.
+      hours + ":" + prependZero(minutes) + ":" + prependZero(seconds)
+    }
   }
 }
