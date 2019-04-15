@@ -1,23 +1,49 @@
 package ch.epfl.lara.engine.game.scheduler
 
-import ch.epfl.lara.engine.game.PlayerState
+import scala.annotation.tailrec
+import scala.collection.mutable
 
 /**
   * @author Louis Vialar
   */
-case class Scheduler(currentTime: Int, runnables: List[Schedulable]) extends Schedulable {
-  override def runTicks(startTime: Int, endTime: Int)(implicit state: PlayerState): Option[Scheduler] = {
-    val runnables = this.runnables.flatMap(r => r.runTicks(startTime, endTime))
+class Scheduler(startTime: Int) {
+  var currentTime: Int = startTime
+  val runnables: mutable.PriorityQueue[Schedulable] = mutable.PriorityQueue()(ord = Ordering.by(s => s.nextRun))
 
-    if (runnables.nonEmpty) Some(Scheduler(endTime, runnables))
-    else None
+  def schedule(schedulable: Schedulable): Unit = runnables.enqueue(schedulable)
+
+  def runOnce(runnable: Int => Unit, inTicks: Int): Unit = schedule(new Schedulable {
+    override val nextRun: Int = currentTime + inTicks
+
+    override def run(tick: Int): Option[Schedulable] = {
+      runnable(tick)
+      None
+    }
+  })
+
+  def runRegular(runnable: Int => Unit, inTicks: Int, everyTick: Int): Unit = {
+    def generate(next: Int): Schedulable = new Schedulable {
+      override val nextRun: Int = next
+
+      override def run(tick: Int): Option[Schedulable] = {
+        runnable(tick)
+        Some(generate(nextRun + everyTick))
+      }
+    }
+
+    schedule(generate(currentTime + inTicks))
   }
 
-  def addTime(diff: Int): Option[Scheduler] = {
-    runTicks(currentTime, currentTime + diff)(???)
+  @tailrec
+  private def runTick(tick: Int): Unit = {
+    if (runnables.nonEmpty && runnables.head.nextRun <= tick) {
+      runnables.dequeue().run(tick).foreach(schedule)
+      runTick(tick)
+    }
   }
 
-  def schedule(schedule: Schedulable*): Scheduler = {
-    Scheduler(currentTime, runnables ++ schedule)
+  def addTime(diff: Int): Unit = {
+    currentTime += diff
+    runTick(currentTime)
   }
 }
