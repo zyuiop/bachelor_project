@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.actions
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.PlayerState
+import ch.epfl.lara.engine.game.{GameState, CharacterState}
 import ch.epfl.lara.engine.game.environment.Position
 
 import scala.util.Try
@@ -11,31 +11,34 @@ import scala.util.Try
   * @author Louis Vialar
   */
 case class ActionUseDoor(direction: Option[Position]) extends Action {
-  /**
-    * Returns the result of executing this action on a given level state
-    *
-    * @param inState the state of the level at the beggining
-    * @param out     a print stream
-    * @return the state of the level after executing this action
-    */
-  override def apply(inState: PlayerState, out: PrintStream): (PlayerState, Int) = {
-    implicit val ps: PrintStream = out
+  override def apply(inState: CharacterState): Int = {
     inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
       case Some(door) =>
         if (door.isOpen(inState)) {
-          val (roomId, pos) = door.use(inState.currentRoom)
-          val room = inState.map.rooms.getRoom(roomId)
+          val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
+          val room = GameState.level.rooms.getRoom(roomId)
 
-          out.println(room.describe(inState.map))
+          inState.ps.println(room.describe())
 
-          (inState.copy(currentRoom = room, currentPosition = pos), 7)
+          val prev = inState.currentRoom
+
+          room ! (Console.YELLOW + inState.name + " enters the room.")
+
+          inState.currentRoom = room
+
+          prev ! (Console.YELLOW + inState.name + " leaves the room.")
+
+          inState.currentPosition = pos
+
+          7
         } else {
-          out.println(s"The door is locked...")
-          (inState, 5)
+          inState.ps.println(s"The door is locked...")
+
+          5
         }
       case None =>
-        out.println(s"There is no door ${if (direction.isEmpty) "here" else "there"}...")
-        (inState, 0)
+        inState.ps.println(s"There is no door ${if (direction.isEmpty) "here" else "there"}...")
+        0
     }
 
   }
