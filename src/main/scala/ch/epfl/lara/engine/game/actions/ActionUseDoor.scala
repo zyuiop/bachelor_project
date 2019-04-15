@@ -18,7 +18,7 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  override def apply(inState: PlayerState, out: PrintStream): PlayerState = {
+  override def apply(inState: PlayerState, out: PrintStream): (PlayerState, Int) = {
     implicit val ps: PrintStream = out
     inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
       case Some(door) =>
@@ -28,14 +28,14 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
 
           out.println(room.describe(inState.map))
 
-          inState.copy(currentRoom = room, currentPosition = pos)
+          (inState.copy(currentRoom = room, currentPosition = pos), 7)
         } else {
           out.println(s"The door is locked...")
-          inState
+          (inState, 5)
         }
       case None =>
         out.println(s"There is no door ${if (direction.isEmpty) "here" else "there"}...")
-        inState
+        (inState, 0)
     }
 
   }

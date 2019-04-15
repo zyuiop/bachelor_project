@@ -16,7 +16,7 @@ trait Inventory {
       override def apply(input: Array[String]): Try[Action] = Try {
         (inState, out) => {
           printContent(out)
-          inState
+          (inState, 5)
         }
       }
 

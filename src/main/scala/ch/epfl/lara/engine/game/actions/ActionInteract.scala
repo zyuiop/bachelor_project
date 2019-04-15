@@ -17,13 +17,14 @@ case class ActionInteract(objectName: String) extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  override def apply(inState: PlayerState, out: PrintStream): PlayerState = {
+  override def apply(inState: PlayerState, out: PrintStream): (PlayerState, Int) = {
     inState.currentRoom
       .getInteractableItem(objectName, inState.currentPosition)
       .map(_.interact(inState)(out))
+      .map((_, 5))
       .getOrElse {
       println("there is nothing to interact here...")
-      inState
+        (inState, 0)
     }
   }
 }

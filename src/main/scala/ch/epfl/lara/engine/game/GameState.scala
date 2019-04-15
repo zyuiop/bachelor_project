@@ -7,10 +7,10 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class GameState(val level: LevelMap) {
+class GameState(val level: LevelMap, val startTime: Int = 0) {
   GameState.instance = Some(this)
 
-  val scheduler: Scheduler = new Scheduler(0)
+  val scheduler: Scheduler = new Scheduler(startTime)
   val attributes: mutable.Map[String, String] = mutable.Map()
 }
 

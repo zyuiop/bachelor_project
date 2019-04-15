@@ -18,7 +18,7 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
   private val leaveInventoryAction: ActionBuilder[Action] = new ActionBuilder[Action] {
     private val action: Action = (state, out) => {
       out.println(s"You close the $name")
-      state.dequeueParser()
+      (state.dequeueParser(), 3)
     }
 
     override def apply(input: Array[String]): Try[Action] = Try(action)

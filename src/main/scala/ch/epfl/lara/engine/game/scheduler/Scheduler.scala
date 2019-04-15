@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.scheduler
 
+import java.io.PrintStream
+
 import scala.annotation.tailrec
 import scala.collection.mutable
 
@@ -8,25 +10,25 @@ import scala.collection.mutable
   */
 class Scheduler(startTime: Int) {
   var currentTime: Int = startTime
-  val runnables: mutable.PriorityQueue[Schedulable] = mutable.PriorityQueue()(ord = Ordering.by(s => s.nextRun))
+  val runnables: mutable.PriorityQueue[Schedulable] = mutable.PriorityQueue[Schedulable]()(ord = Ordering.by[Schedulable, Int](s => s.nextRun).reverse)
 
   def schedule(schedulable: Schedulable): Unit = runnables.enqueue(schedulable)
 
-  def runOnce(runnable: Int => Unit, inTicks: Int): Unit = schedule(new Schedulable {
+  def runOnce(runnable: (Int, Int) => Unit, inTicks: Int): Unit = schedule(new Schedulable {
     override val nextRun: Int = currentTime + inTicks
 
     override def run(tick: Int): Option[Schedulable] = {
-      runnable(tick)
+      runnable(tick, nextRun)
       None
     }
   })
 
-  def runRegular(runnable: Int => Unit, inTicks: Int, everyTick: Int): Unit = {
+  def runRegular(runnable: (Int, Int) => Unit, inTicks: Int, everyTick: Int): Unit = {
     def generate(next: Int): Schedulable = new Schedulable {
       override val nextRun: Int = next
 
       override def run(tick: Int): Option[Schedulable] = {
-        runnable(tick)
+        runnable(tick, nextRun)
         Some(generate(nextRun + everyTick))
       }
     }

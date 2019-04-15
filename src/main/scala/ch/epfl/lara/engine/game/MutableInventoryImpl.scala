@@ -31,10 +31,10 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
 
           if (succ) {
             out.println(s"You took $quantity * ${item.displayName} into your inventory.")
-            inState.copy(inventory = right)(out)
+            (inState.copy(inventory = right)(out), 5)
           } else {
             out.println("There are not enough items to " + input.head.toLowerCase)
-            inState
+            (inState, 3)
           }
         }
       }
@@ -50,15 +50,15 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
 
             if (succ) {
               out.println(s"You dropped $quantity * ${item.displayName} from your inventory.")
-              inState.copy(inventory = left)(out)
+              (inState.copy(inventory = left)(out), 5)
             } else {
               out.println("There are not enough items to " + input.head.toLowerCase)
-              inState
+              (inState, 3)
             }
           } catch {
             case e: IllegalArgumentException =>
               out.println(e.getMessage)
-              inState
+              (inState, 0)
           }
         }
       }
