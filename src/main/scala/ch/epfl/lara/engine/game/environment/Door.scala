@@ -2,12 +2,12 @@ package ch.epfl.lara.engine.game.environment
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.PlayerState
+import ch.epfl.lara.engine.game.CharacterState
 
 /**
   * @author Louis Vialar
   */
-case class Door(left: String, right: String, leftPos: Position, rightPos: Position, doorType: DoorType, isOpen: PlayerState => Boolean = _ => true) {
+case class Door(left: String, right: String, leftPos: Position, rightPos: Position, doorType: DoorType, isOpen: CharacterState => Boolean = _ => true) {
   def use(from: Room)(implicit out: PrintStream): (String, Position) = {
     val leftToRight = from.id == left
     out.println(doorType.describe(leftToRight).capitalize + ".")

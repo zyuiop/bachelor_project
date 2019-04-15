@@ -3,6 +3,8 @@ package ch.epfl.lara.engine.game.messaging
 /**
   * @author Louis Vialar
   */
-class MessageHandler {
+trait MessageHandler {
+  def handle(message: Message): Unit
 
+  def !(message: Message): Unit = handle(message)
 }

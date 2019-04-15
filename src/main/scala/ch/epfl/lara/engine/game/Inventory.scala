@@ -14,9 +14,9 @@ trait Inventory {
   private lazy val basicActionParser = ActionParser(
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
-        (inState, out) => {
-          printContent(out)
-          (inState, 5)
+        inState => {
+          printContent(inState.ps)
+          5
         }
       }
 

@@ -8,10 +8,7 @@ trait Pickable extends Item {
 }
 
 object Pickable {
-  def apply(name: String): Pickable = new Pickable {
-    /**
-      * The name under which this item can be referenced from the command line
-      */
-    override val displayName: String = name
-  }
+  case class SimplePickable(displayName: String) extends Pickable
+
+  def apply(name: String): Pickable = SimplePickable(name)
 }

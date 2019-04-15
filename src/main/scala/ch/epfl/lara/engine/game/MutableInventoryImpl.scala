@@ -26,15 +26,15 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
       override def apply(input: Array[String]): Try[Action] = Try {
         val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, MutableInventoryImpl.this)
 
-        (inState: PlayerState, out: PrintStream) => {
+        inState => {
           val (succ, _, right) = transferTo(inState.inventory, item, quantity)
 
           if (succ) {
-            out.println(s"You took $quantity * ${item.displayName} into your inventory.")
-            (inState.copy(inventory = right)(out), 5)
+            inState.ps.println(s"You took $quantity * ${item.displayName} into your inventory.")
+            5
           } else {
-            out.println("There are not enough items to " + input.head.toLowerCase)
-            (inState, 3)
+            inState.ps.println("There are not enough items to " + input.head.toLowerCase)
+            3
           }
         }
       }
@@ -43,22 +43,22 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
     },
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
-        (inState: PlayerState, out: PrintStream) => {
+        inState => {
           try {
             val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, inState.inventory)
             val (succ, left, _) = inState.inventory.transferTo(MutableInventoryImpl.this, item, quantity)
 
             if (succ) {
-              out.println(s"You dropped $quantity * ${item.displayName} from your inventory.")
-              (inState.copy(inventory = left)(out), 5)
+              inState.ps.println(s"You dropped $quantity * ${item.displayName} from your inventory.")
+              5
             } else {
-              out.println("There are not enough items to " + input.head.toLowerCase)
-              (inState, 3)
+              inState.ps.println("There are not enough items to " + input.head.toLowerCase)
+              3
             }
           } catch {
             case e: IllegalArgumentException =>
-              out.println(e.getMessage)
-              (inState, 0)
+              inState.ps.println(e.getMessage)
+              0
           }
         }
       }

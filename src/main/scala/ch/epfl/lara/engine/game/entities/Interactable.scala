@@ -1,8 +1,6 @@
 package ch.epfl.lara.engine.game.entities
 
-import java.io.PrintStream
-
-import ch.epfl.lara.engine.game.{GameState, PlayerState}
+import ch.epfl.lara.engine.game.CharacterState
 
 /**
   * @author Louis Vialar
@@ -10,8 +8,9 @@ import ch.epfl.lara.engine.game.{GameState, PlayerState}
 trait Interactable {
   /**
     * Computes the result of the player interacting with this entity
-    * @param state the source state of the level
-    * @return the new state of the scene, as well as the updated version of this interactable
+    *
+    * @param state the state of the player interacting
+    * @return the time the interaction took
     */
-  def interact(state: PlayerState)(implicit out: PrintStream): PlayerState
+  def interact(state: CharacterState): Int
 }

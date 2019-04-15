@@ -9,6 +9,9 @@ import ch.epfl.lara.engine.game.items.ItemRegistry
   */
 package object game {
 
-  case class LevelMap(objects: ItemRegistry, rooms: RoomRegistry)
+  case class LevelMap(objects: ItemRegistry, rooms: RoomRegistry) {
+
+    val entities: EntitiesRegistry = new EntitiesRegistry
+  }
 
 }

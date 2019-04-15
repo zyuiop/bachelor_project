@@ -14,7 +14,7 @@ class Scheduler(startTime: Int) {
 
   def schedule(schedulable: Schedulable): Unit = runnables.enqueue(schedulable)
 
-  def runOnce(runnable: (Int, Int) => Unit, inTicks: Int): Unit = schedule(new Schedulable {
+  def runOnce(inTicks: Int)(runnable: (Int, Int) => Unit): Unit = schedule(new Schedulable {
     override val nextRun: Int = currentTime + inTicks
 
     override def run(tick: Int): Option[Schedulable] = {
@@ -23,7 +23,7 @@ class Scheduler(startTime: Int) {
     }
   })
 
-  def runRegular(runnable: (Int, Int) => Unit, inTicks: Int, everyTick: Int): Unit = {
+  def runRegular(inTicks: Int, everyTick: Int)(runnable: (Int, Int) => Unit): Unit = {
     def generate(next: Int): Schedulable = new Schedulable {
       override val nextRun: Int = next
 

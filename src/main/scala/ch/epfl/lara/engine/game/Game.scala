@@ -1,12 +1,12 @@
 package ch.epfl.lara.engine.game
 
-import java.io.PrintStream
+import java.io.{OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
-import ch.epfl.lara.engine.game.entities.Interactable
+import ch.epfl.lara.engine.game.entities.NPC
 import ch.epfl.lara.engine.game.environment._
-import ch.epfl.lara.engine.game.items.{Item, ItemRegistry, Pickable}
 import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
+import ch.epfl.lara.engine.game.items.{ItemRegistry, Pickable}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
@@ -20,6 +20,8 @@ object Game {
 
 
   private implicit val printStream: PrintStream = Console.out
+
+  val emptyStream = new PrintStream((b: Int) => ())
 
   def main(args: Array[String]): Unit = {
 
@@ -53,29 +55,59 @@ object Game {
 
     new GameState(map, 6 * 3600) // 6 AM
 
-    GameState.get.scheduler.runRegular((tick, scheduled) => {
+    GameState.get.scheduler.runRegular(5, 10) { (tick, scheduled) =>
       println(s"Running tick $scheduled at $tick")
-    }, 5, 10)
+    }
 
-    GameState.get.scheduler.runRegular((_, _) => {
+    GameState.get.scheduler.runRegular(5, 10)((_, _) => {
       cellar.add(peanut, 1)
-    }, 5, 10)
+    })
 
-    GameState.get.scheduler.runRegular((_, _) => {
+    GameState.get.scheduler.runRegular(0, 24 * 3600)((_, _) => {
       println(s"The sun rises...")
-    }, 0, 24 * 3600)
+    })
 
-    GameState.get.scheduler.runRegular((_, _) => {
+    GameState.get.scheduler.runRegular(18 * 3600, 24 * 3600)((_, _) => {
       println(s"The sun starts to go down...")
-    }, 18 * 3600, 24 * 3600)
+    })
 
-    GameState.get.scheduler.runRegular((_, _) => {
+    GameState.get.scheduler.runRegular(21 * 3600, 24 * 3600)((_, _) => {
       println(s"The sky is now dark...")
-    }, 21 * 3600, 24 * 3600)
+    })
 
-    val state = PlayerState(new ImmutableInventoryImpl(Map()), rooms.getRoom("street"), Center, None, Map(), map, List(ActionParser.DefaultParser))(Console.out)
+    // Create dummy NPCs
+    val dummyNPC1 = new NPC(
+      new CharacterState(rooms.getRoom("store"), Center, "Shop Keeper", out = emptyStream),
+        """
+          |say Hello, how are you?
+          |wait 500
+          |say Hmmm... where are the people?
+          |wait 500
+        """.stripMargin
+    )
+    val dummyNPC2 = new NPC(
+      new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
+        """
+          |say Hello, who are you?
+          |wait 10
+          |open cellar
+          |take 1 peanut
+          |quit
+          |go east
+          |drop 1 peanut
+          |say I love peanut butter!
+          |go west
+        """.stripMargin
+    )
 
-    println(state.currentRoom.describe(state.map))
+    dummyNPC1.spawn()
+    dummyNPC2.spawn()
+
+    // Create Player State
+    val state = new CharacterState(rooms.getRoom("street"), Center)
+    state.spawn()
+
+    println(state.currentRoom.describe())
 
     loop(state)
   }
@@ -84,16 +116,16 @@ object Game {
     ActionSaveGame // TODO: add quit, ...
   )
 
-  def saveGame(state: PlayerState) = ???
+  def saveGame(state: CharacterState) = ???
 
-  def loadGame(): PlayerState = ???
+  def loadGame(): CharacterState = ???
 
   def quitGame(): Unit = {
     running = false
   }
 
   @tailrec
-  def loop(state: PlayerState): Unit = {
+  def loop(state: CharacterState): Unit = {
     if (!running) {
       printStream.println("Good bye!")
       return
@@ -104,9 +136,9 @@ object Game {
     val action = parser(nextStep)
 
     if (action.isSuccess) {
-      val (nstate, time) = action.get.execute(state)
+      val time = action.get.execute(state)
       GameState.get.scheduler.addTime(time)
-      loop(nstate)
+      loop(state)
     } else {
       println(action.failed.get.getMessage)
       loop(state)

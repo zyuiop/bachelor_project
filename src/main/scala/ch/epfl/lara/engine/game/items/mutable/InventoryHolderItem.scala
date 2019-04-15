@@ -5,7 +5,7 @@ import java.io.PrintStream
 import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder, ActionParser}
 import ch.epfl.lara.engine.game.entities.Interactable
 import ch.epfl.lara.engine.game.items.{Item, Pickable}
-import ch.epfl.lara.engine.game.{Inventory, PlayerState, MutableInventoryImpl}
+import ch.epfl.lara.engine.game.{Inventory, CharacterState, MutableInventoryImpl}
 
 import scala.util.Try
 
@@ -16,9 +16,10 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
   private lazy val completeActionParser: ActionParser = ActionParser(leaveInventoryAction, inventory.actionParser)
 
   private val leaveInventoryAction: ActionBuilder[Action] = new ActionBuilder[Action] {
-    private val action: Action = (state, out) => {
-      out.println(s"You close the $name")
-      (state.dequeueParser(), 3)
+    private val action: Action = state => {
+      state.ps.println(s"You close the $name")
+      state.dequeueParser()
+      3
     }
 
     override def apply(input: Array[String]): Try[Action] = Try(action)
@@ -41,10 +42,12 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  override def interact(state: PlayerState)(implicit out: PrintStream): PlayerState = {
-    out.println(s"You open the $name. It contains: ")
-    super.printContent
+  override def interact(state: CharacterState): Int = {
+    state.ps.println(s"You open the $name. It contains: ")
+    super.printContent(state.ps)
     state.addParser(actionParser)
+
+    7
   }
 
   override def take(o: Pickable, quantity: Int): Inventory = inventory.take(o, quantity)

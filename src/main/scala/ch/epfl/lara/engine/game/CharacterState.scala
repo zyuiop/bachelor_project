@@ -4,19 +4,20 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
+import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
 import scala.collection.mutable
 
 /**
   * @author Louis Vialar
   */
-class PlayerState(startRoom: Room,
-                  startPosition: Position,
-                  val name: String = "You",
-                  startInventory: Inventory = Inventory.empty,
-                  startAttributes: Map[String, String] = Map.empty,
-                  firstParser: ActionParser = ActionParser.DefaultParser,
-                  out: PrintStream = Console.out) {
+class CharacterState(startRoom: Room,
+                     startPosition: Position,
+                     val name: String = "You",
+                     startInventory: Inventory = Inventory.empty,
+                     startAttributes: Map[String, String] = Map.empty,
+                     firstParser: ActionParser = ActionParser.DefaultParser,
+                     out: PrintStream = Console.out) extends MessageHandler {
 
   val inventory: Inventory = new MutableInventoryImpl(startInventory.getContent)
   private val parsers: mutable.ArrayStack[ActionParser] = new mutable.ArrayStack[ActionParser]()
@@ -49,5 +50,8 @@ class PlayerState(startRoom: Room,
     else parsers.pop()
   }
 
-  def !(message: String): Unit = out.println(Console.CYAN + message + Console.RESET)
+  def handle(message: Message): Unit = out.println(Console.CYAN + message + Console.RESET)
 }
+
+
+
