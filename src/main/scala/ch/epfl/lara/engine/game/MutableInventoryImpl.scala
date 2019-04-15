@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.decisions.{Action, ActionBuilder, ActionParser}
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder, ActionParser}
 import ch.epfl.lara.engine.game.items.Pickable
 
 import scala.collection.mutable
@@ -20,7 +20,7 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
       override def apply(input: Array[String]): Try[Action] = Try {
         val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, MutableInventoryImpl.this)
 
-        (inState: LevelState, out: PrintStream) => {
+        (inState: PlayerState, out: PrintStream) => {
           val (succ, _, right) = transferTo(inState.inventory, item, quantity)
 
           if (succ)
@@ -36,7 +36,7 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
     },
     new ActionBuilder[Action] {
       override def apply(input: Array[String]): Try[Action] = Try {
-        (inState: LevelState, out: PrintStream) => {
+        (inState: PlayerState, out: PrintStream) => {
           try {
             val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, inState.inventory)
             val (succ, left, _) = inState.inventory.transferTo(MutableInventoryImpl.this, item, quantity)

@@ -2,10 +2,10 @@ package ch.epfl.lara.engine.game.items.mutable
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.decisions.{Action, ActionBuilder, ActionParser}
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder, ActionParser}
 import ch.epfl.lara.engine.game.entities.Interactable
 import ch.epfl.lara.engine.game.items.{Item, Pickable}
-import ch.epfl.lara.engine.game.{Inventory, LevelState, MutableInventoryImpl}
+import ch.epfl.lara.engine.game.{Inventory, PlayerState, MutableInventoryImpl}
 
 import scala.util.Try
 
@@ -25,7 +25,7 @@ class InventoryHolderItem(val name: String, initialItems: Inventory) extends Ite
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  override def interact(state: LevelState): LevelState = {
+  override def interact(state: PlayerState): PlayerState = {
     state.addParser(actionParser)
   }
 

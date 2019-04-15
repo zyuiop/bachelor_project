@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.decisions.{Action, ActionBuilder, ActionParser}
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder, ActionParser}
 import ch.epfl.lara.engine.game.items.Pickable
 
 import scala.util.Try

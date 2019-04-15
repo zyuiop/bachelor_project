@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.entities
 
-import ch.epfl.lara.engine.game.{GameState, LevelState}
+import ch.epfl.lara.engine.game.{GameState, PlayerState}
 
 /**
   * @author Louis Vialar
@@ -11,5 +11,5 @@ trait Interactable {
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  def interact(state: LevelState): LevelState
+  def interact(state: PlayerState): PlayerState
 }

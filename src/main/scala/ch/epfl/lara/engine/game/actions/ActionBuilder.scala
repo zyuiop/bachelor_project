@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.decisions
+package ch.epfl.lara.engine.game.actions
 
 import scala.util.Try
 

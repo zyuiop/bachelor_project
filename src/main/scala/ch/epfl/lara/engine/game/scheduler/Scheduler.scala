@@ -1,12 +1,12 @@
 package ch.epfl.lara.engine.game.scheduler
 
-import ch.epfl.lara.engine.game.LevelState
+import ch.epfl.lara.engine.game.PlayerState
 
 /**
   * @author Louis Vialar
   */
 case class Scheduler(currentTime: Int, runnables: List[Schedulable]) extends Schedulable {
-  override def runTicks(startTime: Int, endTime: Int)(implicit state: LevelState): Option[Scheduler] = {
+  override def runTicks(startTime: Int, endTime: Int)(implicit state: PlayerState): Option[Scheduler] = {
     val runnables = this.runnables.flatMap(r => r.runTicks(startTime, endTime))
 
     if (runnables.nonEmpty) Some(Scheduler(endTime, runnables))

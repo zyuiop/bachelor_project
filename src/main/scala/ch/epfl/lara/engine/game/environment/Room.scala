@@ -1,7 +1,8 @@
 package ch.epfl.lara.engine.game.environment
 
-import ch.epfl.lara.engine.game.{ImmutableInventoryImpl, LevelMap, LevelState}
-import ch.epfl.lara.engine.game.decisions.Command
+import ch.epfl.lara.engine.game.entities.Interactable
+import ch.epfl.lara.engine.game.items.Item
+import ch.epfl.lara.engine.game.{LevelMap, MutableInventoryImpl}
 
 /**
   * @author Louis Vialar
@@ -9,7 +10,8 @@ import ch.epfl.lara.engine.game.decisions.Command
 case class Room(id: String,
                 name: String,
                 ambient: String,
-                objects: Map[Position, ImmutableInventoryImpl]) {
+                objects: Map[Position, MutableInventoryImpl],
+                interactable: Map[String, Map[Position, Item with Interactable]]) {
 
   def describe(implicit level: LevelMap): String = {
     def describeDoors: String = {
@@ -25,5 +27,11 @@ case class Room(id: String,
        |$describeDoors""".stripMargin
   }
 
-  private def newInventory(decision: Command, inventory: List[(Object, Int)]) = ???
+  def getInteractableItem(name: String, position: Position): Option[Item with Interactable] = {
+    interactable.get(name.toLowerCase).flatMap(m => {
+      if (m.size > 1) m.get(position)
+      else if (m.isEmpty) None
+      else Some(m.head._2)
+    })
+  }
 }

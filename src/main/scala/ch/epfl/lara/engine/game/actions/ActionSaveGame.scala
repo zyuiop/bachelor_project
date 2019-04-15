@@ -1,8 +1,8 @@
-package ch.epfl.lara.engine.game.decisions
+package ch.epfl.lara.engine.game.actions
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.{Game, LevelState}
+import ch.epfl.lara.engine.game.{Game, PlayerState}
 
 import scala.util.Try
 
@@ -17,7 +17,7 @@ case class ActionSaveGame() extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  override def apply(inState: LevelState, out: PrintStream): LevelState = {
+  override def apply(inState: PlayerState, out: PrintStream): PlayerState = {
     Game.saveGame(inState)
     inState
   }
