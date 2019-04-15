@@ -28,7 +28,7 @@ case class PlayerState(inventory: Inventory,
     copy(commandParsers = parser :: commandParsers)
   }
 
-  def currentParser: ActionParser = commandParsers.head
+  def currentParser: ActionParser = ActionParser(commandParsers.head, currentRoom.inventory.actionParser)
 
   def dequeueParser(): PlayerState = {
     if (commandParsers.tail.isEmpty) throw new IllegalStateException("cannot dequeue last parser")

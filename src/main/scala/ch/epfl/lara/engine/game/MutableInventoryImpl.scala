@@ -14,6 +14,12 @@ import scala.util.Try
   * @author Louis Vialar
   */
 class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory {
+  /* TODO: parsing while knowing is fun,
+      but actually we should not parse commands knowing the
+      context in which they will be executed,
+      because that's meaningless
+   */
+  @deprecated
   private lazy val completeActionParser: ActionParser = ActionParser(
     super.actionParser,
     new ActionBuilder[Action] {
@@ -23,9 +29,10 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
         (inState: PlayerState, out: PrintStream) => {
           val (succ, _, right) = transferTo(inState.inventory, item, quantity)
 
-          if (succ)
+          if (succ) {
+            out.println(s"You took $quantity * ${item.displayName} into your inventory.")
             inState.copy(inventory = right)(out)
-          else {
+          } else {
             out.println("There are not enough items to " + input.head.toLowerCase)
             inState
           }
@@ -41,9 +48,10 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
             val (item, quantity) = Inventory.parseItemNameAndQuantity(input drop 1, inState.inventory)
             val (succ, left, _) = inState.inventory.transferTo(MutableInventoryImpl.this, item, quantity)
 
-            if (succ)
+            if (succ) {
+              out.println(s"You dropped $quantity * ${item.displayName} from your inventory.")
               inState.copy(inventory = left)(out)
-            else {
+            } else {
               out.println("There are not enough items to " + input.head.toLowerCase)
               inState
             }
@@ -90,7 +98,7 @@ class MutableInventoryImpl(initialContent: Map[Pickable, Int]) extends Inventory
   }
 
   def canTake(o: Pickable, quantity: Int): Boolean =
-    quantity > 0 && content.getOrElse(o, 0) < quantity
+    quantity > 0 && content.getOrElse(o, 0) >= quantity
 
   override def getContent: Map[Pickable, Int] = content.toMap
 }

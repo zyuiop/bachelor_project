@@ -1,17 +1,24 @@
 package ch.epfl.lara.engine.game.environment
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.entities.Interactable
-import ch.epfl.lara.engine.game.items.Item
-import ch.epfl.lara.engine.game.{LevelMap, MutableInventoryImpl}
+import ch.epfl.lara.engine.game.items.{Item, Pickable}
+import ch.epfl.lara.engine.game.{Inventory, LevelMap, MutableInventoryImpl}
 
 /**
   * @author Louis Vialar
   */
-case class Room(id: String,
-                name: String,
-                ambient: String,
-                objects: Map[Position, MutableInventoryImpl],
-                interactable: Map[String, Map[Position, Item with Interactable]]) {
+class Room(val id: String, val name: String, val ambient: String,
+           initialItems: Map[Pickable, Int] = Map(),
+           interactable: Map[String, Map[Position, Item with Interactable]] = Map()) {
+
+  val inventory: Inventory = new MutableInventoryImpl(initialItems) {
+    override def printContent(implicit printStream: PrintStream): Unit = {
+      printStream.println("On the floor, you find:")
+      super.printContent
+    }
+  }
 
   def describe(implicit level: LevelMap): String = {
     def describeDoors: String = {

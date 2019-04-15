@@ -3,14 +3,13 @@ package ch.epfl.lara.engine.game.actions
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.PlayerState
-import ch.epfl.lara.engine.game.environment.Position
 
 import scala.util.Try
 
 /**
   * @author Louis Vialar
   */
-case class ActionInteract(elem: String) extends Action {
+case class ActionInteract(objectName: String) extends Action {
   /**
     * Returns the result of executing this action on a given level state
     *
@@ -18,11 +17,16 @@ case class ActionInteract(elem: String) extends Action {
     * @param out     a print stream
     * @return the state of the level after executing this action
     */
-  /*override def apply(inState: PlayerState, out: PrintStream): PlayerState = {
-    inState.copy(currentPosition = position)(out)
-  }*/
+  override def apply(inState: PlayerState, out: PrintStream): PlayerState = {
+    inState.currentRoom
+      .getInteractableItem(objectName, inState.currentPosition)
+      .map(_.interact(inState)(out))
+      .getOrElse {
+      println("there is nothing to interact here...")
+      inState
+    }
+  }
 }
-
 
 object ActionInteract extends ActionBuilder[ActionInteract] {
   /**
@@ -32,15 +36,12 @@ object ActionInteract extends ActionBuilder[ActionInteract] {
     * @return an optional action
     */
   override def apply(input: Array[String]): Try[Action] = Try {
-    val args = input.tail
-
-    if (args.isEmpty) throw new IllegalArgumentException("you need to provide a direction to walk to...")
-    else ActionMove(Position.parse(args.mkString("-")))
+    ActionInteract(input.drop(1).mkString(" ").toLowerCase)
   }
 
 
   /**
     * All the keywords that CAN trigger this builder
     */
-  override val triggeringKeywords: Set[String] = Set("interact", "talk", "open", "use")
+  override val triggeringKeywords: Set[String] = Set("interact", "use", "open")
 }

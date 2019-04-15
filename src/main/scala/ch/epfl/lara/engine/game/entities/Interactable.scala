@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.entities
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.{GameState, PlayerState}
 
 /**
@@ -11,5 +13,5 @@ trait Interactable {
     * @param state the source state of the level
     * @return the new state of the scene, as well as the updated version of this interactable
     */
-  def interact(state: PlayerState): PlayerState
+  def interact(state: PlayerState)(implicit out: PrintStream): PlayerState
 }

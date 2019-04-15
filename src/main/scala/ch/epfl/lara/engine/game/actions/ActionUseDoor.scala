@@ -64,5 +64,5 @@ object ActionUseDoor extends ActionBuilder[ActionUseDoor] {
   /**
     * All the keywords that CAN trigger this builder
     */
-  override val triggeringKeywords: Set[String] = Set("use", "take", "pass", "climb", "descend")
+  override val triggeringKeywords: Set[String] = Set("use", "take", "pass", "climb", "descend", "move", "go","walk")
 }

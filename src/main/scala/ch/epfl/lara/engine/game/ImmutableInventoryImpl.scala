@@ -26,7 +26,7 @@ case class ImmutableInventoryImpl(content: Map[Pickable, Int]) extends Inventory
   }
 
   def canTake(o: Pickable, quantity: Int): Boolean =
-    quantity > 0 && content.getOrElse(o, 0) < quantity
+    quantity > 0 && content.getOrElse(o, 0) >= quantity
 
   override def getContent: Map[Pickable, Int] = content
 }

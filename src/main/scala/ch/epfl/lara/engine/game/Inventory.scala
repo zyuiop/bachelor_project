@@ -74,15 +74,27 @@ trait Inventory {
 }
 
 object Inventory {
+  val empty: Inventory = new Inventory {
+    override def getContent: Map[Pickable, Int] = Map.empty
+
+    override def take(o: Pickable, quantity: Int): Inventory = throw new IllegalArgumentException("not enough items in inventory")
+
+    override def add(o: Pickable, quantity: Int): Inventory = throw new IllegalStateException("cannot add in empty inventory")
+
+    override def canTake(o: Pickable, quantity: Int): Boolean = false
+  }
+
   def parseItemNameAndQuantity(input: Array[String], inv: Inventory, defaultQuantity: Int = 1): (Pickable, Int) = {
     val (quantity, itemNameParts) =
-      if (input.last.forall(c => c.isDigit))
-        (input.last.toInt, input dropRight 1)
+      if (input.head.forall(c => c.isDigit))
+        (input.head.toInt, input drop 1)
+      else if (input.head.equalsIgnoreCase("a"))
+        (1, input drop 1)
       else
         (defaultQuantity, input)
 
     val itemName = (itemNameParts mkString " ").toLowerCase
-    val acceptableItems = inv.getContent.keySet.filter(_.displayName == itemName)
+    val acceptableItems = inv.getContent.keySet.filter(i => i.displayName == itemName || i.displayName + "s" == itemName)
 
     if (acceptableItems.isEmpty)
       throw new IllegalArgumentException("there is no item by that name here...")

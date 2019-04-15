@@ -1,16 +1,17 @@
 package ch.epfl.lara.engine.game
 
+import ch.epfl.lara.engine.game.scheduler.Scheduler
+
+import scala.collection.mutable
+
 /**
   * @author Louis Vialar
   */
-class GameState() {
+class GameState(val level: LevelMap) {
   GameState.instance = Some(this)
 
-
-
-
-  // TODO: wrap LevelState, and detect scene switches
-  // do that only once SceneStates work correctly
+  val scheduler: Scheduler = new Scheduler(0)
+  val attributes: mutable.Map[String, String] = mutable.Map()
 }
 
 object GameState {
