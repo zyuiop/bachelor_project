@@ -6,7 +6,7 @@ import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.entities.NPC
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
-import ch.epfl.lara.engine.game.items.{ItemRegistry, Pickable}
+import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, Pickable}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
@@ -27,7 +27,7 @@ object Game {
 
     val peanut = Pickable("peanut")
 
-    val cellar = new InventoryHolderItem("cellar", new ImmutableInventoryImpl(Map(peanut -> 3)))
+    val cellar = new InventoryHolderItem("cellar", Map(peanut -> 3))
 
     val rooms = RoomRegistry(Seq(
       new Room("street", "42nd Street", "The sun is rising. The crowd is moving between buildings.", Map(), Map()),
@@ -49,9 +49,7 @@ object Game {
         Door("1st-floor-dining-room", "1st-floor-bedroom", West, East, DoorType.Door)
       ))
 
-    val items = ItemRegistry(Map())
-
-    val map = LevelMap(items, rooms)
+    val map = LevelMap(rooms)
 
     new GameState(map, 6 * 3600) // 6 AM
 
@@ -124,6 +122,8 @@ object Game {
     running = false
   }
 
+  val parser: ActionParser = ActionParser.DefaultParser union systemActionsParser
+
   @tailrec
   def loop(state: CharacterState): Unit = {
     if (!running) {
@@ -131,8 +131,11 @@ object Game {
       return
     }
 
+    // Check for level transitions
+    GameState.level
+
+    // Run action
     val nextStep = StdIn.readLine("> ").split(" ")
-    val parser = state.currentParser.union(systemActionsParser)
     val action = parser(nextStep)
 
     if (action.isSuccess) {

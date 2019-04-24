@@ -5,7 +5,6 @@ package ch.epfl.lara.engine.game.environment
   */
 sealed trait Position {
   val name: String = this.getClass.getCanonicalName
-
 }
 
 case object North extends Position

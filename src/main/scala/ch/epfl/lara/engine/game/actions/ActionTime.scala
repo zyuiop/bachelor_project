@@ -20,7 +20,7 @@ case class ActionTime() extends Action {
   }
 }
 
-object ActionTime extends ActionBuilder[ActionTime] {
+object ActionTime extends ActionBuilder {
   override def apply(input: Array[String]): Try[Action] = Try {
     ActionTime()
   }

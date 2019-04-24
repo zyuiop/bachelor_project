@@ -16,7 +16,7 @@ case class ActionSay(what: String) extends Action {
   }
 }
 
-object ActionSay extends ActionBuilder[ActionSay] {
+object ActionSay extends ActionBuilder {
   override def apply(input: Array[String]): Try[Action] = Try {
     ActionSay(input.drop(1).mkString(" "))
   }

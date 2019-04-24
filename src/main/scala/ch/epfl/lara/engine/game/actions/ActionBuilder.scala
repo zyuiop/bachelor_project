@@ -7,7 +7,7 @@ import scala.util.Try
   *
   * @author Louis Vialar
   */
-trait ActionBuilder[T <: Action] {
+trait ActionBuilder {
   /**
     * Build the action from the complete user input
     * @param input the user input, split by spaces
@@ -22,8 +22,8 @@ trait ActionBuilder[T <: Action] {
 }
 
 object ActionBuilder {
-  def apply[T <: Action](triggering: Set[String], builder: Array[String] => Try[Action]): ActionBuilder[T] =
-    new ActionBuilder[T] {
+  def apply(triggering: Set[String], builder: Array[String] => Try[Action]): ActionBuilder =
+    new ActionBuilder {
       override def apply(input: Array[String]): Try[Action] = builder(input)
       override val triggeringKeywords: Set[String] = triggering
     }

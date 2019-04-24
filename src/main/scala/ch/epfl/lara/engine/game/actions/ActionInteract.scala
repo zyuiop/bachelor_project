@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.actions
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.CharacterState
 
 import scala.util.Try
@@ -9,19 +11,26 @@ import scala.util.Try
   */
 case class ActionInteract(objectName: String) extends Action {
   override def apply(inState: CharacterState): Int = {
-    val item = inState.currentRoom
-      .getInteractableItem(objectName, inState.currentPosition)
-
-    if (item.isEmpty) {
-      println("there is nothing to interact here...")
-      0
+    // Special: open own inventory
+    if (objectName.toLowerCase == "inventory") {
+      // Just list content, as all other commands are implicitly related to current own inventory
+      inState.inventory.printContent(inState.ps)
+      15
     } else {
-      item.get.interact(inState)
+      val item = inState.currentRoom
+        .getInteractableItem(objectName, inState.currentPosition)
+
+      if (item.isEmpty) {
+        println("there is nothing to interact here...")
+        0
+      } else {
+        item.get.interact(inState)
+      }
     }
   }
 }
 
-object ActionInteract extends ActionBuilder[ActionInteract] {
+object ActionInteract extends ActionBuilder {
   override def apply(input: Array[String]): Try[Action] = Try {
     ActionInteract(input.drop(1).mkString(" ").toLowerCase)
   }

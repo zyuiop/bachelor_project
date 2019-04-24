@@ -5,7 +5,7 @@ import scala.util.{Failure, Try}
 /**
   * @author Louis Vialar
   */
-class ActionParser(val actions: Map[String, Seq[ActionBuilder[_ <: Action]]]) extends ActionBuilder[Action] {
+class ActionParser(val actions: Map[String, Seq[ActionBuilder]]) extends ActionBuilder {
   /**
     * Build the action from the complete user input
     *
@@ -27,9 +27,9 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder[_ <: Action]]]) ex
     */
   override val triggeringKeywords: Set[String] = actions.keySet
 
-  def addBuilders(builders: ActionBuilder[_ <: Action]*): ActionParser = {
+  def addBuilders(builders: ActionBuilder*): ActionParser = {
     val buildersMap = ActionParser.buildersToMap(builders)
-    val nActions: Map[String, Seq[ActionBuilder[_ <: Action]]] = actions ++ buildersMap.map{ case (k, v) => (k, actions.getOrElse(k, Nil) ++ v) }
+    val nActions: Map[String, Seq[ActionBuilder]] = actions ++ buildersMap.map{ case (k, v) => (k, actions.getOrElse(k, Nil) ++ v) }
 
     new ActionParser(nActions)
   }
@@ -39,12 +39,12 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder[_ <: Action]]]) ex
 
 object ActionParser {
 
-  def apply(builders: ActionBuilder[_ <: Action]*): ActionParser =
+  def apply(builders: ActionBuilder*): ActionParser =
     new ActionParser(buildersToMap(builders))
 
-  private def buildersToMap(builders: Seq[ActionBuilder[_ <: Action]]) = builders.flatMap(b => b.triggeringKeywords.map((_, b))).groupBy(_._1).mapValues(_.map(_._2))
+  private def buildersToMap(builders: Seq[ActionBuilder]) = builders.flatMap(b => b.triggeringKeywords.map((_, b))).groupBy(_._1).mapValues(_.map(_._2))
 
   val DefaultParser: ActionParser = ActionParser(
-    ActionUseDoor, ActionInteract, ActionWait, ActionSay, ActionTime
+    ActionUseDoor, ActionInteract, ActionWait, ActionSay, ActionTime, ActionInventoryList, ActionInventoryClose, ActionInventoryMove
   )
 }

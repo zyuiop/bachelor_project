@@ -14,6 +14,11 @@ class GameState(val level: LevelMap, val startTime: Int = 0) {
   val scheduler: Scheduler = new Scheduler(startTime)
   val attributes: mutable.Map[String, String] = mutable.Map()
   val registry: EntitiesRegistry = new EntitiesRegistry
+
+  def isLevelComplete(playerState: CharacterState): Boolean = false
+
+  def isLevelFailed(playerState: CharacterState): Boolean = false
+
 }
 
 object GameState {

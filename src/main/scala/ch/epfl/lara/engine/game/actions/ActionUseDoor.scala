@@ -46,7 +46,7 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
 
 }
 
-object ActionUseDoor extends ActionBuilder[ActionUseDoor] {
+object ActionUseDoor extends ActionBuilder {
   /**
     * Build the action from the complete user input
     *

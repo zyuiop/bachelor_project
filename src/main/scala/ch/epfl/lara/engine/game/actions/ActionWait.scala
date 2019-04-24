@@ -16,7 +16,7 @@ case class ActionWait(time: Int) extends Action {
   }
 }
 
-object ActionWait extends ActionBuilder[ActionWait] {
+object ActionWait extends ActionBuilder {
   /**
     * Build the action from the complete user input
     *

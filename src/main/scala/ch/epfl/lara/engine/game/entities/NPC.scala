@@ -2,6 +2,7 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
+import ch.epfl.lara.engine.game.actions.ActionParser
 import ch.epfl.lara.engine.game.scheduler.Schedulable
 import ch.epfl.lara.engine.game.{CharacterState, GameState}
 
@@ -14,8 +15,7 @@ import scala.collection.mutable
 // TODO: make it able to react to messages directly
 class NPC(startState: CharacterState, program: String) extends CharacterState(
   startState.currentRoom, startState.currentPosition, startState.name,
-  startState.inventory, startState.attributes.toMap,
-  startState.currentParser, new PrintStream(_ => ())
+  startState.inventory, startState.attributes.toMap, new PrintStream(_ => ())
 ) {
 
   private val commands: mutable.Queue[String] = mutable.Queue()
@@ -39,7 +39,7 @@ class NPC(startState: CharacterState, program: String) extends CharacterState(
 
 
     val com = commands.dequeue()
-    val parsed = currentParser.apply(com.split(" ")).toOption
+    val parsed = ActionParser.DefaultParser.apply(com.split(" ")).toOption
     if (parsed.isEmpty) schedulable(1 + tick) // ignore
     else {
       val t = parsed.get.apply(this)
