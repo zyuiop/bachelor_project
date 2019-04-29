@@ -17,7 +17,7 @@ import scala.collection.mutable
   */
 class CharacterState(startRoom: Room,
                      startPosition: Position,
-                     val name: String = "You",
+                     val name: String,
                      startInventory: Map[Pickable, Int] = Map.empty,
                      startAttributes: Map[String, String] = Map.empty,
                      out: PrintStream = Console.out) extends MessageHandler {
@@ -70,10 +70,10 @@ class CharacterState(startRoom: Room,
 
   def handle(message: Message): Unit = message match {
     case TalkingMessage(sentBy, content) =>
-      out.println(Console.CYAN + sentBy + ": " + content + Console.RESET)
+      out.println(Console.CYAN + sentBy.name + ": " + content + Console.RESET)
 
     case RoomMovement(sentBy, entering) =>
-      out.println(Console.YELLOW + sentBy + " " + (if (entering) "enters" else "leaves") + " the room." + Console.RESET)
+      out.println(Console.YELLOW + sentBy.name + " " + (if (entering) "enters" else "leaves") + " the room." + Console.RESET)
 
   }
 

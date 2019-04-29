@@ -1,7 +1,5 @@
 package ch.epfl.lara.engine.game.scheduler
 
-import java.io.PrintStream
-
 import scala.annotation.tailrec
 import scala.collection.mutable
 
@@ -11,6 +9,8 @@ import scala.collection.mutable
 class Scheduler(startTime: Int) {
   var currentTime: Int = startTime
   val runnables: mutable.PriorityQueue[Schedulable] = mutable.PriorityQueue[Schedulable]()(ord = Ordering.by[Schedulable, Int](s => s.nextRun).reverse)
+
+  def dayTime: Int = currentTime % 86400
 
   def schedule(schedulable: Schedulable): Unit = runnables.enqueue(schedulable)
 

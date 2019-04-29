@@ -53,10 +53,6 @@ object Game {
 
     new GameState(map, 6 * 3600) // 6 AM
 
-    GameState.get.scheduler.runRegular(5, 10) { (tick, scheduled) =>
-      println(s"Running tick $scheduled at $tick")
-    }
-
     GameState.get.scheduler.runRegular(5, 10)((_, _) => {
       cellar.add(peanut, 1)
     })
@@ -77,11 +73,20 @@ object Game {
     val dummyNPC1 = new NPC(
       new CharacterState(rooms.getRoom("store"), Center, "Shop Keeper", out = emptyStream),
         """
-          |say Hello, how are you?
-          |wait 500
-          |say Hmmm... where are the people?
-          |wait 500
-        """.stripMargin
+          |wait 1
+        """.stripMargin,
+      List(
+        "anyone enters" ->
+          """
+            |if time >= 6:00 && time < 18:00
+            |say Hello you!
+            |end
+            |
+            |if time >= 18:00 || time < 6:00
+            |say The shop is closed... please leave!
+            |end
+          """.stripMargin
+      )
     )
     val dummyNPC2 = new NPC(
       new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
@@ -102,7 +107,7 @@ object Game {
     dummyNPC2.spawn()
 
     // Create Player State
-    val state = new CharacterState(rooms.getRoom("street"), Center)
+    val state = new PlayerState(rooms.getRoom("street"))
     state.spawn()
 
     println(state.currentRoom.describe())

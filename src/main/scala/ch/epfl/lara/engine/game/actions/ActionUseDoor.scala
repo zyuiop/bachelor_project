@@ -23,11 +23,11 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
 
           val prev = inState.currentRoom
 
-          room ! RoomMovement(inState.name, entering = true)
+          room ! RoomMovement(inState, entering = true)
 
           inState.currentRoom = room
 
-          prev ! RoomMovement(inState.name, entering = false)
+          prev ! RoomMovement(inState, entering = false)
 
           inState.currentPosition = pos
 

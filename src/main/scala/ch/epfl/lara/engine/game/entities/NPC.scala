@@ -2,7 +2,10 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.actions.ActionParser
+import ch.epfl.lara.engine.game.actions.Action
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.Expr
+import ch.epfl.lara.engine.game.actions.control.{ActionCompiler, ConditionRunner, IfAction}
+import ch.epfl.lara.engine.game.messaging.Message
 import ch.epfl.lara.engine.game.scheduler.Schedulable
 import ch.epfl.lara.engine.game.{CharacterState, GameState}
 
@@ -12,43 +15,79 @@ import scala.collection.mutable
   * @author Louis Vialar
   */
 
-// TODO: make it able to react to messages directly
-class NPC(startState: CharacterState, program: String) extends CharacterState(
+class NPC(startState: CharacterState,
+          program: String = "",
+          triggers: List[(String, String)] = Nil) extends CharacterState(
   startState.currentRoom, startState.currentPosition, startState.name,
-  startState.inventory, startState.attributes.toMap, new PrintStream(_ => ())
+  startState.inventory.getContent, startState.attributes.toMap, new PrintStream(_ => ())
 ) {
 
-  private val commands: mutable.Queue[String] = mutable.Queue()
+  private val compiledProgram: List[Action] = ActionCompiler.compile(program.split("\n").toList)
+  private val compiledTriggers: List[(Expr, List[Action])] = triggers.map {
+    case (when, what) => (ActionCompiler.compileCondition(when), ActionCompiler.compile(what.split("\n").toList))
+  }
+
+  private val returnTo: mutable.ArrayStack[mutable.Queue[Action]] = mutable.ArrayStack()
+  private val commands: mutable.Queue[Action] = mutable.Queue()
 
   reset()
 
   private def reset(): Unit = {
-    commands.enqueue(program.split("\n").filterNot(_.isEmpty): _*)
+    if (returnTo.nonEmpty) {
+      commands.enqueue(returnTo.pop(): _*)
+    } else commands.enqueue(compiledProgram: _*)
   }
 
   def schedulable(n: Int = GameState.scheduler.currentTime): Schedulable = new Schedulable {
     override val nextRun: Int = n
 
     override def run(tick: Int): Option[Schedulable] = {
+      runTriggers(None)
+
       Some(runNextCommand(n))
     }
   }
 
   private def runNextCommand(tick: Int): Schedulable = {
-    if (commands.isEmpty) reset()
+    while (commands.isEmpty) reset()
 
+    commands.dequeue() match {
+      case IfAction(cond, actions) =>
+        if (ConditionRunner.runCondition(cond)(this, None)) {
+          returnTo.push(commands.clone())
+          commands.clear()
+          commands.enqueue(actions: _*)
+        }
 
-    val com = commands.dequeue()
-    val parsed = ActionParser.DefaultParser.apply(com.split(" ")).toOption
-    if (parsed.isEmpty) schedulable(1 + tick) // ignore
-    else {
-      val t = parsed.get.apply(this)
-      schedulable(t + tick)
+        runNextCommand(tick)
+      case action: Action =>
+        val t = action.apply(this)
+        schedulable(t + tick)
+    }
+  }
+
+  private def runTriggers(implicit trigger: Option[Message]): Unit = {
+    implicit val me: CharacterState = this
+    val triggers = compiledTriggers.filter(pair => ConditionRunner.runCondition(pair._1))
+      .map(_._2)
+      .map(list => mutable.Queue(list:_*))
+
+    if (triggers.nonEmpty) {
+      returnTo.push(commands.clone())
+      returnTo ++= triggers
+      commands.clear()
+      reset()
     }
   }
 
   override def spawn(): Unit = {
     super.spawn()
     GameState.scheduler.schedule(schedulable())
+  }
+
+  override def handle(message: Message): Unit = {
+    super.handle(message)
+
+    runTriggers(Some(message))
   }
 }
