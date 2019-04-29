@@ -38,17 +38,17 @@ class NPC(startState: CharacterState,
     } else commands.enqueue(compiledProgram: _*)
   }
 
-  def schedulable(n: Int = GameState.scheduler.currentTime): Schedulable = new Schedulable {
+  protected def schedulable(n: Int = GameState.scheduler.currentTime): Schedulable = new Schedulable {
     override val nextRun: Int = n
 
     override def run(tick: Int): Option[Schedulable] = {
       runTriggers(None)
 
-      Some(runNextCommand(n))
+      Option(runNextCommand(n))
     }
   }
 
-  private def runNextCommand(tick: Int): Schedulable = {
+  protected def runNextCommand(tick: Int): Schedulable = {
     while (commands.isEmpty) reset()
 
     commands.dequeue() match {
@@ -66,7 +66,7 @@ class NPC(startState: CharacterState,
     }
   }
 
-  private def runTriggers(implicit trigger: Option[Message]): Unit = {
+  protected def runTriggers(implicit trigger: Option[Message]): Unit = {
     implicit val me: CharacterState = this
     val triggers = compiledTriggers.filter(pair => ConditionRunner.runCondition(pair._1))
       .map(_._2)

@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game
 import java.io.{OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
-import ch.epfl.lara.engine.game.entities.NPC
+import ch.epfl.lara.engine.game.entities.{NPC, PPC}
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
 import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, Pickable}
@@ -70,7 +70,7 @@ object Game {
     })
 
     // Create dummy NPCs
-    val dummyNPC1 = new NPC(
+    val dummyNPC1 = PPC(
       new CharacterState(rooms.getRoom("store"), Center, "Shop Keeper", out = emptyStream),
         """
           |wait 1
