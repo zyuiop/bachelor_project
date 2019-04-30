@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game
 import java.io.{OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
-import ch.epfl.lara.engine.game.entities.{NPC, PPC}
+import ch.epfl.lara.engine.game.entities.{PPC, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
 import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, Pickable}
@@ -70,7 +70,7 @@ object Game {
     })
 
     // Create dummy NPCs
-    val dummyNPC1 = PPC(
+    /*val dummyNPC1 = PPC(
       new CharacterState(rooms.getRoom("store"), Center, "Shop Keeper", out = emptyStream),
         """
           |wait 1
@@ -78,6 +78,7 @@ object Game {
       List(
         "anyone enters" ->
           """
+            |if me has room == "store"
             |if time >= 6:00 && time < 18:00
             |say Hello you!
             |end
@@ -85,10 +86,20 @@ object Game {
             |if time >= 18:00 || time < 6:00
             |say The shop is closed... please leave!
             |end
+            |end
+          """.stripMargin,
+        "anyone trades" ->
+          """
+            |accept
           """.stripMargin
       )
+    )*/
+    val dummyNPC1 = new TraderNPC(rooms.getRoom("store"), Center, "Shop Keeper",
+      Map(peanut -> 500, Pickable("nut") -> 500, Pickable("noiset") -> 100),
+      Map(peanut -> 1, Pickable("nut") -> 2, Pickable("noiset") -> 5)
     )
-    val dummyNPC2 = new NPC(
+
+    val dummyNPC2 = PPC(
       new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
         """
           |say Hello, who are you?
@@ -100,14 +111,15 @@ object Game {
           |drop 1 peanut
           |say I love peanut butter!
           |go west
-        """.stripMargin
+        """.stripMargin,
+      List()
     )
 
     dummyNPC1.spawn()
     dummyNPC2.spawn()
 
     // Create Player State
-    val state = new PlayerState(rooms.getRoom("street"))
+    val state = new PlayerState(rooms.getRoom("street"), Map(GameState.Currency -> 1000))
     state.spawn()
 
     println(state.currentRoom.describe())

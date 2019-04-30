@@ -3,6 +3,7 @@ package ch.epfl.lara.engine.game.actions.control
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
 import ch.epfl.lara.engine.game.messaging.Message
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage}
+import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 import ch.epfl.lara.engine.game.{CharacterState, GameState, PlayerState}
 
 /**
@@ -43,20 +44,26 @@ object ConditionRunner {
     case (TalksTrigger(who), Some(TalkingMessage(sentBy, _))) =>
       applies(who, sentBy)
 
+    case (TradeTrigger(who), Some(InventoryTradeRequest(sentBy, target, _, _))) =>
+      applies(who, sentBy)
+
     case (InteractsTrigger(who), _) => false // TODO: handle (and pass context...?)
 
     case (HasTrigger(who: Entity, what: Comparison), _) =>
       // We need to get the appropriate entities and apply the comparison on them
-      val roomEntities = GameState.registry.getEntities(runningEntity.currentRoom)
+      lazy val roomEntities = GameState.registry.getEntities(runningEntity.currentRoom)
 
       val appropriate: List[CharacterState] = who match {
         case PlayerEntity => roomEntities.filter(_.isInstanceOf[PlayerState])
         case NamedEntity(e) => roomEntities.filter(_.name.toLowerCase == e.toLowerCase)
         case AnyEntity => roomEntities
+        case CurrentEntity => List(runningEntity)
       }
 
       // Apply condition
-      appropriate.exists(state => runComp(what)(env ++ state.attributes))
+      appropriate.exists(state => runComp(what)((env ++ state.attributes)
+        + ("room" -> state.currentRoom.id)
+        + ("position" -> state.currentPosition.name)))
 
     case _ => false
   }

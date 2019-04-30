@@ -2,13 +2,12 @@ package ch.epfl.lara.engine.game
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.entities.Interactable
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
-import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
 import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage}
-import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
+import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
+import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
+import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 
 import scala.collection.mutable
 
@@ -35,17 +34,19 @@ class CharacterState(startRoom: Room,
 
   private var _currentRoom: Room = startRoom
   private var _currentPosition: Position = startPosition
-  private var _attributes: mutable.Map[String, String] = mutable.Map(startAttributes.toList:_*)
+  private var _attributes: mutable.Map[String, String] = mutable.Map(startAttributes.toList: _*)
 
   def currentRoom: Room = _currentRoom
+
   def currentPosition: Position = _currentPosition
+
   def attributes: Map[String, String] = _attributes.toMap
 
-  def changeRoom(target: Room): Unit = {
+  def currentRoom_=(target: Room): Unit = {
     this._currentRoom = target
   }
 
-  def changePosition(target: Position): Unit = {
+  def currentPosition_=(target: Position): Unit = {
     this._currentPosition = target
   }
 
@@ -90,12 +91,35 @@ class CharacterState(startRoom: Room,
     case TalkingMessage(sentBy, content) =>
       out.println(Console.CYAN + sentBy.name + ": " + content + Console.RESET)
 
+    case SystemMessage(content) =>
+      out.println(content)
+
     case RoomMovement(sentBy, entering) =>
       out.println(Console.YELLOW + sentBy.name + " " + (if (entering) "enters" else "leaves") + " the room." + Console.RESET)
 
+    case r: Request =>
+      receivedRequests.put(r.requestId, r)
+      handleRequest(r)
+
+    case _ => // unhandled
   }
 
-    //
+  def handleRequest(request: Request): Unit = request match {
+    case _ =>
+      ps.println(s"Received a request from ${request.sentBy.name}:\n$request")
+  }
+
+  private val receivedRequests: mutable.Map[Int, Request] = mutable.Map()
+
+  def activeRequests: Iterable[Request] = receivedRequests.values.filter(p => p.sentBy.currentRoom == currentRoom)
+
+  def removeAndGetRequest(id: Int): Option[Request] = {
+    if (receivedRequests.contains(id) && receivedRequests(id).sentBy.currentRoom == currentRoom)
+      receivedRequests.remove(id)
+    else None
+  }
+
+  //
 }
 
 

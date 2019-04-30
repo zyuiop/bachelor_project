@@ -7,12 +7,14 @@ object Tokens {
   private val SymbolMap: Map[String, Token] =
     Map(
       "player" -> Player,
+      "me" -> CurrentOne,
       "anyone" -> AnyOne,
       "someone" -> AnyOne,
       "enters" -> Enters,
       "leaves" -> Leaves,
       "talks" -> Talks,
       "interacts" -> Interacts,
+      "trades" -> Trades,
       "has" -> Has)
 
   trait Token
@@ -22,6 +24,7 @@ object Tokens {
   case object Or extends Token
 
   case object Player extends Token
+  case object CurrentOne extends Token
 
   case object AnyOne extends Token
 
@@ -32,6 +35,7 @@ object Tokens {
   case object Talks extends Token
 
   case object Interacts extends Token
+  case object Trades extends Token
 
   case object Has extends Token
 

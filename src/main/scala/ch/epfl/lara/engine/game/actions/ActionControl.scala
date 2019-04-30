@@ -17,7 +17,7 @@ case class ActionControl(characterName: String) extends Action {
     val player = inState.asInstanceOf[PlayerState]
 
     if (player.controlled.nonEmpty) {
-      println(s"You already control ${player.controlled.get.name}! Please release them before controlling someone else...")
+      inState.ps.println(s"You already control ${player.controlled.get.name}! Please release them before controlling someone else...")
       return 0
     }
 
@@ -26,21 +26,21 @@ case class ActionControl(characterName: String) extends Action {
         .filter(_.name.toLowerCase.startsWith(characterName.toLowerCase))
 
     if (characters.isEmpty) {
-      println("There is nobody by that name here...")
+      inState.ps.println("There is nobody by that name here...")
       0
     } else if (characters.size > 1) {
-      println("There are too many characters by that name here... Try to use the full character name.")
+      inState.ps.println("There are too many characters by that name here... Try to use the full character name.")
       0
     } else {
       val c = characters.head
 
       c match {
         case ppc: PPC =>
-          println(s"You concentrate all your possession powers and take control of ${ppc.name}!")
+          inState.ps.println(s"You concentrate all your possession powers and take control of ${ppc.name}!")
           player.control(ppc)
           5
         case _ =>
-          println("You can't use your possession power on this character...")
+          inState.ps.println("You can't use your possession power on this character...")
           5
       }
     }

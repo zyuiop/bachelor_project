@@ -7,15 +7,15 @@ import ch.epfl.lara.engine.game.scheduler.Schedulable
 /**
   * @author Louis Vialar
   */
-class PPC(startState: CharacterState, val states: Set[String], programs: Map[String, String], firstState: String, stateTransitions: Map[String, String], triggers: List[(String, String)]) extends NPC(startState, programs(firstState), triggers) {
+class PPC(startState: CharacterState, val states: Set[String], programs: Map[String, String], firstState: String, stateTransitions: Map[String, String], triggers: List[(String, String)]) extends ProgrammedNPC(startState, programs(firstState), triggers) {
   var controlled = false
 
-  def takeControl() = {
+  def takeControl(): Unit = {
     controlled = true
     GameState.registry.removeEntity(this)
   }
 
-  def releaseControl() = {
+  def releaseControl(): Unit = {
     controlled = false
     spawn()
   }

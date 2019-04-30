@@ -8,6 +8,8 @@ import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
 import ch.epfl.lara.engine.game.items.{Inventory, Item, Pickable}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
+import scala.collection.mutable
+
 /**
   * @author Louis Vialar
   */
@@ -49,7 +51,9 @@ class Room(val id: String, val name: String, val ambient: String,
        |$describeDoors $describeInteracts""".stripMargin
   }
 
-  def handle(message: Message): Unit = GameState.registry.getEntities(this).foreach(_ ! message)
+  def handle(message: Message): Unit = {
+    GameState.registry.getEntities(this).foreach(_ ! message)
+  }
 
   def getInteractableItem(name: String, position: Position): Option[Item with Interactable] = {
     interactable.get(name.toLowerCase).flatMap(m => {

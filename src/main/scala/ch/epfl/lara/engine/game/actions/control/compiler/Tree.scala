@@ -5,6 +5,8 @@ import ch.epfl.lara.engine.game.actions.control.compiler.Tokens.Token
 /**
   * @author Louis Vialar
   */
+
+// TODO: improve, allow to check inventories
 object Tree {
 
   trait Expr
@@ -16,6 +18,8 @@ object Tree {
   trait Entity
 
   case object PlayerEntity extends Entity
+
+  case object CurrentEntity extends Entity
 
   case object AnyEntity extends Entity
 
@@ -30,6 +34,8 @@ object Tree {
   case class TalksTrigger(who: Entity) extends Trigger
 
   case class InteractsTrigger(who: Entity) extends Trigger
+
+  case class TradeTrigger(who: Entity) extends Trigger
 
   case class HasTrigger(who: Entity, what: Comparison) extends Trigger
 
@@ -115,6 +121,9 @@ object Tree {
       case l :: Tokens.Interacts :: Nil =>
         InteractsTrigger(parseEntity(l))
 
+      case l :: Tokens.Trades :: Nil =>
+        TradeTrigger(parseEntity(l))
+
 
       // Other conditions
       case _ => parseComparison(tokens)
@@ -136,6 +145,7 @@ object Tree {
 
     def parseEntity(token: Token): Entity = token match {
       case Tokens.Player => PlayerEntity
+      case Tokens.CurrentOne => CurrentEntity
       case Tokens.Symbol(name) => NamedEntity(name)
       case Tokens.AnyOne => AnyEntity
     }

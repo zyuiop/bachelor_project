@@ -25,11 +25,11 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
 
           room ! RoomMovement(inState, entering = true)
 
-          inState changeRoom room
+          inState.currentRoom = room
 
           prev ! RoomMovement(inState, entering = false)
 
-          inState changePosition pos
+          inState.currentPosition = pos
 
           7
         } else {

@@ -7,14 +7,10 @@ import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
 /**
   * @author Louis Vialar
   */
-class PlayerState(startRoom: Room) extends CharacterState(startRoom, Center, "you") {
+class PlayerState(startRoom: Room, startInventory: Map[Pickable, Int] = Map()) extends CharacterState(startRoom, Center, "you", startInventory = startInventory) {
   private var _controlled: Option[PPC] = None
 
   def controlled: Option[PPC] = _controlled
-
-  private def controlledInv: Option[Inventory] = controlled.map(_.inventory)
-
-  private val selfInv = _inventory
 
   def control(ppc: PPC): Unit = {
     _controlled = Some(ppc)
@@ -26,53 +22,18 @@ class PlayerState(startRoom: Room) extends CharacterState(startRoom, Center, "yo
     _controlled = None
   }
 
-  override def inventory: Inventory = new Inventory {
-    override val name: String = selfInv.name
+  override def inventory: Inventory = controlled.map(_.inventory).getOrElse(_inventory)
 
-    override def getContent: Map[Pickable, Int] = {
-      if (controlledInv.nonEmpty) {
-        val selfContent = selfInv.getContent
-        val controlledInvContent =
-          controlledInv.get.getContent.map(pair => {
-            if (selfContent.contains(pair._1))
-              (pair._1, selfContent(pair._1) + pair._2)
-            else pair
-          })
+  override def currentRoom_=(target: Room): Unit = {
+    super.currentRoom_=(target)
 
-        selfContent ++ controlledInvContent
-      } else {
-        selfInv.getContent
-      }
-    }
-
-    override def take(o: Pickable, quantity: Int): Inventory = {
-      if (controlledInv.nonEmpty && controlledInv.get.canTake(o, quantity))
-        controlled.get.inventory.take(o, quantity)
-      else selfInv.take(o, quantity)
-      this
-    }
-
-    override def add(o: Pickable, quantity: Int): Inventory = {
-      if (controlledInv.nonEmpty)
-        controlledInv.get.add(o, quantity)
-      else selfInv.add(o, quantity)
-    }
-
-    override def canTake(o: Pickable, quantity: Int): Boolean = {
-      (controlledInv.nonEmpty && controlledInv.get.canTake(o, quantity)) || selfInv.canTake(o, quantity)
-    }
+    controlled.foreach(_.currentRoom_=(target))
   }
 
-  override def changeRoom(target: Room): Unit = {
-    super.changeRoom(target)
+  override def currentPosition_=(target: Position): Unit = {
+    super.currentPosition_=(target)
 
-    controlled.foreach(_.changeRoom(target))
-  }
-
-  override def changePosition(target: Position): Unit = {
-    super.changePosition(target)
-
-    controlled.foreach(_.changePosition(target))
+    controlled.foreach(_.currentPosition = target)
   }
 
   override def changeAttribute(key: String, value: String): Unit = {

@@ -1,6 +1,7 @@
 package ch.epfl.lara.engine.game
 
-import ch.epfl.lara.engine.game.entities.NPC
+import ch.epfl.lara.engine.game.entities.ProgrammedNPC
+import ch.epfl.lara.engine.game.items.Pickable
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
 import scala.collection.mutable
@@ -23,6 +24,8 @@ class GameState(val level: LevelMap, val startTime: Int = 0) {
 
 object GameState {
   private var instance: Option[GameState] = None
+
+  val Currency: Pickable = Pickable("coin")
 
   def get: GameState = instance.get
 

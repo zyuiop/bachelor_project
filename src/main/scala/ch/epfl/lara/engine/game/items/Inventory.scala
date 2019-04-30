@@ -8,6 +8,8 @@ import scala.util.{Failure, Success, Try}
   * @author Louis Vialar
   */
 trait Inventory {
+  def nonEmpty: Boolean = getContent.nonEmpty
+
   def printContent(implicit printStream: PrintStream): Unit = {
     val c = getContent
 
