@@ -11,16 +11,10 @@ import scala.util.Try
 case class ActionRequestReply(accept: Boolean, requestId: Option[Int]) extends Action {
   override def apply(inState: CharacterState): Int = {
     def act(req: Request) = {
-      if (accept) {
-        req.accept()
-      }
-      else {
-        req.refuse()
-      }
-
+      if (accept) req.accept()
+      else req.refuse()
       3
     }
-
 
     if (requestId.isEmpty) {
       val active = inState.activeRequests
