@@ -1,11 +1,9 @@
 package ch.epfl.lara.engine.game.actions.control
 
 import ch.epfl.lara.engine.game.CharacterState
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler.compile
-import ch.epfl.lara.engine.game.actions.control.compiler.{CompileError, Lexer, Parser, Tokens, Tree}
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.{Expression, LogicalExpression}
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
+import ch.epfl.lara.engine.game.actions.control.compiler.{CompileError, Lexer, Parser}
 import ch.epfl.lara.engine.game.actions.{Action, ActionParser}
-import ch.epfl.lara.engine.game.actions.control.IfAction
 
 /**
   * Compiles a list of actions for a NPC
@@ -13,14 +11,25 @@ import ch.epfl.lara.engine.game.actions.control.IfAction
   * @author Louis Vialar
   */
 object ActionCompiler {
-  def compileProgram(program: String): Expression = {
+  def compileProgram(program: String): (Expression, List[When]) = {
     {
       for {
         tokens <- Lexer(program).right
         tree <- Parser(tokens).right
       } yield tree
     } match {
-      case Right(code) => code
+      case Right(code) => code match {
+        // parseIte | parseDo | block | when
+        case e: When => (EmptyExpr(), e :: Nil)
+        case Sequence(list) =>
+          val (expr, whens) = list.partition {
+            case e: When => false
+            case _ => true
+          }
+
+          (Sequence(expr), whens.map(_.asInstanceOf[When]))
+        case _ => (code, Nil)
+      }
       case Left(err) => throw new Exception("compilation of (" + program + ") failed: \n" + err)
     }
   }
@@ -70,6 +79,7 @@ object ActionCompiler {
         }
       }
     }
+
     val (ret, _) = compile(commands.map(_.trim).filter(_.nonEmpty), Nil)
     ret
   }
