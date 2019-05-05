@@ -62,6 +62,10 @@ class CharacterState(startRoom: Room,
     GameState.registry.addEntity(this)
   }
 
+  def despawn(): Unit = {
+    GameState.registry.removeEntity(this)
+  }
+
   def startInteracting(interactWith: Interactable): Unit = interacts.push(interactWith)
 
   def stopInteracting(): Unit = interacts.pop()

@@ -24,6 +24,10 @@ class LexerTest extends FlatSpec with Matchers {
       Identifier("trigger"), Dot(), Identifier("type"), Eq(), StringLiteral("InventoryTradeRequest"), And(),
       Not(), StringLiteral("peanut"), In(), Identifier("trigger"), Dot(), Identifier("content"), Dot(), Identifier("sentItem")
     )))
+
+    Lexer("""trigger != null""") should be(Right(List(
+      Identifier("trigger"), Neq(), Null()
+    )))
   }
 
   it should "parse times" in {

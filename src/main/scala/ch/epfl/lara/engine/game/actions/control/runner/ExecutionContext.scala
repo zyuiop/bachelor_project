@@ -6,6 +6,7 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.{CharacterState, GameState}
 
 import scala.collection.immutable.Queue
+import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -20,43 +21,55 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
         .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
     )),
     "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
-    "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState)),
-    "trigger" -> MapEnvironment(Map("__name" -> ValueEnvironment("None")))
+    "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
   ) ++ additionnal)
 
-  private var queue = Queue[Expression]()
-  private var branches = Queue[(Int, Queue[Expression])]()
-  private var nextRun = 0
+  case class BranchState(queue: mutable.Queue[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])
+
+  private var currentState = BranchState(mutable.Queue(), 0, Map())
+
+  private var branches = Queue[BranchState]()
+  private var stopped = true
+  private var scheduled = false
 
   private def runTick(currentTick: Int, expectedTick: Int): Unit = {
-    if (nextRun > 0) {
-      nextRun -= 1 // Will run every tick
+    if (stopped)
+      return
+
+
+    if (currentState.nextRun > 0) {
+      currentState.nextRun -= 1 // Will run every tick
     }
 
     // Check the triggers every tick
-    checkTriggers(env())
+    checkTriggers()(env())
 
-    while (nextRun <= 0) {
-      if (this.queue.isEmpty) next()
+    while (currentState.nextRun <= 0) {
+      while (currentState.queue.isEmpty) next()
 
-      val (n, queue) = this.queue.dequeue
-      this.queue = queue
-      execute(n)
+      execute(this.currentState.queue.dequeue)
     }
   }
 
-  def start() = {
+  def start(): Unit = {
+    stopped = false
+    if (scheduled) return
+
     GameState.scheduler.runRegular(1, 1)(runTick)
+    scheduled = true
+  }
+
+  def stop() = {
+    stopped = true
   }
 
   private def schedule(expr: Expression) = {
-    queue.enqueue(expr)
+    currentState.queue.enqueue(expr)
   }
 
-  private def interrupt() = {
-    branches = branches.enqueue((nextRun, queue))
-    queue = Queue()
-    nextRun = 0
+  private def interrupt(moreEnv: Map[String, Environment] = Map()) = {
+    branches = branches.enqueue(currentState)
+    currentState = BranchState(mutable.Queue(), 0, moreEnv)
   }
 
   /**
@@ -64,18 +77,20 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     */
   private def next() = {
     if (branches.nonEmpty) {
-      ((nextRun, queue), branches) = branches.dequeue
+      val (state, nbranches) = branches.dequeue
+      currentState = state
+      branches = nbranches
     } else {
-      queue = queue.enqueue(program)
+      currentState.queue.enqueue(program)
     }
   }
 
   private def suspendFor(time: Int) = {
-    nextRun = time
+    currentState.nextRun = time
   }
 
   private def execute(expr: Expression) = {
-    implicit val env: Environment = this.env()
+    implicit val env: Environment = this.env(currentState.moreEnv)
 
     expr match {
       case Ite(cond, left, right) =>
@@ -91,28 +106,33 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
           suspendFor(time)
 
         // Check the triggers once we did something (no need for conditional branches)
-        checkTriggers
+        // We don't reuse the previous env as it's outdated
+        checkTriggers()(this.env())
       case Sequence(exprs) =>
         exprs.foreach(schedule)
       case EmptyExpr() =>
     }
   }
 
-  private def checkTriggers(implicit env: Environment) = {
+  private def checkTriggers(moreEnv: Map[String, Environment] = Map())(implicit env: Environment): Unit = {
+    if (stopped)
+      return
+
     triggers.foreach(t => {
       if (runCondition(t.cond)) {
-        interrupt()
+        interrupt(moreEnv)
         schedule(t.when)
       }
     })
   }
 
   def handle(message: Message) = {
-    implicit val env: Environment = this.env(Map(
+    val moreEnv = Map(
       "trigger" -> ObjectMappingEnvironment(message)
-    ))
+    )
+    implicit val env: Environment = this.env(moreEnv)
 
-    checkTriggers
+    checkTriggers(moreEnv)
   }
 
   private def runCondition(cond: LogicalExpression)(implicit env: Environment): Boolean = {

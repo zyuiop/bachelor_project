@@ -71,17 +71,15 @@ object Lexer extends RegexParsers {
 
   def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow | nulls
 
-  def identifierOrReserved = reserved | identifier
-
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(identifierOrReserved | not | lbrack | rbrack | lpar | rpar | identifier | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus)
+      rep1(positioned(reserved | identifier | lbrack | rbrack | lpar | rpar | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus | not))
     )
   }
 
   def apply(code: String): Either[CompileError, List[Token]] = {
     parse(tokens, code) match {
-      case NoSuccess(msg, _) => Left(CompileError(msg))
+      case NoSuccess(msg, next) => Left(CompileError(Location(next.pos.line, next.pos.column), msg))
       case Success(result, _) => Right(result)
     }
   }

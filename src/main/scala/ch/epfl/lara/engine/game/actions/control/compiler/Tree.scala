@@ -19,7 +19,7 @@ object Tree {
 
   case class EmptyExpr() extends Expression
 
-  sealed trait LogicalExpression
+  sealed trait LogicalExpression extends Positional
 
   case class And(left: LogicalExpression, right: LogicalExpression) extends LogicalExpression
 
@@ -27,7 +27,7 @@ object Tree {
 
   case class Not(e: LogicalExpression) extends LogicalExpression
 
-  sealed trait Value
+  sealed trait Value extends Positional
 
   case class Identifier(parts: List[String]) extends Value
 

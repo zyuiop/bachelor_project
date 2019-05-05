@@ -171,6 +171,10 @@ class ParserTest extends FlatSpec with Matchers {
         |do "say cheese"
         |do "thanks"
         |}
+        |when (cond == false && true) {
+        |do "say helooo"
+        |do "thanks"
+        |}
         |
       """.stripMargin) should be(Right(
       Sequence(List(
@@ -186,6 +190,13 @@ class ParserTest extends FlatSpec with Matchers {
           And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
           Sequence(List(
             Do(StringLiteral("say cheese"), false),
+            Do(StringLiteral("thanks"), false)
+          ))
+        ),
+        When(
+          And(Eq(Identifier(List("cond")), BooleanLiteral(false)), BooleanLiteral(true)),
+          Sequence(List(
+            Do(StringLiteral("say helooo"), false),
             Do(StringLiteral("thanks"), false)
           ))
         )

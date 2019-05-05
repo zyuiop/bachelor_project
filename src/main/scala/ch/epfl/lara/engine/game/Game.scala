@@ -97,32 +97,29 @@ object Game {
     val dummyNPC0 = PPC(
       new CharacterState(rooms.getRoom("1st-floor"), Center, "Somebody", out = emptyStream),
       """
-        |wait 1
-      """.stripMargin,
-      List(
-        """trigger.type == "RoomMovement" && trigger.content.entering == true""" ->
-          """
-            |if characters.me.currentRoom.id == "1st-floor"
-            |if time >= 6:00:00 && time < 18:00:00
-            |say Hello you!
-            |end
-            |
-            |if time >= 18:00:00 || time < 6:00:00
-            |say The shop is closed... please leave!
-            |end
-            |end
-          """.stripMargin,
-        """trigger.type == "InventoryTradeRequest" && "peanut" in trigger.content.sentItems""" ->
-          """
-            |immediate refuse
-            |immediate say Oh no, please, no more peanuts!
-          """.stripMargin,
-        """trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItems""" ->
-          """
-            |accept
-          """.stripMargin
+        |do "wait 1"
+        |
+        |when (trigger != null && trigger.entering == true && characters.me.currentRoom.id == "1st-floor") {
+        |  if (time >= 6:00:00 && time < 18:00:00) {
+        |    do "say Hello you!"
+        |  } else {
+        |    do "say What are you doing here?"
+        |  }
+        |}
+        |
+        |when (trigger != null && trigger.__name == "InventoryTradeRequest") {
+        | do now "say Hmm... let's see what you're offering me... " + trigger.sentItems.`0` + ", I see..."
+        | if ("peanut" in trigger.sentItems) {
+        |   do now "refuse"
+        |   do now "say Please, no, no, no more peanuts...!"
+        | } else {
+        |   do now "accept"
+        |   do now "say Thank you for this present!"
+        | }
+        | do "wait 2"
+        |}
+      """.stripMargin
       )
-    )
 
     val dummyNPC1 = new TraderNPC(rooms.getRoom("store"), Center, "Shop Keeper",
       Map(peanut -> 500, Pickable("nut") -> 500, Pickable("noiset") -> 100),
@@ -132,17 +129,16 @@ object Game {
     val dummyNPC2 = PPC(
       new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
         """
-          |say Hello, who are you?
-          |wait 10
-          |open cellar
-          |take 1 peanut
-          |quit
-          |go east
-          |drop 1 peanut
-          |say I love peanut butter!
-          |go west
-        """.stripMargin,
-      List()
+          |do "say Hello, who are you?"
+          |do "wait 10"
+          |do "open cellar"
+          |do "take 1 peanut"
+          |do "quit"
+          |do "go east"
+          |do "drop 1 peanut"
+          |do "say I love peanut butter!"
+          |do "go west"
+        """.stripMargin
     )
 
     dummyNPC0.spawn()

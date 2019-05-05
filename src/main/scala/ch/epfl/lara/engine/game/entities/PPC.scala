@@ -7,31 +7,24 @@ import ch.epfl.lara.engine.game.scheduler.Schedulable
 /**
   * @author Louis Vialar
   */
-class PPC(startState: CharacterState, val states: Set[String], programs: Map[String, String], firstState: String, stateTransitions: Map[String, String], triggers: List[(String, String)]) extends ProgrammedNPC(startState, programs(firstState), triggers) {
+class PPC(startState: CharacterState, val states: Set[String], program: String, firstState: String) extends ProgrammedNPC(startState, program) {
   var controlled = false
+
+  // TODO: setter command in the program? (or just parse conditions)
 
   def takeControl(): Unit = {
     controlled = true
-    GameState.registry.removeEntity(this)
+    despawn()
   }
 
   def releaseControl(): Unit = {
     controlled = false
     spawn()
   }
-
-  override protected def runNextCommand(tick: Int): Schedulable = {
-    if (!controlled) super.runNextCommand(tick)
-    else null
-  }
-
-  override protected def runTriggers(implicit trigger: Option[Message]): Unit = {
-    if (!controlled) super.runTriggers
-  }
 }
 
 object PPC {
-  def apply(startState: CharacterState, program: String, triggers: List[(String, String)]): PPC = {
-    new PPC(startState, Set("unique"), Map("unique" -> program), "unique", Map(), triggers)
+  def apply(startState: CharacterState, program: String): PPC = {
+    new PPC(startState, Set("unique"), program, "unique")
   }
 }

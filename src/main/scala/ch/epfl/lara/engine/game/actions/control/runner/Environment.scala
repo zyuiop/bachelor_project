@@ -13,13 +13,31 @@ sealed trait Environment {
 }
 
 case class MapEnvironment(map: Map[String, Environment]) extends Environment {
+  private lazy val companion = CollectionEnvironment(map.keys.map(ValueEnvironment).toSeq)
+
   override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
     if (path.nonEmpty) {
       map.get(path.head) match {
         case Some(v) => v.resolvePath(path.tail).recoverWith(PathNotFoundException.update(path.head))
-        case None => Failure(PathNotFoundException(path.head :: Nil, map.keySet))
+        case None if path.head.nonEmpty && path.head.forall(_.isDigit) =>
+          // Handle to the "set companion" to allow searching the keys as a set
+          companion.resolvePath(path)
+        case None =>
+          Failure(PathNotFoundException(path.head :: Nil, map.keySet))
       }
     } else Success(SetValue(map.keySet))
+  }
+}
+
+case class CollectionEnvironment(collection: Seq[Environment]) extends Environment {
+  override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
+    if (path.nonEmpty && path.head.nonEmpty && path.head.forall(_.isDigit)) {
+      val index = path.head.toInt
+      if (index < collection.size) collection(index).resolvePath(path.tail).recoverWith(PathNotFoundException.update(path.head))
+      else Failure(PathNotFoundException(path.head :: Nil, collection.indices.map(_.toString)))
+    } else {
+      Failure(PathNotFoundException(path.head :: Nil, collection.indices.map(_.toString)))
+    }
   }
 }
 
@@ -63,7 +81,7 @@ case class ObjectMappingEnvironment(obj: Any) extends Environment {
 
 
   override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
-    if (path.nonEmpty) {
+    if (path.nonEmpty && path.head.nonEmpty) {
       val optField = fieldsAndMethods.get(path.head)
 
       if (optField.nonEmpty) {
@@ -77,7 +95,7 @@ case class ObjectMappingEnvironment(obj: Any) extends Environment {
 
 case class ValueEnvironment(value: String) extends Environment {
   override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
-    if (path.isEmpty) Success(UnknownTypeValue(value))
+    if (path.isEmpty || path.head.isEmpty) Success(UnknownTypeValue(value))
     else Failure(PathNotFoundException(path.head :: Nil, Set()))
   }
 }
