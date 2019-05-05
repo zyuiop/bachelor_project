@@ -67,12 +67,15 @@ object Lexer extends RegexParsers {
   def doNow = positioned("now " ^^^ DoNow())
   def lpar = positioned("(" ^^^ LPar())
   def rpar = positioned(")" ^^^ RPar())
+  def nulls = positioned("null" ^^^ Null())
 
-  def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow
+  def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow | nulls
+
+  def identifierOrReserved = reserved | identifier
 
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(reserved | not | lbrack | rbrack | lpar | rpar | identifier | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus)
+      rep1(identifierOrReserved | not | lbrack | rbrack | lpar | rpar | identifier | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus)
     )
   }
 

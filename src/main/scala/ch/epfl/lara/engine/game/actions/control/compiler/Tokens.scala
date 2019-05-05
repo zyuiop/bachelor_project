@@ -52,4 +52,6 @@ object Tokens {
   case class LPar() extends Token
   case class RPar() extends Token
 
+  case class Null() extends Token
+
 }

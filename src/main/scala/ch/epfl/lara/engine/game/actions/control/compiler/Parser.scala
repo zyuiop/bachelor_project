@@ -27,6 +27,7 @@ object Parser extends Parsers {
     case BooleanLiteral(b) => Tree.BooleanLiteral(b)
     case StringLiteral(s) => Tree.StringLiteral(s)
     case IntLiteral(i) => Tree.IntLiteral(i)
+    case Null() => Tree.NullLiteral()
   })
 
   def concat: Parser[Tree.Value] = chainl1(identifier | literals, value, Plus() ^^^ {

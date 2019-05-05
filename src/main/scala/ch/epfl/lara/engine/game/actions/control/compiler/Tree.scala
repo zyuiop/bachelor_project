@@ -41,6 +41,8 @@ object Tree {
 
   case class BooleanLiteral(value: Boolean) extends Literal with Comparison
 
+  case class NullLiteral() extends Literal
+
 
 
   sealed trait Comparison extends LogicalExpression

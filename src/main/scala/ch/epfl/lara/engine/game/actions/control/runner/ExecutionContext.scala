@@ -6,6 +6,7 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.{CharacterState, GameState}
 
 import scala.collection.immutable.Queue
+import scala.util.Try
 
 /**
   * @author Louis Vialar
@@ -134,10 +135,12 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     case StringLiteral(s) => StringValue(s)
     case BooleanLiteral(b) => BooleanValue(b)
     case IntLiteral(i) => IntValue(i)
+    case NullLiteral() => NullValue
     case Identifier(parts) =>
       env.resolvePath(parts).get
   }
 
+  def tryResolve(value: Value)(implicit env: Environment) = Try(resolve(value))
 
   def resolveAsNumber(value: Value)(implicit env: Environment): Int = resolve(value) match {
     case IntValue(i) => i
@@ -148,9 +151,17 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
   def checkComparison(condition: Comparison)(implicit env: Environment): Boolean = condition match {
     case BooleanLiteral(value) => value
     case Eq(left: Value, right: Value) =>
-      resolve(left).asString == resolve(right).asString
+      val (l, r) = (tryResolve(left), tryResolve(right))
+
+      if (l.isFailure) {
+        r.isSuccess && r.get.value == NullValue
+      } else if (r.isFailure) {
+        l.isSuccess && l.get.value == NullValue
+      } else {
+        l.get.asString == r.get.asString
+      }
     case Neq(left: Value, right: Value) =>
-      resolve(left).asString != resolve(right).asString
+      !checkComparison(Eq(left, right))
     case Lte(left: Value, right: Value) =>
       resolveAsNumber(left) <= resolveAsNumber(right)
     case Lt(left: Value, right: Value) =>
