@@ -23,7 +23,7 @@ object ActionCompiler {
   def compile(condition: String): Either[CompileError, LogicalExpression] = {
     for {
       tokens <- Lexer(condition).right
-      tree <- Parser(tokens).right
+      tree <- Parser.parseLogicalExpression(tokens).right
     } yield tree
   }
 

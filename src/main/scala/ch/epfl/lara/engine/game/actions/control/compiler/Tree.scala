@@ -13,7 +13,9 @@ object Tree {
 
   case class Do(what: Value, immediate: Boolean) extends Expression
 
-  case class Sequence(first: Expression, rest: Expression) extends Expression
+  case class Sequence(list: List[Expression]) extends Expression
+
+  case object EmptyExpr extends Expression
 
   sealed trait LogicalExpression
 
@@ -36,6 +38,7 @@ object Tree {
   case class StringLiteral(value: String) extends Literal
 
   case class BooleanLiteral(value: Boolean) extends Literal with Comparison
+
 
 
   sealed trait Comparison extends LogicalExpression

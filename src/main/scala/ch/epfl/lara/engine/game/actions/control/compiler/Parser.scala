@@ -1,7 +1,7 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
 import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.{Concat, LogicalExpression}
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.{Concat, EmptyExpr, Ite, LogicalExpression, Sequence}
 
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input.{NoPosition, Position, Reader}
@@ -67,6 +67,39 @@ object Parser extends Parsers {
     orExpr | andExpr | basic
   }
 
+  def block = LBracket ~ expr ~ RBracket ^^ { case _ ~ e ~ _ => e }
+
+  def parseIte: Parser[Tree.Ite] = {
+
+    If ~ LPar ~ logicalExpr ~ RPar ~ singleExpr ~ (Else ~ singleExpr).? ^^ {
+      case _ ~ _ ~ log ~ _ ~ thenn ~ Some(_ ~ elze) => Ite(log, thenn, elze)
+      case _ ~ _ ~ log ~ _ ~ thenn ~ None => Ite(log, thenn, EmptyExpr)
+    }
+  }
+
+  def parseWhen: Parser[Tree.When] = {
+    When ~ LPar ~ logicalExpr ~ RPar ~ block ^^ {
+      case _ ~ _ ~ cond ~ _ ~ act => Tree.When(cond, act)
+    }
+  }
+
+  def parseDo: Parser[Tree.Do] = {
+    Do ~ DoNow.? ~ value ^^ {
+      case _ ~ Some(_) ~ v => Tree.Do(v, true)
+      case _ ~ None ~ v => Tree.Do(v, false)
+    }
+  }
+
+  def singleExpr = parseIte | parseWhen | parseDo | block
+
+  def expr: Parser[Tree.Expression] = {
+    rep1(singleExpr) ^^ {
+      elems =>
+        if (elems.length > 1) Sequence(elems)
+        else elems.head
+    }
+  }
+
   class TokenReader(tokens: Seq[Token]) extends Reader[Token] {
     override def first: Token = tokens.head
 
@@ -77,9 +110,9 @@ object Parser extends Parsers {
     override def atEnd: Boolean = tokens.isEmpty
   }
 
-  def apply(tokens: Seq[Token]): Either[CompileError, Tree.LogicalExpression] = {
+  def apply(tokens: Seq[Token]): Either[CompileError, Tree.Expression] = {
     val reader = new TokenReader(tokens)
-    phrase(logicalExpr)(reader) match {
+    phrase(expr)(reader) match {
       case NoSuccess(msg, next) => Left(CompileError(msg))
       case Success(result, next) => Right(result)
     }

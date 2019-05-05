@@ -1,6 +1,5 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -15,6 +14,13 @@ class ParserTest extends FlatSpec with Matchers {
     for {
       tokens <- Lexer(condition).right
       tree <- Parser.parseLogicalExpression(tokens).right
+    } yield tree
+  }
+
+  def compile(prog: String): Either[CompileError, Expression] = {
+    for {
+      tokens <- Lexer(prog).right
+      tree <- Parser(tokens).right
     } yield tree
   }
 
@@ -58,5 +64,132 @@ class ParserTest extends FlatSpec with Matchers {
         Or(BooleanLiteral(false), BooleanLiteral(true)))
     ))
 
+  }
+
+  it should "parse a basic chain of expressions" in {
+    compile(
+      """
+        |do "something"
+        |do now "something else"
+        |do "something" + "with" + concat
+      """.stripMargin) should be(Right(
+      Sequence(List(
+        Do(StringLiteral("something"), false),
+        Do(StringLiteral("something else"), true),
+        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+      ))
+    ))
+  }
+  it should "parse a basic block of expressions" in {
+    compile(
+      """
+        |{
+        |do "something"
+        |do now "something else"
+        |do "something" + "with" + concat
+        |}
+      """.stripMargin) should be(Right(
+      Sequence(List(
+        Do(StringLiteral("something"), false),
+        Do(StringLiteral("something else"), true),
+        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+      ))
+    ))
+  }
+  it should "parse a basic block of expressions in the middle of expressions" in {
+    compile(
+      """
+        |do "say plop"
+        |{
+        |do "something"
+        |do now "something else"
+        |}
+        |do "something" + "with" + concat
+        |
+      """.stripMargin) should be(Right(
+      Sequence(List(
+        Do(StringLiteral("say plop"), false),
+        Sequence(List(
+          Do(StringLiteral("something"), false),
+          Do(StringLiteral("something else"), true))),
+        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+      ))
+    ))
+  }
+
+
+  it should "parse a basic set of conditions" in {
+    compile(
+      """
+        |do "say plop"
+        |if (id == otherId && true) {
+        |do "something"
+        |} else {
+        | if (id == false) {
+        |   do now "something else"
+        |} }
+        |do "something" + "with" + concat
+        |when (cond == true && false) {
+        |do "say cheese"
+        |do "thanks"
+        |}
+        |
+      """.stripMargin) should be(Right(
+      Sequence(List(
+        Do(StringLiteral("say plop"), false),
+        Ite(And(Eq(Identifier(List("id")), Identifier(List("otherId"))), BooleanLiteral(true)),
+          Do(StringLiteral("something"), false),
+          Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
+            Do(StringLiteral("something else"), true),
+            EmptyExpr)
+        ),
+        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
+        When(
+          And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
+          Sequence(List(
+            Do(StringLiteral("say cheese"), false),
+            Do(StringLiteral("thanks"), false)
+          ))
+        )
+      )
+      )))
+  }
+
+
+
+  it should "parse a basic set of conditions with no brackets" in {
+    compile(
+      """
+        |do "say plop"
+        |if (id == otherId && true)
+        |   do "something"
+        |else if (id == false)
+        |   do now "something else"
+        |
+        |do "something" + "with" + concat
+        |when (cond == true && false) {
+        |do "say cheese"
+        |do "thanks"
+        |}
+        |
+      """.stripMargin) should be(Right(
+      Sequence(List(
+        Do(StringLiteral("say plop"), false),
+        Ite(And(Eq(Identifier(List("id")), Identifier(List("otherId"))), BooleanLiteral(true)),
+          Do(StringLiteral("something"), false),
+          Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
+            Do(StringLiteral("something else"), true),
+            EmptyExpr)
+        ),
+        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
+        When(
+          And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
+          Sequence(List(
+            Do(StringLiteral("say cheese"), false),
+            Do(StringLiteral("thanks"), false)
+          ))
+        )
+      )
+      )))
   }
 }
