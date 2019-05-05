@@ -13,7 +13,7 @@ class LexerTest extends FlatSpec with Matchers {
 
   "The lexer" should "parse easy programs" in {
     val lst = List(
-      StringLiteral("peanut"), In, Identifier("player"), Dot, Identifier("inventory"), And, Identifier("event"), Dot, Identifier("type"), Eq, StringLiteral("enters")
+      StringLiteral("peanut"), In(), Identifier("player"), Dot(), Identifier("inventory"), And(), Identifier("event"), Dot(), Identifier("type"), Eq(), StringLiteral("enters")
     )
 
     val p = Lexer(""""peanut" in player.inventory && event.type == "enters"""").right
@@ -21,8 +21,8 @@ class LexerTest extends FlatSpec with Matchers {
     p.get should be(lst)
 
     Lexer("""trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItem""") should be(Right(List(
-      Identifier("trigger"), Dot, Identifier("type"), Eq, StringLiteral("InventoryTradeRequest"), And,
-      Not, StringLiteral("peanut"), In, Identifier("trigger"), Dot, Identifier("content"), Dot, Identifier("sentItem")
+      Identifier("trigger"), Dot(), Identifier("type"), Eq(), StringLiteral("InventoryTradeRequest"), And(),
+      Not(), StringLiteral("peanut"), In(), Identifier("trigger"), Dot(), Identifier("content"), Dot(), Identifier("sentItem")
     )))
   }
 
@@ -31,16 +31,16 @@ class LexerTest extends FlatSpec with Matchers {
     Lexer("15:00:00").right.get should be(List(IntLiteral(54000)))
     Lexer("time >= 6:00:00") should be(Right(List(
       Identifier("time"),
-      Hte,
+      Hte(),
       IntLiteral(21600)
     )))
     Lexer("time >= 6:00:00 && time < 18:00:00") should be(Right(List(
       Identifier("time"),
-      Hte,
+      Hte(),
       IntLiteral(21600),
-      And,
+      And(),
       Identifier("time"),
-      Lt,
+      Lt(),
       IntLiteral(64800)
     )))
   }
@@ -48,13 +48,13 @@ class LexerTest extends FlatSpec with Matchers {
   it should "parse basic boolean expressions" in {
 
     Lexer("""(true || false) && (false || true)""") should be(Right(List(
-      LPar, BooleanLiteral(true), Or, BooleanLiteral(false), RPar, And, LPar,
-      BooleanLiteral(false), Or, BooleanLiteral(true), RPar
+      LPar(), BooleanLiteral(true), Or(), BooleanLiteral(false), RPar(), And(), LPar(),
+      BooleanLiteral(false), Or(), BooleanLiteral(true), RPar()
     )))
 
     Lexer("""true || false && false || true""") should be(Right(List(
-      BooleanLiteral(true), Or, BooleanLiteral(false), And,
-          BooleanLiteral(false), Or, BooleanLiteral(true)
+      BooleanLiteral(true), Or(), BooleanLiteral(false), And(),
+          BooleanLiteral(false), Or(), BooleanLiteral(true)
     )))
   }
 }

@@ -141,7 +141,7 @@ class ParserTest extends FlatSpec with Matchers {
           Do(StringLiteral("something"), false),
           Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
             Do(StringLiteral("something else"), true),
-            EmptyExpr)
+            EmptyExpr())
         ),
         Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
         When(
@@ -179,7 +179,7 @@ class ParserTest extends FlatSpec with Matchers {
           Do(StringLiteral("something"), false),
           Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
             Do(StringLiteral("something else"), true),
-            EmptyExpr)
+            EmptyExpr())
         ),
         Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
         When(
