@@ -16,6 +16,9 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
     inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
       case Some(door) =>
         if (door.isOpen(inState)) {
+          if (inState.currentInteract.nonEmpty)
+            inState.stopInteracting()
+
           val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
           val room = GameState.level.rooms.getRoom(roomId)
 

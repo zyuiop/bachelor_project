@@ -8,6 +8,8 @@ import scala.collection.mutable
   * @author Louis Vialar
   */
 class EntitiesRegistry {
+  def player: CharacterState = entities.filter(_.isInstanceOf[CharacterState]).head
+
   val entities: mutable.ArrayBuffer[CharacterState] = mutable.ArrayBuffer()
 
   def addEntity(entity: CharacterState): Unit = entities += entity

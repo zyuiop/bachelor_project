@@ -94,6 +94,36 @@ object Game {
           """.stripMargin
       )
     )*/
+    val dummyNPC0 = PPC(
+      new CharacterState(rooms.getRoom("1st-floor"), Center, "Somebody", out = emptyStream),
+      """
+        |wait 1
+      """.stripMargin,
+      List(
+        """trigger.type == "RoomMovement" && trigger.content.entering == true""" ->
+          """
+            |if characters.me.currentRoom.id == "1st-floor"
+            |if time >= 6:00:00 && time < 18:00:00
+            |say Hello you!
+            |end
+            |
+            |if time >= 18:00:00 || time < 6:00:00
+            |say The shop is closed... please leave!
+            |end
+            |end
+          """.stripMargin,
+        """trigger.type == "InventoryTradeRequest" && "peanut" in trigger.content.sentItems""" ->
+          """
+            |immediate refuse
+            |immediate say Oh no, please, no more peanuts!
+          """.stripMargin,
+        """trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItems""" ->
+          """
+            |accept
+          """.stripMargin
+      )
+    )
+
     val dummyNPC1 = new TraderNPC(rooms.getRoom("store"), Center, "Shop Keeper",
       Map(peanut -> 500, Pickable("nut") -> 500, Pickable("noiset") -> 100),
       Map(peanut -> 1, Pickable("nut") -> 2, Pickable("noiset") -> 5)
@@ -115,11 +145,12 @@ object Game {
       List()
     )
 
+    dummyNPC0.spawn()
     dummyNPC1.spawn()
     dummyNPC2.spawn()
 
     // Create Player State
-    val state = new PlayerState(rooms.getRoom("street"), Map(GameState.Currency -> 1000))
+    val state = new PlayerState(rooms.getRoom("street"), Map(GameState.Currency -> 1000, peanut -> 50, Pickable("nut") -> 10))
     state.spawn()
 
     println(state.currentRoom.describe())

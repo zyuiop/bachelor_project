@@ -44,8 +44,9 @@ case class ActionGive(objectName: String, quantity: Int, characterName: String) 
         }
 
 
-      })
-
+      }).recover {
+        case e: IllegalArgumentException => inState.ps.println(e.getMessage)
+      }
 
       3
     }

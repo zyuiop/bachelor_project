@@ -68,9 +68,10 @@ class ProgrammedNPC(startState: CharacterState,
 
   protected def runTriggers(implicit trigger: Option[Message]): Unit = {
     implicit val me: CharacterState = this
+
     val triggers = compiledTriggers.filter(pair => ConditionRunner.runCondition(pair._1))
       .map(_._2)
-      .map(list => mutable.Queue(list:_*))
+      .map(list => mutable.Queue(list: _*))
 
     if (triggers.nonEmpty) {
       returnTo.push(commands.clone())

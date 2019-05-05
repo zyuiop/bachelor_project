@@ -1,108 +1,215 @@
 package ch.epfl.lara.engine.game.actions.control
 
+import java.lang.reflect.{Field, Method}
+
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
 import ch.epfl.lara.engine.game.messaging.Message
-import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage}
-import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
-import ch.epfl.lara.engine.game.{CharacterState, GameState, PlayerState}
+import ch.epfl.lara.engine.game.{CharacterState, GameState}
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * @author Louis Vialar
   */
 object ConditionRunner {
 
+  private case class PathNotFoundException(path: List[String], availablePaths: Iterable[String], cause: Exception = null) extends Exception(cause) {
+    def addParentPath(parent: String): PathNotFoundException = copy(parent :: path)
 
-  def runCondition(cond: Expr)(implicit runningEntity: CharacterState, trigger: Option[Message]): Boolean = {
-    implicit val env: Map[String, String] = Map(
-      "room" -> runningEntity.currentRoom.name,
-      "totaltime" -> GameState.scheduler.currentTime.toString,
-      "time" -> GameState.scheduler.dayTime.toString
-    )
+    override def getMessage: String = "Path not found " + path.mkString(".") + " ; alternative paths were [" + availablePaths.mkString(", ") + "]"
+  }
 
-    cond match {
-      case And(left, right) => runCondition(left) && runCondition(right)
-      case Or(left, right) => runCondition(left) || runCondition(right)
-
-      case t: Trigger => runTrigger(t)
-      case c: Comparison => runComp(c)
+  private object PathNotFoundException {
+    def update(path: String): PartialFunction[Throwable, Try[TypedValue[_]]] = {
+      case pne: PathNotFoundException => Failure(pne.addParentPath(path))
     }
   }
 
-  private def applies(who: Entity, actual: CharacterState): Boolean = who match {
-    case AnyEntity => true
-    case NamedEntity(e) => actual.name.toLowerCase == e.toLowerCase
-    case PlayerEntity => actual.isInstanceOf[PlayerState]
+  sealed trait Environment {
+    def resolvePath(path: List[String]): Try[TypedValue[_]]
   }
 
-  private def runTrigger(cond: Trigger)(implicit runningEntity: CharacterState, trigger: Option[Message], env: Map[String, String]): Boolean = (cond, trigger) match {
-    case (EntersTrigger(who), Some(RoomMovement(sentBy, true))) =>
-      applies(who, sentBy)
+  case class MapEnvironment(map: Map[String, Environment]) extends Environment {
+    override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
+      if (path.nonEmpty) {
+        map.get(path.head) match {
+          case Some(v) => v.resolvePath(path.tail).recoverWith(PathNotFoundException.update(path.head))
+          case None => Failure(PathNotFoundException(path.head :: Nil, map.keySet))
+        }
+      } else Success(SetValue(map.keySet))
+    }
+  }
 
-    case (LeavesTrigger(who), Some(RoomMovement(sentBy, false))) =>
-      applies(who, sentBy)
+  case class ObjectMappingEnvironment(obj: Any) extends Environment {
 
-    case (TalksTrigger(who), Some(TalkingMessage(sentBy, _))) =>
-      applies(who, sentBy)
-
-    case (TradeTrigger(who), Some(InventoryTradeRequest(sentBy, target, _, _))) =>
-      applies(who, sentBy)
-
-    case (InteractsTrigger(who), _) => false // TODO: handle (and pass context...?)
-
-    case (HasTrigger(who: Entity, what: Comparison), _) =>
-      // We need to get the appropriate entities and apply the comparison on them
-      lazy val roomEntities = GameState.registry.getEntities(runningEntity.currentRoom)
-
-      val appropriate: List[CharacterState] = who match {
-        case PlayerEntity => roomEntities.filter(_.isInstanceOf[PlayerState])
-        case NamedEntity(e) => roomEntities.filter(_.name.toLowerCase == e.toLowerCase)
-        case AnyEntity => roomEntities
-        case CurrentEntity => List(runningEntity)
+    private lazy val fieldsAndMethods = {
+      def readField(f: Field) = () => {
+        if (!f.isAccessible) f.setAccessible(true)
+        f.get(obj)
+      }
+      def readMethod(m: Method) = () => {
+        if (!m.isAccessible) m.setAccessible(true)
+        m.invoke(obj)
       }
 
-      // Apply condition
-      appropriate.exists(state => runComp(what)((env ++ state.attributes)
-        + ("room" -> state.currentRoom.id)
-        + ("position" -> state.currentPosition.name)))
+      def fieldAndMethods(c: Class[_]): Map[String, () => AnyRef] = {
+        if (c == null) Map()
+        else {
+          c.getDeclaredFields.map(f => (f.getName, readField(f))).toMap ++
+            c.getDeclaredMethods.filter(_.getParameterCount == 0).map(m => (m.getName, readMethod(m))).toMap ++
+            fieldAndMethods(c.getSuperclass)
+        }
+      }
 
-    case _ => false
+      fieldAndMethods(obj.getClass)
+    }
+
+    private def produceEnv(value: Any): Environment = {
+      value match {
+        case map: Map[_, _] => MapEnvironment(map.map(p =>
+          p._1.toString -> produceEnv(p._2)
+        ))
+        case s: String => ValueEnvironment(s)
+        case i: Int => ValueEnvironment(i.toString)
+        case d: Double => ValueEnvironment(d.toString)
+        case b: Boolean => ValueEnvironment(b.toString)
+        case _ => ObjectMappingEnvironment(value)
+      }
+    }
+
+
+    override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
+      if (path.nonEmpty) {
+        val optField = fieldsAndMethods.get(path.head)
+
+        if (optField.nonEmpty) {
+          produceEnv(optField.get.apply()).resolvePath(path.tail).recoverWith(PathNotFoundException.update(path.head))
+        } else {
+          Failure(PathNotFoundException(path.head :: Nil, fieldsAndMethods.keySet))
+        }
+      } else Success(SetValue(fieldsAndMethods.keySet))
+    }
+  }
+
+  case class ValueEnvironment(value: String) extends Environment {
+    override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
+      if (path.isEmpty) Success(UnknownTypeValue(value))
+      else Failure(PathNotFoundException(path.head :: Nil, Set()))
+    }
+  }
+
+  case class PassByNameEnvironment(env: () => Environment) extends Environment {
+    override def resolvePath(path: List[String]): Try[TypedValue[_]] = env.apply().resolvePath(path)
   }
 
 
-  private def runComp(cond: Comparison)(implicit env: Map[String, String]): Boolean = cond match {
+  def runCondition(cond: Expr)(implicit runningEntity: CharacterState, trigger: Option[Message]): Boolean = {
+    implicit val env: Environment = MapEnvironment(Map(
+      "time" -> ValueEnvironment(GameState.scheduler.dayTime.toString),
+      "totalTime" -> ValueEnvironment(GameState.scheduler.currentTime.toString),
+      "characters" -> PassByNameEnvironment(() => MapEnvironment(
+        GameState.registry.getEntities(runningEntity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
+          .toMap + ("me" -> ObjectMappingEnvironment(runningEntity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
+      )),
+      "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(runningEntity.currentRoom)),
+      "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState)),
+      "trigger" ->
+        trigger.map(m => MapEnvironment(Map(
+          "type" -> ValueEnvironment(m.getClass.getSimpleName),
+          "content" -> ObjectMappingEnvironment(m)
+        ))).getOrElse(MapEnvironment(Map("type" -> ValueEnvironment("None"))))
+    ))
+
+    def recRunCondition(cond: Expr): Boolean = {
+
+      cond match {
+        case And(l, r) => recRunCondition(l) && recRunCondition(r)
+        case Or(l, r) => recRunCondition(l) || recRunCondition(r)
+        case Not(e) => !recRunCondition(e)
+        case c: Comparison => checkComparison(c)
+      }
+    }
+
+    recRunCondition(cond)
+  }
+
+
+  trait TypedValue[T] {
+    val value: T
+
+    def asString: String = value.toString
+  }
+
+  case class StringValue(value: String) extends TypedValue[String]
+
+  case class IntValue(value: Int) extends TypedValue[Int]
+
+  case class BooleanValue(value: Boolean) extends TypedValue[Boolean]
+
+  case class UnknownTypeValue(value: String) extends TypedValue[String] {
+    def canBeInt: Boolean = value.nonEmpty && value.forall(_.isDigit)
+
+    def canBeBoolean: Boolean = value.toLowerCase == "true" || value.toLowerCase == "false"
+  }
+
+  case class SetValue(value: Set[String]) extends TypedValue[Set[String]]
+
+
+  def resolve(value: Value)(implicit env: Environment): TypedValue[_] = value match {
+    case Concat(left, right) => (resolve(left), resolve(right)) match {
+      case (SetValue(l1), SetValue(l2)) => SetValue(l1 ++ l2)
+      case (SetValue(lst), v) => SetValue(lst + v.asString)
+      case (v, SetValue(lst)) => SetValue(lst + v.asString)
+      case (l, r) => StringValue(l.asString + r.asString)
+    }
+    case StringLiteral(s) => StringValue(s)
+    case BooleanLiteral(b) => BooleanValue(b)
+    case IntLiteral(i) => IntValue(i)
+    case Identifier(parts) =>
+      env.resolvePath(parts).get
+  }
+
+
+  def resolveAsNumber(value: Value)(implicit env: Environment): Int = resolve(value) match {
+    case IntValue(i) => i
+    case u@UnknownTypeValue(v) if u.canBeInt => v.toInt
+    case _ => throw new IllegalArgumentException(value + " cannot be considered as an int!")
+  }
+
+  def checkComparison(condition: Comparison)(implicit env: Environment): Boolean = condition match {
     case Eq(left: Value, right: Value) =>
-      getString(left) == getString(right)
-
+      resolve(left).asString == resolve(right).asString
     case Neq(left: Value, right: Value) =>
-      getString(left) != getString(right)
-
+      resolve(left).asString != resolve(right).asString
     case Lte(left: Value, right: Value) =>
-      getInt(left) <= getInt(right)
-
+      resolveAsNumber(left) <= resolveAsNumber(right)
     case Lt(left: Value, right: Value) =>
-      getInt(left) < getInt(right)
-
+      resolveAsNumber(left) < resolveAsNumber(right)
     case Ht(left: Value, right: Value) =>
-      getInt(left) > getInt(right)
-
+      resolveAsNumber(left) > resolveAsNumber(right)
     case Hte(left: Value, right: Value) =>
-      getInt(left) >= getInt(right)
-  }
+      resolveAsNumber(left) >= resolveAsNumber(right)
+    case In(left: Value, right: Value) =>
+      val l = resolve(left)
+      val r = resolve(right)
 
-  private def parseIntValue(v: Value)(implicit env: Map[String, String]): Option[Int] = v match {
-    case Variable(name: String) => env.get(name).filter(_.forall(_.isDigit)).map(_.toInt)
-    case IntLiteral(value: Int) => Some(value)
-    case StringLiteral(value: String) => Option(value).filter(_.forall(_.isDigit)).map(_.toInt)
-  }
+      r match {
+        case StringValue(_) | UnknownTypeValue(_) =>
+          l match {
+            case StringValue(_) | UnknownTypeValue(_) =>
+              r.asString.contains(l.asString)
 
-  private def getInt(v: Value)(implicit env: Map[String, String]): Int = parseIntValue(v) match {
-    case Some(i) => i
-    case None => throw new IllegalArgumentException("Excepted int value but got string")
-  }
+            case _ =>
+              throw new IllegalArgumentException(left + " cannot be at the left hand side of a `in` operator if the right hand is a string")
+          }
 
-  private def getString(v: Value)(implicit env: Map[String, String]): String = v match {
-    case Variable(name: String) => env(name)
-    case IntLiteral(value: Int) => value.toString
-    case StringLiteral(value: String) => value
+        case SetValue(rightSet) =>
+
+          l match {
+            case SetValue(leftSet) => leftSet.forall(s => rightSet(s))
+            case _ => rightSet(l.asString)
+          }
+        case _ => throw new IllegalArgumentException("Illegal use of in operator with right hand " + r)
+      }
   }
 }
