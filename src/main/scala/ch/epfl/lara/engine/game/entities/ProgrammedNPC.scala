@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.entities
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.Action
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.Expr
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.LogicalExpression
 import ch.epfl.lara.engine.game.actions.control.{ActionCompiler, ConditionRunner, IfAction}
 import ch.epfl.lara.engine.game.messaging.Message
 import ch.epfl.lara.engine.game.scheduler.Schedulable
@@ -23,7 +23,7 @@ class ProgrammedNPC(startState: CharacterState,
 ) with NPC {
 
   private val compiledProgram: List[Action] = ActionCompiler.compile(program.split("\n").toList)
-  private val compiledTriggers: List[(Expr, List[Action])] = triggers.map {
+  private val compiledTriggers: List[(LogicalExpression, List[Action])] = triggers.map {
     case (when, what) => (ActionCompiler.compileCondition(when), ActionCompiler.compile(what.split("\n").toList))
   }
 

@@ -1,7 +1,7 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
 import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.{Concat, Expr}
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.{Concat, LogicalExpression}
 
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input.{NoPosition, Position, Reader}
@@ -38,7 +38,7 @@ object Parser extends Parsers {
   def comparison: Parser[Tree.Comparison] = {
     def comparisonOperator = Eq | Neq | Lte | Lt | Hte | Ht | In
 
-    value ~ comparisonOperator ~ value ^^ {
+    def comp = value ~ comparisonOperator ~ value ^^ {
       case l ~ Eq ~ r => Tree.Eq(l, r)
       case l ~ Neq ~ r => Tree.Neq(l, r)
       case l ~ Lte ~ r => Tree.Lte(l, r)
@@ -47,16 +47,24 @@ object Parser extends Parsers {
       case l ~ Ht ~ r => Tree.Ht(l, r)
       case l ~ In ~ r => Tree.In(l, r)
     }
+
+    def boolLit = accept("boolean", { case BooleanLiteral(b) => Tree.BooleanLiteral(b) })
+
+    comp | boolLit
   }
 
-  def expr: Parser[Expr] = {
-    def notExpr = Not ~ expr ^^ { case not ~ e => Tree.Not(e) }
+  def logicalExpr: Parser[LogicalExpression] = {
+    def notExpr = Not ~ logicalExpr ^^ { case not ~ e => Tree.Not(e) }
 
-    def orExpr = comparison ~ Or ~ expr ^^ { case l ~ or ~ r => Tree.Or(l, r) }
+    def orExpr = basic ~ Or ~ logicalExpr ^^ { case l ~ or ~ r => Tree.Or(l, r) }
 
-    def andExpr = comparison ~ And ~ expr ^^ { case l ~ and ~ r => Tree.And(l, r) }
+    def andExpr = basic ~ And ~ logicalExpr ^^ { case l ~ and ~ r => Tree.And(l, r) }
 
-    orExpr | andExpr | notExpr | comparison
+    def parExpr = LPar ~ logicalExpr ~ RPar ^^ { case l ~ e ~ r => e }
+
+    def basic = parExpr | notExpr | comparison
+
+    orExpr | andExpr | basic
   }
 
   class TokenReader(tokens: Seq[Token]) extends Reader[Token] {
@@ -69,9 +77,17 @@ object Parser extends Parsers {
     override def atEnd: Boolean = tokens.isEmpty
   }
 
-  def apply(tokens: Seq[Token]): Either[CompileError, Tree.Expr] = {
+  def apply(tokens: Seq[Token]): Either[CompileError, Tree.LogicalExpression] = {
     val reader = new TokenReader(tokens)
-    expr(reader) match {
+    phrase(logicalExpr)(reader) match {
+      case NoSuccess(msg, next) => Left(CompileError(msg))
+      case Success(result, next) => Right(result)
+    }
+  }
+
+  def parseLogicalExpression(tokens: Seq[Token]): Either[CompileError, Tree.LogicalExpression] = {
+    val reader = new TokenReader(tokens)
+    phrase(logicalExpr)(reader) match {
       case NoSuccess(msg, next) => Left(CompileError(msg))
       case Success(result, next) => Right(result)
     }

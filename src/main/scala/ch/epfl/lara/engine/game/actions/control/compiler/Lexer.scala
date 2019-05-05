@@ -58,9 +58,21 @@ object Lexer extends RegexParsers {
   def bTrue = "true" ^^^ BooleanLiteral(true)
   def bFalse = "false" ^^^ BooleanLiteral(false)
 
+  def ifs = "if " ^^^ If
+  def elses = "else " ^^^ Else
+  def when = "when " ^^^ When
+  def lbrack = "{" ^^^ LBracket
+  def rbrack = "}" ^^^ RBracket
+  def dos = "do " ^^^ Do
+  def doNow = "now " ^^^ DoNow
+  def lpar = "(" ^^^ LPar
+  def rpar = ")" ^^^ RPar
+
+  def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow
+
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(in | not | bTrue | bFalse | identifier | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus)
+      rep1(reserved | not | lbrack | rbrack | lpar | rpar | identifier | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus)
     )
   }
 

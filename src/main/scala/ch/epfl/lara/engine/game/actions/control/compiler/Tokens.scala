@@ -37,4 +37,17 @@ object Tokens {
 
   case class BooleanLiteral(value: Boolean) extends Token
 
+  case object If extends Token
+  case object Else extends Token
+  case object When extends Token
+
+  case object LBracket extends Token
+  case object RBracket extends Token
+
+  case object Do extends Token
+  case object DoNow extends Token
+
+  case object LPar extends Token
+  case object RPar extends Token
+
 }

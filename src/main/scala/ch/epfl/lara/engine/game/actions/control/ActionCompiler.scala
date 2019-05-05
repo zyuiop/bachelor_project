@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.actions.control
 import ch.epfl.lara.engine.game.CharacterState
 import ch.epfl.lara.engine.game.actions.control.ActionCompiler.compile
 import ch.epfl.lara.engine.game.actions.control.compiler.{CompileError, Lexer, Parser, Tokens, Tree}
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.Expr
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.LogicalExpression
 import ch.epfl.lara.engine.game.actions.{Action, ActionParser}
 import ch.epfl.lara.engine.game.actions.control.IfAction
 
@@ -13,14 +13,14 @@ import ch.epfl.lara.engine.game.actions.control.IfAction
   * @author Louis Vialar
   */
 object ActionCompiler {
-  def compileCondition(condition: String): Expr = {
+  def compileCondition(condition: String): LogicalExpression = {
     compile(condition) match {
       case Right(code) => code
       case Left(err) => throw new Exception("compilation of (" + condition + ") failed: \n" + err)
     }
   }
 
-  def compile(condition: String): Either[CompileError, Expr] = {
+  def compile(condition: String): Either[CompileError, LogicalExpression] = {
     for {
       tokens <- Lexer(condition).right
       tree <- Parser(tokens).right

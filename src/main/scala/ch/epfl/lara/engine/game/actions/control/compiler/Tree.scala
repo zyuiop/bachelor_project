@@ -5,20 +5,29 @@ package ch.epfl.lara.engine.game.actions.control.compiler
   */
 object Tree {
 
-  sealed trait Expr
+  sealed trait Expression
 
-  case class And(left: Expr, right: Expr) extends Expr
+  case class Ite(cond: LogicalExpression, thenn: Expression, elze: Expression) extends Expression
 
-  case class Or(left: Expr, right: Expr) extends Expr
+  case class When(cond: LogicalExpression, when: Expression) extends Expression
 
-  case class Not(e: Expr) extends Expr
+  case class Do(what: Value, immediate: Boolean) extends Expression
 
-  sealed trait Value extends Expr
+  case class Sequence(first: Expression, rest: Expression) extends Expression
+
+  sealed trait LogicalExpression
+
+  case class And(left: LogicalExpression, right: LogicalExpression) extends LogicalExpression
+
+  case class Or(left: LogicalExpression, right: LogicalExpression) extends LogicalExpression
+
+  case class Not(e: LogicalExpression) extends LogicalExpression
+
+  sealed trait Value
 
   case class Identifier(parts: List[String]) extends Value
 
   case class Concat(left: Value, right: Value) extends Value
-
 
   sealed trait Literal extends Value
 
@@ -26,10 +35,10 @@ object Tree {
 
   case class StringLiteral(value: String) extends Literal
 
-  case class BooleanLiteral(value: Boolean) extends Literal
+  case class BooleanLiteral(value: Boolean) extends Literal with Comparison
 
 
-  sealed trait Comparison extends Expr
+  sealed trait Comparison extends LogicalExpression
 
   case class Eq(left: Value, right: Value) extends Comparison
 

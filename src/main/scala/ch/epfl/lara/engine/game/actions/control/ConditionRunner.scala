@@ -103,7 +103,7 @@ object ConditionRunner {
   }
 
 
-  def runCondition(cond: Expr)(implicit runningEntity: CharacterState, trigger: Option[Message]): Boolean = {
+  def runCondition(cond: LogicalExpression)(implicit runningEntity: CharacterState, trigger: Option[Message]): Boolean = {
     implicit val env: Environment = MapEnvironment(Map(
       "time" -> ValueEnvironment(GameState.scheduler.dayTime.toString),
       "totalTime" -> ValueEnvironment(GameState.scheduler.currentTime.toString),
@@ -120,7 +120,7 @@ object ConditionRunner {
         ))).getOrElse(MapEnvironment(Map("type" -> ValueEnvironment("None"))))
     ))
 
-    def recRunCondition(cond: Expr): Boolean = {
+    def recRunCondition(cond: LogicalExpression): Boolean = {
 
       cond match {
         case And(l, r) => recRunCondition(l) && recRunCondition(r)
@@ -177,6 +177,7 @@ object ConditionRunner {
   }
 
   def checkComparison(condition: Comparison)(implicit env: Environment): Boolean = condition match {
+    case BooleanLiteral(value) => value
     case Eq(left: Value, right: Value) =>
       resolve(left).asString == resolve(right).asString
     case Neq(left: Value, right: Value) =>

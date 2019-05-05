@@ -25,7 +25,8 @@ class LexerTest extends FlatSpec with Matchers {
       Not, StringLiteral("peanut"), In, Identifier("trigger"), Dot, Identifier("content"), Dot, Identifier("sentItem")
     )))
   }
-  "The lexer" should "parse times" in {
+
+  it should "parse times" in {
 
     Lexer("15:00:00").right.get should be(List(IntLiteral(54000)))
     Lexer("time >= 6:00:00") should be(Right(List(
@@ -41,6 +42,19 @@ class LexerTest extends FlatSpec with Matchers {
       Identifier("time"),
       Lt,
       IntLiteral(64800)
+    )))
+  }
+
+  it should "parse basic boolean expressions" in {
+
+    Lexer("""(true || false) && (false || true)""") should be(Right(List(
+      LPar, BooleanLiteral(true), Or, BooleanLiteral(false), RPar, And, LPar,
+      BooleanLiteral(false), Or, BooleanLiteral(true), RPar
+    )))
+
+    Lexer("""true || false && false || true""") should be(Right(List(
+      BooleanLiteral(true), Or, BooleanLiteral(false), And,
+          BooleanLiteral(false), Or, BooleanLiteral(true)
     )))
   }
 }
