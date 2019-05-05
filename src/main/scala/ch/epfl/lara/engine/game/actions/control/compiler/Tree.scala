@@ -1,11 +1,13 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
+import scala.util.parsing.input.Positional
+
 /**
   * @author Louis Vialar
   */
 object Tree {
 
-  sealed trait Expression
+  sealed trait Expression extends Positional
 
   case class Ite(cond: LogicalExpression, thenn: Expression, elze: Expression) extends Expression
 
@@ -15,7 +17,7 @@ object Tree {
 
   case class Sequence(list: List[Expression]) extends Expression
 
-  case object EmptyExpr extends Expression
+  case class EmptyExpr() extends Expression
 
   sealed trait LogicalExpression
 

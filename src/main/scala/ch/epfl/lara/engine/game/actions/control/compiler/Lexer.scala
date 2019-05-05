@@ -9,22 +9,22 @@ import scala.util.parsing.input.CharSequenceReader
   * @author Louis Vialar
   */
 object Lexer extends RegexParsers {
-  def identifier: Parser[Identifier] = {
+  def identifier: Parser[Identifier] = positioned {
     def simpleIdentifier = "[a-zA-Z_][a-zA-Z0-9_]*".r ^^ { str => Identifier(str) }
     def spacedIdentifier = """`[^`]*`""".r ^^ { str => Identifier(str drop 1 dropRight 1) }
 
     simpleIdentifier | spacedIdentifier
   }
 
-  def stringLiteral: Parser[StringLiteral] = {
+  def stringLiteral: Parser[StringLiteral] = positioned {
     """"[^"]*"""".r ^^ { str => StringLiteral(str drop 1 dropRight 1) }
   }
 
-  def intLiteral: Parser[IntLiteral] = {
+  def intLiteral: Parser[IntLiteral] = positioned {
     """[0-9]+""".r ^^ { str => IntLiteral(str.toInt) }
   }
 
-  def timeLiteral: Parser[IntLiteral] = {
+  def timeLiteral: Parser[IntLiteral] = positioned {
     """[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}""".r ^? ( {
       case str =>
         val parts = str.split(":")
@@ -33,40 +33,40 @@ object Lexer extends RegexParsers {
     }, _ => "Invalid time format")
   }
 
-  def and = "&&" ^^^ And
+  def and = positioned("&&" ^^^ And())
 
-  def or = "||" ^^^ Or
+  def or = positioned("||" ^^^ Or())
 
-  def eq = "==" ^^^ Eq
+  def eq = positioned("==" ^^^ Eq())
 
-  def neq = "!=" ^^^ Neq
+  def neq = positioned("!=" ^^^ Neq())
 
-  def lte = "<=" ^^^ Lte
+  def lte = positioned("<=" ^^^ Lte())
 
-  def lt = "<" ^^^ Lt
+  def lt = positioned("<" ^^^ Lt())
 
-  def ht = ">" ^^^ Ht
+  def ht = positioned(">" ^^^ Ht())
 
-  def hte = ">=" ^^^ Hte
+  def hte = positioned(">=" ^^^ Hte())
 
-  def dot = "." ^^^ Dot
+  def dot = positioned("." ^^^ Dot())
 
-  def plus = "+" ^^^ Plus
+  def plus = positioned("+" ^^^ Plus())
 
-  def in = "in " ^^^ In
-  def not = "!" ^^^ Not
-  def bTrue = "true" ^^^ BooleanLiteral(true)
-  def bFalse = "false" ^^^ BooleanLiteral(false)
+  def in = positioned("in " ^^^ In())
+  def not = positioned("!" ^^^ Not())
+  def bTrue = positioned("true" ^^^ BooleanLiteral(true))
+  def bFalse = positioned("false" ^^^ BooleanLiteral(false))
 
-  def ifs = "if " ^^^ If
-  def elses = "else " ^^^ Else
-  def when = "when " ^^^ When
-  def lbrack = "{" ^^^ LBracket
-  def rbrack = "}" ^^^ RBracket
-  def dos = "do " ^^^ Do
-  def doNow = "now " ^^^ DoNow
-  def lpar = "(" ^^^ LPar
-  def rpar = ")" ^^^ RPar
+  def ifs = positioned("if " ^^^ If())
+  def elses = positioned("else " ^^^ Else())
+  def when = positioned("when " ^^^ When())
+  def lbrack = positioned("{" ^^^ LBracket())
+  def rbrack = positioned("}" ^^^ RBracket())
+  def dos = positioned("do " ^^^ Do())
+  def doNow = positioned("now " ^^^ DoNow())
+  def lpar = positioned("(" ^^^ LPar())
+  def rpar = positioned(")" ^^^ RPar())
 
   def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow
 

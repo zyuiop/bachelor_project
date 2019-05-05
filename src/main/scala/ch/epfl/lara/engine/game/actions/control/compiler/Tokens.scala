@@ -1,33 +1,35 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
+import scala.util.parsing.input.Positional
+
 
 object Tokens {
 
-  trait Token
+  trait Token extends Positional
 
-  case object And extends Token
+  case class And() extends Token
 
-  case object Or extends Token
+  case class Or() extends Token
 
-  case object In extends Token
+  case class In() extends Token
 
-  case object Not extends Token
+  case class Not() extends Token
 
-  case object Dot extends Token
+  case class Dot() extends Token
 
-  case object Plus extends Token
+  case class Plus() extends Token
 
-  case object Eq extends Token
+  case class Eq() extends Token
 
-  case object Neq extends Token
+  case class Neq() extends Token
 
-  case object Lte extends Token
+  case class Lte() extends Token
 
-  case object Lt extends Token
+  case class Lt() extends Token
 
-  case object Ht extends Token
+  case class Ht() extends Token
 
-  case object Hte extends Token
+  case class Hte() extends Token
 
   case class Identifier(name: String) extends Token
 
@@ -37,17 +39,17 @@ object Tokens {
 
   case class BooleanLiteral(value: Boolean) extends Token
 
-  case object If extends Token
-  case object Else extends Token
-  case object When extends Token
+  case class If() extends Token
+  case class Else() extends Token
+  case class When() extends Token
 
-  case object LBracket extends Token
-  case object RBracket extends Token
+  case class LBracket() extends Token
+  case class RBracket() extends Token
 
-  case object Do extends Token
-  case object DoNow extends Token
+  case class Do() extends Token
+  case class DoNow() extends Token
 
-  case object LPar extends Token
-  case object RPar extends Token
+  case class LPar() extends Token
+  case class RPar() extends Token
 
 }
