@@ -67,7 +67,11 @@ object Parser extends Parsers {
     orExpr | andExpr | basic
   }
 
-  def block = LBracket ~ expr ~ RBracket ^^ { case _ ~ e ~ _ => e }
+  def block: Parser[Tree.Expression] = LBracket ~ singleExpr.* ~ RBracket ^^ { case _ ~ e ~ _ => {
+    if (e.isEmpty) EmptyExpr
+    else if (e.size == 1) e.head
+    else Sequence(e)
+  } }
 
   def parseIte: Parser[Tree.Ite] = {
 
@@ -90,10 +94,10 @@ object Parser extends Parsers {
     }
   }
 
-  def singleExpr = parseIte | parseWhen | parseDo | block
+  def singleExpr = parseIte | parseDo | block
 
   def expr: Parser[Tree.Expression] = {
-    rep1(singleExpr) ^^ {
+    rep1(singleExpr | parseWhen) ^^ { // When only allowed at top level !
       elems =>
         if (elems.length > 1) Sequence(elems)
         else elems.head
