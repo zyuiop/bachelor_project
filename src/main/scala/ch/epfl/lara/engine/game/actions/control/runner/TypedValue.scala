@@ -24,4 +24,4 @@ case class UnknownTypeValue(value: String) extends TypedValue[String] {
   def canBeBoolean: Boolean = value.toLowerCase == "true" || value.toLowerCase == "false"
 }
 
-case class SetValue(value: Set[String]) extends TypedValue[Set[String]]
+case class SetValue(value: collection.Set[String]) extends TypedValue[collection.Set[String]]

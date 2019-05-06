@@ -18,6 +18,10 @@ object Tokens {
   case class Dot() extends Token
 
   case class Plus() extends Token
+  case class Mod() extends Token
+  case class Div() extends Token
+  case class Times() extends Token
+  case class Minus() extends Token
 
   case class Eq() extends Token
 

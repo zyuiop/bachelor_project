@@ -28,6 +28,7 @@ object Game {
     val peanut = Pickable("peanut")
 
     val cellar = new InventoryHolderItem("cellar", Map(peanut -> 3))
+    val bin = new InventoryHolderItem("bin", Map())
 
     val rooms = RoomRegistry(Seq(
       new Room("street", "42nd Street", "The sun is rising. The crowd is moving between buildings.", Map(), Map()),
@@ -36,7 +37,9 @@ object Game {
       new Room("1st-floor-bathroom", "Bathroom", "It's quite clean", Map(), Map()),
       new Room("1st-floor-dining-room", "Dining Room", "A table, 4 chairs", Map(),
         Map("cellar" -> Map(South -> cellar))),
-      new Room("1st-floor-kitchen", "Kitchen", "Also a small table I guess", Map(), Map()),
+      new Room("1st-floor-kitchen", "Kitchen", "Also a small table I guess", Map(),
+        Map("bin" -> Map(East -> bin))
+      ),
       new Room("1st-floor-bedroom", "Bedroom", "The bed is not properly cleaned", Map(), Map())
     ),
       Seq(
@@ -94,17 +97,34 @@ object Game {
           """.stripMargin
       )
     )*/
-    val dummyNPC0 = PPC(
+    val dummyNPC0 = new PPC(
       new CharacterState(rooms.getRoom("1st-floor"), Center, "Somebody", out = emptyStream),
       """
         |do "wait 1"
         |
-        |when (trigger != null && trigger.entering == true && characters.me.currentRoom.id == "1st-floor") {
-        |  if (time >= 6:00:00 && time < 18:00:00) {
+        |when (trigger != null && trigger.__name == "RoomMovement" && trigger.entering == true) {
+        |  if (room.id == "1st-floor") {
+        |   if (time >= 6:00:00 && time < 18:00:00) {
         |    do "say Hello you!"
-        |  } else {
+        |   } else {
         |    do "say What are you doing here?"
+        |   }
+        |  } else if (lost != null && lost == true) {
+        |   do "say I am lost... help me go back home please...!"
         |  }
+        |}
+        |
+        |when (trigger != null && trigger.__name == "ReleasedControl") {
+        | if (room.id == initRoom) {
+        |   lost := false
+        | } else {
+        |   lost:= true
+        |   do now "say What... Where am I?"
+        | }
+        |}
+        |
+        |when (trigger != null && trigger.__name == "TakenControl") {
+        | initRoom := room.id
         |}
         |
         |when (trigger != null && trigger.__name == "InventoryTradeRequest") {
@@ -118,6 +138,31 @@ object Game {
         | }
         | do "wait 2"
         |}
+        |
+        |/* Every hour */
+        |if (time % 3600 == 0 && (lost == null || lost == false)) {
+        | do "go south"
+        | do "go east"
+        | if (room.inventory.content.peanut != null) {
+        |   count := room.inventory.content.peanut
+        |   do "say Argh, so many peanuts again... What a child!"
+        |   do "take " + count + " peanuts"
+        |   do "say " + count + " peanuts, really, can't he start doing something else?"
+        |   do "open bin"
+        |   do "drop " + count + " peanuts"
+        |   do "close"
+        | }
+        | do "go west"
+        | do "go north"
+        |}
+        |
+        |if (lost != null && lost == true && time % 90 == 0) {
+        |  sentenceNum := ((time % 270) / 90)
+        |  if (sentenceNum == 0) do "say I want to see my familly back..."
+        |  else if (sentenceNum == 1) do "say HELP! I AM LOST!"
+        |  else if (sentenceNum == 2) do "say (whining) Where am I... Please..."
+        |  else do "say Please? Can anybody help me?"
+        |}
       """.stripMargin
       )
 
@@ -126,28 +171,30 @@ object Game {
       Map(peanut -> 1, Pickable("nut") -> 2, Pickable("noiset") -> 5)
     )
 
-    val dummyNPC2 = PPC(
+    val dummyNPC2 = new PPC(
       new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
         """
           |
-          |if (characters.me.attributes.moved == null) {
-          | characters.me.attributes.moved := 0
-          | do "wait 100"
-          | do "say creating.."
+          |if (moved == null) {
+          | moved := 0
           |}
-          |do "say Hello, who are you?"
-          |do "wait 10"
+          |
+          |if (characters.`1` != null) {
+          | do "say Hello, who are you?"
+          |}
           |do "open cellar"
           |do "take 1 peanut"
           |do "quit"
           |do "go east"
           |do "drop 1 peanut"
-          |do "say I love peanut butter!"
+          |if (characters.`1` != null) {
+          | do "say I love peanut butter!"
+          |}
           |
-          |characters.me.attributes.moved := characters.me.attributes.moved + 1
+          |moved := moved + 1
           |
           |when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigger.content.toLowerCase && trigger.sentBy.name != "Child") {
-          | do "say Hello! I've moved " + characters.me.attributes.moved + " peanuts... That's a hard work you know?"
+          | do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
           |}
           |do "go west"
         """.stripMargin

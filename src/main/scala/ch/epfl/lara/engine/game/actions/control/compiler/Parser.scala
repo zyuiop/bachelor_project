@@ -36,12 +36,20 @@ object Parser extends Parsers {
   }
 
   def concat: Parser[Tree.Value] = positioned {
-    chainl1(identifier | literals, value, Plus() ^^^ {
-      (l: Tree.Value, r: Tree.Value) => Tree.Concat(l, r)
+    def operator = Plus() | Minus() | Div() | Mod() | Times()
+
+    chainl1(identifier | literals | parValue, value, operator ^^ {
+      case Plus() => (l: Tree.Value, r: Tree.Value) => Tree.Sum(l, r)
+      case Minus() => (l: Tree.Value, r: Tree.Value) => Tree.Difference(l, r)
+      case Div() => (l: Tree.Value, r: Tree.Value) => Tree.Division(l, r)
+      case Mod() => (l: Tree.Value, r: Tree.Value) => Tree.Module(l, r)
+      case Times() => (l: Tree.Value, r: Tree.Value) => Tree.Multiplication(l, r)
     })
   }
 
-  def value: Parser[Tree.Value] = positioned(concat | identifier | literals)
+  def parValue = (LPar() ~! value ~! RPar()) ^^ { case _ ~ v ~ _ => v}
+
+  def value: Parser[Tree.Value] = positioned(concat | identifier | literals | parValue)
 
   def comparison: Parser[Tree.Comparison] = positioned {
     def comparisonOperator = positioned(Eq() | Neq() | Lte() | Lt() | Hte() | Ht() | In())
@@ -84,14 +92,14 @@ object Parser extends Parsers {
 
   def parseIte: Parser[Tree.Ite] = positioned {
 
-    If() ~ LPar() ~ logicalExpr ~ RPar() ~ singleExpr ~ (Else() ~ singleExpr).? ^^ {
+    If() ~! LPar() ~! logicalExpr ~! RPar() ~! singleExpr ~! (Else() ~! singleExpr).? ^^ {
       case _ ~ _ ~ log ~ _ ~ thenn ~ Some(_ ~ elze) => Tree.Ite(log, thenn, elze)
       case _ ~ _ ~ log ~ _ ~ thenn ~ _ => Tree.Ite(log, thenn, Tree.EmptyExpr())
     }
   }
 
   def parseWhen: Parser[Tree.When] = positioned {
-    When() ~ LPar() ~ logicalExpr ~ RPar() ~ block ^^ {
+    When() ~! LPar() ~! logicalExpr ~! RPar() ~! singleExpr ^^ {
       case _ ~ _ ~ cond ~ _ ~ act => Tree.When(cond, act)
     }
   }
@@ -104,7 +112,7 @@ object Parser extends Parsers {
   }
 
   def parseSet: Parser[Tree.Set] = positioned {
-    identifier ~ Set() ~ value ^^ {
+    identifier ~! Set() ~! value ^^ {
       case id ~ _ ~ v => Tree.Set(id, v)
     }
   }

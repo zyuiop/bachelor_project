@@ -3,6 +3,7 @@ package ch.epfl.lara.engine.game
 import ch.epfl.lara.engine.game.entities.PPC
 import ch.epfl.lara.engine.game.environment.{Center, Position, Room}
 import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
+import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}
 
 /**
   * @author Louis Vialar
@@ -14,11 +15,11 @@ class PlayerState(startRoom: Room, startInventory: Map[Pickable, Int] = Map()) e
 
   def control(ppc: PPC): Unit = {
     _controlled = Some(ppc)
-    ppc.takeControl()
+    ppc ! TakenControl(this)
   }
 
   def release(): Unit = {
-    _controlled.get.releaseControl()
+    _controlled.get ! ReleasedControl(this)
     _controlled = None
   }
 

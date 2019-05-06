@@ -12,7 +12,7 @@ sealed trait Environment {
   def resolvePath(path: List[String]): Try[TypedValue[_]]
 }
 
-case class MapEnvironment(map: Map[String, Environment]) extends Environment {
+case class MapEnvironment(map: collection.Map[String, Environment]) extends Environment {
   private lazy val companion = CollectionEnvironment(map.keys.map(ValueEnvironment).toSeq)
 
   override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
@@ -68,7 +68,7 @@ case class ObjectMappingEnvironment(obj: Any) extends Environment {
 
   private def produceEnv(value: Any): Environment = {
     value match {
-      case map: Map[_, _] => MapEnvironment(map.map(p =>
+      case map: collection.Map[_, _] => MapEnvironment(map.map(p =>
         p._1.toString -> produceEnv(p._2)
       ))
       case s: String => ValueEnvironment(s)

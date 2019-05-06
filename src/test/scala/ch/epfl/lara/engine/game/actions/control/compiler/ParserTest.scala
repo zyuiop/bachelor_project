@@ -36,7 +36,7 @@ class ParserTest extends FlatSpec with Matchers {
         Tree.Or(
           Tree.Eq(
             Tree.Identifier(List("event", "type")),
-            Tree.Concat(Tree.StringLiteral("enters"), Tree.Concat(Tree.StringLiteral(" "), Tree.Identifier(List("room", "name"))))),
+            Tree.Sum(Tree.StringLiteral("enters"), Tree.Sum(Tree.StringLiteral(" "), Tree.Identifier(List("room", "name"))))),
           Tree.In(
             StringLiteral("peanuts"),
             Tree.Identifier(List("characters", "Shop Keeper", "inventory"))
@@ -76,7 +76,7 @@ class ParserTest extends FlatSpec with Matchers {
       Sequence(List(
         Do(StringLiteral("something"), false),
         Do(StringLiteral("something else"), true),
-        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
       ))
     ))
   }
@@ -92,7 +92,7 @@ class ParserTest extends FlatSpec with Matchers {
       Sequence(List(
         Do(StringLiteral("something"), false),
         Do(StringLiteral("something else"), true),
-        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
       ))
     ))
   }
@@ -112,7 +112,7 @@ class ParserTest extends FlatSpec with Matchers {
         Sequence(List(
           Do(StringLiteral("something"), false),
           Do(StringLiteral("something else"), true))),
-        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false)
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
       ))
     ))
   }
@@ -143,7 +143,7 @@ class ParserTest extends FlatSpec with Matchers {
             Do(StringLiteral("something else"), true),
             EmptyExpr())
         ),
-        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false),
         When(
           And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
           Sequence(List(
@@ -185,7 +185,7 @@ class ParserTest extends FlatSpec with Matchers {
             Do(StringLiteral("something else"), true),
             EmptyExpr())
         ),
-        Do(Concat(StringLiteral("something"), Concat(StringLiteral("with"), Identifier(List("concat")))), false),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false),
         When(
           And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
           Sequence(List(

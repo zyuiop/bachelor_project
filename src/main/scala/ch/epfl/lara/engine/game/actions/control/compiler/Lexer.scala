@@ -9,8 +9,11 @@ import scala.util.parsing.input.CharSequenceReader
   * @author Louis Vialar
   */
 object Lexer extends RegexParsers {
+  override val whiteSpace = """(\s|/\*.*\*/)+""".r
+
   def identifier: Parser[Identifier] = positioned {
     def simpleIdentifier = "[a-zA-Z_][a-zA-Z0-9_]*".r ^^ { str => Identifier(str) }
+
     def spacedIdentifier = """`[^`]*`""".r ^^ { str => Identifier(str drop 1 dropRight 1) }
 
     simpleIdentifier | spacedIdentifier
@@ -53,28 +56,50 @@ object Lexer extends RegexParsers {
 
   def plus = positioned("+" ^^^ Plus())
 
+  def mod = positioned("%" ^^^ Mod())
+
+  def div = positioned("/" ^^^ Div())
+
+  def minus = positioned("-" ^^^ Minus())
+
+  def times = positioned("*" ^^^ Times())
+
   def in = positioned("in " ^^^ In())
+
   def not = positioned("!" ^^^ Not())
+
   def bTrue = positioned("true" ^^^ BooleanLiteral(true))
+
   def bFalse = positioned("false" ^^^ BooleanLiteral(false))
 
-  def ifs = positioned("if " ^^^ If())
-  def elses = positioned("else " ^^^ Else())
-  def when = positioned("when " ^^^ When())
+  def ifs = positioned("if" ^^^ If())
+
+  def elses = positioned("else" ^^^ Else())
+
+  def when = positioned("when" ^^^ When())
+
   def lbrack = positioned("{" ^^^ LBracket())
+
   def rbrack = positioned("}" ^^^ RBracket())
+
   def dos = positioned("do " ^^^ Do())
+
   def doNow = positioned("now " ^^^ DoNow())
+
   def lpar = positioned("(" ^^^ LPar())
+
   def rpar = positioned(")" ^^^ RPar())
+
   def nulls = positioned("null" ^^^ Null())
+
   def set = positioned(":=" ^^^ Set())
+
 
   def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow | nulls
 
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(positioned(reserved | identifier | lbrack | rbrack | lpar | rpar | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus | not | set))
+      rep1(positioned((identifier ||| reserved) | lbrack | rbrack | lpar | rpar | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus | minus | div | mod | times | not | set))
     )
   }
 

@@ -10,7 +10,7 @@ class Scheduler(startTime: Int) {
   var currentTime: Int = startTime
   val runnables: mutable.PriorityQueue[Schedulable] = mutable.PriorityQueue[Schedulable]()(ord = Ordering.by[Schedulable, Int](s => s.nextRun).reverse)
 
-  def dayTime: Int = currentTime % 86400
+  def dayTime: Int = Scheduler.timeToDayTime(currentTime)
 
   def schedule(schedulable: Schedulable): Unit = runnables.enqueue(schedulable)
 
@@ -48,4 +48,10 @@ class Scheduler(startTime: Int) {
     currentTime += diff
     runTick(currentTime)
   }
+}
+
+object Scheduler {
+  val OneDay = 86400
+
+  def timeToDayTime(time: Int): Int = time % OneDay
 }

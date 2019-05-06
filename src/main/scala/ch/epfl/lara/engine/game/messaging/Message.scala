@@ -37,6 +37,8 @@ object Message {
 
   case class TradeRequestResult(request: InventoryTradeRequest, success: Boolean) extends Message
 
+  case class TakenControl(sentBy: CharacterState) extends Message
+  case class ReleasedControl(sentBy: CharacterState) extends Message
 }
 
 object Request {

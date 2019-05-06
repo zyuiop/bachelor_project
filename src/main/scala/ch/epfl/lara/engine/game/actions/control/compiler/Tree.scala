@@ -29,11 +29,21 @@ object Tree {
 
   case class Not(e: LogicalExpression) extends LogicalExpression
 
+
   sealed trait Value extends Positional
+
+  sealed trait Operation extends Value {
+    val left: Value
+    val right: Value
+  }
 
   case class Identifier(parts: List[String]) extends Value
 
-  case class Concat(left: Value, right: Value) extends Value
+  case class Sum(left: Value, right: Value) extends Operation
+  case class Difference(left: Value, right: Value) extends Operation
+  case class Module(left: Value, right: Value) extends Operation
+  case class Multiplication(left: Value, right: Value) extends Operation
+  case class Division(left: Value, right: Value) extends Operation
 
   sealed trait Literal extends Value
 
