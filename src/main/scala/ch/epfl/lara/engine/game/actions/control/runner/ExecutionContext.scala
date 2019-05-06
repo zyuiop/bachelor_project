@@ -38,6 +38,8 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
   private var stopped = true
   private var scheduled = false
 
+  def runNow = runTick(GameState.scheduler.currentTime)
+
   private def runTick(currentTick: Int): Unit = {
     if (stopped)
       return

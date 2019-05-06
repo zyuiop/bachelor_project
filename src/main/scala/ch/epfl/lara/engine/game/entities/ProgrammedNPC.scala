@@ -18,7 +18,7 @@ class ProgrammedNPC(startState: CharacterState,
 ) with NPC {
   private val (prog, triggers) = ActionCompiler.compileProgram(program)
 
-  private val ec = new ExecutionContext(prog, triggers, this)
+  protected val ec = new ExecutionContext(prog, triggers, this)
 
   override def spawn(): Unit = {
     super.spawn()

@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game
 
-import java.io.{OutputStream, PrintStream}
+import java.io.{File, OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.entities.{PPC, ProgrammedNPC, TraderNPC}
@@ -9,7 +9,7 @@ import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
 import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, Pickable}
 
 import scala.annotation.tailrec
-import scala.io.StdIn
+import scala.io.{Source, StdIn}
 
 /**
   * @author Louis Vialar
@@ -72,133 +72,9 @@ object Game {
       println(s"The sky is now dark...")
     })
 
-    // Create dummy NPCs
-    /*val dummyNPC1 = PPC(
-      new CharacterState(rooms.getRoom("store"), Center, "Shop Keeper", out = emptyStream),
-        """
-          |wait 1
-        """.stripMargin,
-      List(
-        "anyone enters" ->
-          """
-            |if me has room == "store"
-            |if time >= 6:00 && time < 18:00
-            |say Hello you!
-            |end
-            |
-            |if time >= 18:00 || time < 6:00
-            |say The shop is closed... please leave!
-            |end
-            |end
-          """.stripMargin,
-        "anyone trades" ->
-          """
-            |accept
-          """.stripMargin
-      )
-    )*/
-    val dummyNPC0 = new PPC(
-      new CharacterState(rooms.getRoom("1st-floor"), Center, "Somebody", out = emptyStream),
-      """
-        |do "wait 1"
-        |
-        |when (trigger != null && trigger.__name == "RoomMovement" && trigger.entering == true) {
-        |  if (room.id == "1st-floor") {
-        |   if (time >= 6:00:00 && time < 18:00:00) {
-        |    do "say Hello you!"
-        |   } else {
-        |    do "say What are you doing here?"
-        |   }
-        |  } else if (lost != null && lost == true) {
-        |   do "say I am lost... help me go back home please...!"
-        |  }
-        |}
-        |
-        |when (trigger != null && trigger.__name == "ReleasedControl") {
-        | if (room.id == initRoom) {
-        |   lost := false
-        | } else {
-        |   lost:= true
-        |   do now "say What... Where am I?"
-        | }
-        |}
-        |
-        |when (trigger != null && trigger.__name == "TakenControl") {
-        | initRoom := room.id
-        |}
-        |
-        |when (trigger != null && trigger.__name == "InventoryTradeRequest") {
-        | do now "say Hmm... let's see what you're offering me... " + trigger.sentItems.`0` + ", I see..."
-        | if ("peanut" in trigger.sentItems) {
-        |   do now "refuse"
-        |   do now "say Please, no, no, no more peanuts...!"
-        | } else {
-        |   do now "accept"
-        |   do now "say Thank you for this present!"
-        | }
-        | do "wait 2"
-        |}
-        |
-        |/* Every hour */
-        |if (time % 3600 == 0 && (lost == null || !lost)) {
-        | do "go south"
-        | do "go east"
-        | if (room.inventory.content.peanut != null) {
-        |   count := room.inventory.content.peanut
-        |   do "say Argh, so many peanuts again... What a child!"
-        |   do "take " + count + " peanuts"
-        |   do "say " + count + " peanuts, really, can't he start doing something else?"
-        |   do "open bin"
-        |   do "drop " + count + " peanuts"
-        |   do "close"
-        | }
-        | do "go west"
-        | do "go north"
-        |}
-        |
-        |if (lost != null && lost && time % 90 == 0) {
-        |  sentenceNum := ((time % 270) / 90)
-        |  if (sentenceNum == 0) do "say I want to see my familly again..."
-        |  else if (sentenceNum == 1) do "say HELP! I AM LOST!"
-        |  else if (sentenceNum == 2) do "say (whining) Where am I... Please..."
-        |  else do "say Please? Can anybody help me?"
-        |}
-      """.stripMargin
-      )
-
-    val dummyNPC1 = new TraderNPC(rooms.getRoom("store"), Center, "Shop Keeper",
-      Map(peanut -> 500, Pickable("nut") -> 500, Pickable("noiset") -> 100),
-      Map(peanut -> 1, Pickable("nut") -> 2, Pickable("noiset") -> 5)
-    )
-
-    val dummyNPC2 = new PPC(
-      new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
-        """
-          |
-          |if (moved == null) {
-          | moved := 0
-          |}
-          |
-          |if (characters.`1` != null) {
-          | do "say Hello, who are you?"
-          |}
-          |do "open cellar"
-          |do "take 1 peanut"
-          |do "quit"
-          |do "go east"
-          |do "drop 1 peanut"
-          |if (characters.`1` != null) {
-          | do "say I love peanut butter!"
-          |}
-          |
-          |moved := moved + 1
-          |
-          |when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigger.content.toLowerCase && trigger.sentBy.name != "Child") {
-          | do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
-          |}
-          |do "go west"
-        """.stripMargin
-    )
+    val dummyNPC0 = CharacterParser(Source.fromFile(new File("data/level-1/shopkeeper.txt")).mkString)(rooms.getRoom)
+    val dummyNPC1 = CharacterParser(Source.fromFile(new File("data/level-1/somebody.txt")).mkString)(rooms.getRoom)
+    val dummyNPC2 = CharacterParser(Source.fromFile(new File("data/level-1/child.txt")).mkString)(rooms.getRoom)
 
     dummyNPC0.spawn()
     dummyNPC1.spawn()

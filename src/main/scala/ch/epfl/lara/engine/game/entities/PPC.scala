@@ -22,12 +22,16 @@ class PPC(startState: CharacterState, program: String) extends ProgrammedNPC(sta
 
   override def handle(message: Message): Unit = {
     message match {
-      case TakenControl(_) => takeControl()
-      case ReleasedControl(_) => releaseControl()
-      case _ => ()
+      case TakenControl(_) =>
+        super.handle(message)
+        ec.runNow
+        takeControl()
+      case ReleasedControl(_) =>
+        releaseControl()
+        super.handle(message)
+      case _ =>
+        super.handle(message)
     }
-
-    super.handle(message)
   }
 }
 

@@ -1,0 +1,13 @@
+[params]
+room = "store"
+position = "Center"
+name = "Shop Keeper"
+type = "trader"
+
+inv.peanut = "500"
+inv.nut = "50"
+inv.noiset = "100"
+
+price.peanut = "1"
+price.nut = "2"
+price.noiset = "5"
