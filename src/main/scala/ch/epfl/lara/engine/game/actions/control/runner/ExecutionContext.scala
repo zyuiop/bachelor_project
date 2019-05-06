@@ -6,7 +6,6 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 import ch.epfl.lara.engine.game.{CharacterState, GameState}
 
-import scala.collection.immutable.Queue
 import scala.collection.mutable
 import scala.util.Try
 
@@ -19,27 +18,27 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
     // Shortcuts for self attributes
     entity.attributes.mapValues(ValueEnvironment) ++
-    // Actual env, overrides self attributes if same name
-    Map(
-    "time" -> ValueEnvironment(Scheduler.timeToDayTime(currentTime).toString),
-    "totalTime" -> ValueEnvironment(currentTime.toString),
-    "characters" -> PassByNameEnvironment(() => MapEnvironment(
-      GameState.registry.getEntities(entity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
-        .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
-    )),
-    "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
-    "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
-  ) ++ additionnal)
+      // Actual env, overrides self attributes if same name
+      Map(
+        "time" -> ValueEnvironment(Scheduler.timeToDayTime(currentTime).toString),
+        "totalTime" -> ValueEnvironment(currentTime.toString),
+        "characters" -> PassByNameEnvironment(() => MapEnvironment(
+          GameState.registry.getEntities(entity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
+            .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
+        )),
+        "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
+        "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
+      ) ++ additionnal)
 
   case class BranchState(queue: mutable.Queue[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])
 
   private var currentState = BranchState(mutable.Queue(), 0, Map())
 
-  private var branches = Queue[BranchState]()
+  private var branches = List[BranchState]()
   private var stopped = true
   private var scheduled = false
 
-  private def runTick(currentTick: Int, expectedTick: Int): Unit = {
+  private def runTick(currentTick: Int): Unit = {
     if (stopped)
       return
 
@@ -47,7 +46,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       currentState.nextRun -= 1 // Will run every tick
     }
 
-    currentTime = expectedTick
+    currentTime = currentTick
 
     // Check the triggers every tick
     checkTriggers()(env())
@@ -77,7 +76,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
   }
 
   private def interrupt(moreEnv: Map[String, Environment] = Map()) = {
-    branches = branches.enqueue(currentState)
+    branches = currentState :: branches
     currentState = BranchState(mutable.Queue(), 0, moreEnv)
   }
 
@@ -86,9 +85,8 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     */
   private def next() = {
     if (branches.nonEmpty) {
-      val (state, nbranches) = branches.dequeue
-      currentState = state
-      branches = nbranches
+      currentState = branches.head
+      branches = branches.tail
     } else {
       currentState.queue.enqueue(program)
     }
@@ -105,9 +103,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case Ite(cond, left, right) =>
         interrupt()
 
-        if (valueAsBoolean(resolve(cond))) {
-          schedule(left)
-        } else schedule(right)
+        schedule(if (valueAsBoolean(resolve(cond))) left else right)
       case Do(act, immediate) =>
         // Compile action
         val action = ActionParser.DefaultParser(resolve(act).asString.split(" ")).get
@@ -118,7 +114,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
           suspendFor(time)
       case Set(field, value) =>
         val path = field.parts
-        if (path.length == 1 || (path.length == 3 && path.head == "characters" && path(2) == "attributes"))  {
+        if (path.length == 1 || (path.length == 3 && path.head == "characters" && path(2) == "attributes")) {
           val key = path.last
           val entity: CharacterState = if (path.length > 1) path(1) match {
             case "me" => this.entity
@@ -163,7 +159,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
 
   private def valueAsBoolean(value: TypedValue[_]) = value match {
     case BooleanValue(b) => b
-    case t @ UnknownTypeValue(v) if t.canBeBoolean => v.toBoolean
+    case t@UnknownTypeValue(v) if t.canBeBoolean => v.toBoolean
     case _ => throw new UnsupportedOperationException("unsupported boolean operation on " + value)
   }
 
@@ -172,8 +168,8 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
 
     def numericOp(comb: (Int, Int) => Int) = (left(), right()) match {
       case (IntValue(l), IntValue(r)) => IntValue(comb(l, r))
-      case (l @ UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(comb(lv.toInt, r))
-      case (IntValue(l), r @ UnknownTypeValue(rv)) if r.canBeInt => IntValue(comb(rv.toInt, l))
+      case (l@UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(comb(lv.toInt, r))
+      case (IntValue(l), r@UnknownTypeValue(rv)) if r.canBeInt => IntValue(comb(rv.toInt, l))
       case _ => throw new UnsupportedOperationException("unsupported int operation on " + left + " and " + right)
     }
 
@@ -186,8 +182,8 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case (SetValue(lst), v) => SetValue(setOp(lst, Predef.Set(v.asString)))
       case (v, SetValue(lst)) => SetValue(setOp(lst, Predef.Set(v.asString)))
       case (IntValue(l), IntValue(r)) => IntValue(comb(l, r))
-      case (l @ UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(comb(lv.toInt, r))
-      case (IntValue(l), r @ UnknownTypeValue(rv)) if r.canBeInt => IntValue(comb(rv.toInt, l))
+      case (l@UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(comb(lv.toInt, r))
+      case (IntValue(l), r@UnknownTypeValue(rv)) if r.canBeInt => IntValue(comb(rv.toInt, l))
       case (l, r) => StringValue(stringOp(l.asString, r.asString))
     }
 
@@ -197,15 +193,15 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case m: Multiplication => numericOp(_ * _)
       case d: Division => numericOp(_ / _)
       case m: Module => numericOp(_ % _)
-      case _: And => booleanOp(_() && _())
-      case _: Or => booleanOp(_() || _())
+      case _: And => booleanOp(_ () && _ ())
+      case _: Or => booleanOp(_ () || _ ())
     }
   }
 
   private def resolve(value: Value)(implicit env: Environment): TypedValue[_] = value match {
     case op: Operation => resolveOp(op)
     case c: Comparison => BooleanValue(checkComparison(c))
-    case Not(n) => BooleanValue(! valueAsBoolean(resolve(n)))
+    case Not(n) => BooleanValue(!valueAsBoolean(resolve(n)))
     case StringLiteral(s) => StringValue(s)
     case BooleanLiteral(b) => BooleanValue(b)
     case IntLiteral(i) => IntValue(i)

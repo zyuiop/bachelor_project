@@ -16,16 +16,16 @@ case object ActionStopInteract extends Action with ActionBuilder {
     if (inventory.isEmpty) {
       // Try to leave interact
       if (!inState.isInstanceOf[PlayerState]) {
-        throw new IllegalStateException("This command can only be ran by real players")
+        return 0
       }
 
       val player = inState.asInstanceOf[PlayerState]
 
       if (player.controlled.isEmpty) {
-        println("You don't control anyone!")
+        inState.ps.println("You don't control anyone!")
         0
       } else {
-        println(s"You finally release your powers and leave the body of ${player.controlled.get.name}...")
+        inState.ps.println(s"You finally release your powers and leave the body of ${player.controlled.get.name}...")
         player.release()
         5
       }

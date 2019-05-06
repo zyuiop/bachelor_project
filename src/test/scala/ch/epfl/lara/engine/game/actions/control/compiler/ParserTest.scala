@@ -194,4 +194,54 @@ class ParserTest extends FlatSpec with Matchers {
     )
     ))
   }
+
+  it should "parse NPC program correctly" in {
+    ActionCompiler.compileProgram(
+      """if (time % 3600 == 0 && (lost == null || !lost)) {
+        | do "go south"
+        | do "go east"
+        | if (room.inventory.content.peanut != null) {
+        |   count := room.inventory.content.peanut
+        |   do "say Argh, so many peanuts again... What a child!"
+        |   do "take " + count + " peanuts"
+        |   do "say " + count + " peanuts, really, can't he start doing something else?"
+        |   do "open bin"
+        |   do "drop " + count + " peanuts"
+        |   do "close"
+        | }
+        | do "go west"
+        | do "go north"
+        |}""".stripMargin)._1 should be(
+
+      Ite(And(
+        Eq(Module(Identifier(List("time")), IntLiteral(3600)), IntLiteral(0)),
+        Or(Eq(Identifier(List("lost")), NullLiteral()), Not(Identifier(List("lost"))))
+      ), Sequence(
+        List(
+          Do(StringLiteral("go south"), false),
+          Do(StringLiteral("go east"), false),
+          Ite(Neq(Identifier(List("room", "inventory", "content", "peanut")), NullLiteral()),
+            Sequence(List(
+              Set(Identifier(List("count")), Identifier(List("room", "inventory", "content", "peanut"))),
+              Do(StringLiteral("say Argh, so many peanuts again... What a child!"), false),
+              Do(Sum(StringLiteral("take "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false),
+              Do(Sum(StringLiteral("say "), Sum(Identifier(List("count")), StringLiteral(" peanuts, really, can't he start doing something else?"))), false),
+              Do(StringLiteral("open bin"), false),
+              Do(Sum(StringLiteral("drop "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false),
+              Do(StringLiteral("close"), false)
+
+
+            ))
+            , EmptyExpr()),
+
+          Do(StringLiteral("go west"), false),
+          Do(StringLiteral("go north"), false),
+        )
+      )
+        ,
+        EmptyExpr()
+      )
+
+    )
+  }
 }

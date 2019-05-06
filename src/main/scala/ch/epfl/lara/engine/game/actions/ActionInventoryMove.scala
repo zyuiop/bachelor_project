@@ -28,7 +28,7 @@ case class ActionInventoryMove(action: String, objectName: String, quantity: Int
       }
     }).recover({
       case ex: IllegalArgumentException =>
-        println(ex.getMessage)
+        state.ps.println(ex.getMessage)
         0
     }).get
   }

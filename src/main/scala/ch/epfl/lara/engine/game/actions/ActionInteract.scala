@@ -21,7 +21,7 @@ case class ActionInteract(objectName: String) extends Action {
         .getInteractableItem(objectName, inState.currentPosition)
 
       if (item.isEmpty) {
-        println("there is nothing to interact here...")
+        inState.ps.println("there is nothing to interact here...")
         0
       } else {
         item.get.interact(inState)

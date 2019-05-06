@@ -23,12 +23,12 @@ class Scheduler(startTime: Int) {
     }
   })
 
-  def runRegular(inTicks: Int, everyTick: Int)(runnable: (Int, Int) => Unit): Unit = {
+  def runRegular(inTicks: Int, everyTick: Int)(runnable: Int => Unit): Unit = {
     def generate(next: Int): Schedulable = new Schedulable {
       override val nextRun: Int = next
 
       override def run(tick: Int): Option[Schedulable] = {
-        runnable(tick, nextRun)
+        runnable(tick)
         Some(generate(nextRun + everyTick))
       }
     }
@@ -45,8 +45,20 @@ class Scheduler(startTime: Int) {
   }
 
   def addTime(diff: Int): Unit = {
-    currentTime += diff
-    runTick(currentTime)
+    val (wait, every) = if (diff > 5000) (10, 10) else if (diff > 200) (500 / diff, 10) else (25, 1) // if (diff > 500) 10 else 50 // * 1000 vs * 100 vs * 20
+
+    var rest = diff
+    while (rest > 0) {
+      rest -= 1
+      currentTime += 1
+
+      val start = System.currentTimeMillis()
+      runTick(currentTime)
+      val len = System.currentTimeMillis() - start
+
+      if (rest % every == 0 && len < wait)
+        Thread.sleep(wait - len)
+    }
   }
 }
 

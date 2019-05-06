@@ -56,19 +56,19 @@ object Game {
 
     new GameState(map, 6 * 3600) // 6 AM
 
-    GameState.get.scheduler.runRegular(5, 10)((_, _) => {
+    GameState.get.scheduler.runRegular(5, 10)(_ => {
       cellar.add(peanut, 1)
     })
 
-    GameState.get.scheduler.runRegular(0, 24 * 3600)((_, _) => {
+    GameState.get.scheduler.runRegular(0, 24 * 3600)(_ => {
       println(s"The sun rises...")
     })
 
-    GameState.get.scheduler.runRegular(18 * 3600, 24 * 3600)((_, _) => {
+    GameState.get.scheduler.runRegular(18 * 3600, 24 * 3600)(_ => {
       println(s"The sun starts to go down...")
     })
 
-    GameState.get.scheduler.runRegular(21 * 3600, 24 * 3600)((_, _) => {
+    GameState.get.scheduler.runRegular(21 * 3600, 24 * 3600)(_ => {
       println(s"The sky is now dark...")
     })
 
@@ -158,7 +158,7 @@ object Game {
         |
         |if (lost != null && lost && time % 90 == 0) {
         |  sentenceNum := ((time % 270) / 90)
-        |  if (sentenceNum == 0) do "say I want to see my familly back..."
+        |  if (sentenceNum == 0) do "say I want to see my familly again..."
         |  else if (sentenceNum == 1) do "say HELP! I AM LOST!"
         |  else if (sentenceNum == 2) do "say (whining) Where am I... Please..."
         |  else do "say Please? Can anybody help me?"
