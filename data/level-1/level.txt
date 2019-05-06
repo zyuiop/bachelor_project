@@ -1,0 +1,85 @@
+[doortype]
+
+name = "door"
+leftToRight.0 = "you go through the door"
+
+[doortype]
+
+name = "staircase"
+leftToRight.0 = "you climb the stairs"
+rightToLeft.0 = "you descend the stairs"
+
+[room]
+id = "street"
+name = "42nd Street"
+ambient = "The sun is rising. The crowd is moving between buildings."
+
+[room]
+id = "store"
+name = "Convenience Store"
+ambient = "Day to day items are around the shelves"
+inv.peanut = "5"
+
+[room]
+id = "1st-floor"
+name = "1st Floor"
+ambient = "Boxes"
+
+[room]
+id = "1st-floor-bathroom"
+name = "Bathroom"
+ambient = "It's quite clean"
+
+[room]
+id = "1st-floor-bedroom"
+name = "Bedroom"
+ambient = "The bed is not properly cleaned"
+
+[door]
+left = "street"
+right = "store"
+leftPos = "North"
+rightPos = "South"
+doorType = "door"
+
+[door]
+left = "store"
+right = "1st-floor"
+leftPos = "North"
+rightPos = "North"
+doorType = "staircase"
+
+[door]
+left = "1st-floor"
+right = "1st-floor-bathroom"
+leftPos = "East"
+rightPos = "West"
+doorType = "door"
+
+[door]
+left = "1st-floor"
+right = "1st-floor-dining-room"
+leftPos = "South"
+rightPos = "North"
+doorType = "door"
+
+[door]
+left = "1st-floor-kitchen"
+right = "1st-floor-dining-room"
+leftPos = "West"
+rightPos = "East"
+doorType = "door"
+
+[door]
+left = "1st-floor"
+right = "1st-floor-bedroom"
+leftPos = "West"
+rightPos = "East"
+doorType = "door"
+
+[door]
+left = "1st-floor-dining-room"
+right = "1st-floor-bedroom"
+leftPos = "West"
+rightPos = "East"
+doorType = "door"

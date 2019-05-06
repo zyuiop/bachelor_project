@@ -3,6 +3,7 @@ package ch.epfl.lara.engine.game
 import java.io.{File, OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
+import ch.epfl.lara.engine.game.data.{CharacterParser, LevelParser}
 import ch.epfl.lara.engine.game.entities.{PPC, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
@@ -30,29 +31,18 @@ object Game {
     val cellar = new InventoryHolderItem("cellar", Map(peanut -> 3))
     val bin = new InventoryHolderItem("bin", Map())
 
-    val rooms = RoomRegistry(Seq(
-      new Room("street", "42nd Street", "The sun is rising. The crowd is moving between buildings.", Map(), Map()),
-      new Room("store", "Convenience Store", "Day to day items are around the shelves", Map(peanut -> 5), Map()),
-      new Room("1st-floor", "1st Floor", "Boxes", Map(), Map()),
-      new Room("1st-floor-bathroom", "Bathroom", "It's quite clean", Map(), Map()),
+    val rooms = LevelParser(Source.fromFile(new File("data/level-1/level.txt")).mkString)
+
+    // TODO!
+    val hardcodedRooms = RoomRegistry(Seq(
       new Room("1st-floor-dining-room", "Dining Room", "A table, 4 chairs", Map(),
         Map("cellar" -> Map(South -> cellar))),
       new Room("1st-floor-kitchen", "Kitchen", "Also a small table I guess", Map(),
         Map("bin" -> Map(East -> bin))
-      ),
-      new Room("1st-floor-bedroom", "Bedroom", "The bed is not properly cleaned", Map(), Map())
-    ),
-      Seq(
-        Door("street", "store", North, South, DoorType.Door),
-        Door("store", "1st-floor", North, North, DoorType.Stairs),
-        Door("1st-floor", "1st-floor-bathroom", East, West, DoorType.Door),
-        Door("1st-floor", "1st-floor-dining-room", South, North, DoorType.Door),
-        Door("1st-floor-kitchen", "1st-floor-dining-room", West, East, DoorType.Door),
-        Door("1st-floor", "1st-floor-bedroom", West, East, DoorType.Door),
-        Door("1st-floor-dining-room", "1st-floor-bedroom", West, East, DoorType.Door)
-      ))
+      )
+    ), Seq())
 
-    val map = LevelMap(rooms)
+    val map = LevelMap(rooms.rooms ++ hardcodedRooms)
 
     new GameState(map, 6 * 3600) // 6 AM
 
@@ -72,16 +62,16 @@ object Game {
       println(s"The sky is now dark...")
     })
 
-    val dummyNPC0 = CharacterParser(Source.fromFile(new File("data/level-1/shopkeeper.txt")).mkString)(rooms.getRoom)
-    val dummyNPC1 = CharacterParser(Source.fromFile(new File("data/level-1/somebody.txt")).mkString)(rooms.getRoom)
-    val dummyNPC2 = CharacterParser(Source.fromFile(new File("data/level-1/child.txt")).mkString)(rooms.getRoom)
+    val dummyNPC0 = CharacterParser(Source.fromFile(new File("data/level-1/shopkeeper.txt")).mkString)(map.rooms.getRoom)
+    val dummyNPC1 = CharacterParser(Source.fromFile(new File("data/level-1/somebody.txt")).mkString)(map.rooms.getRoom)
+    val dummyNPC2 = CharacterParser(Source.fromFile(new File("data/level-1/child.txt")).mkString)(map.rooms.getRoom)
 
     dummyNPC0.spawn()
     dummyNPC1.spawn()
     dummyNPC2.spawn()
 
     // Create Player State
-    val state = new PlayerState(rooms.getRoom("street"), Map(GameState.Currency -> 1000, peanut -> 50, Pickable("nut") -> 10))
+    val state = new PlayerState(map.rooms.getRoom("street"), Map(GameState.Currency -> 1000, peanut -> 50, Pickable("nut") -> 10))
     state.spawn()
 
     println(state.currentRoom.describe())

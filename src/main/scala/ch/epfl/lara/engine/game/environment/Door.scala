@@ -4,6 +4,8 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.CharacterState
 
+import scala.util.Random
+
 /**
   * @author Louis Vialar
   */
@@ -22,28 +24,15 @@ case class Door(left: String, right: String, leftPos: Position, rightPos: Positi
   def getPosition(room: Room): Position = if (room.id == left) leftPos else rightPos
 }
 
-trait DoorType {
-  val name: String
-
-  def describe(leftToRight: Boolean): String
+case class DoorType(name: String, leftToRight: List[String], rightToLeft: List[String] = Nil) {
+  def describe(leftToRight: Boolean): String = {
+    val list = if (leftToRight || rightToLeft.isEmpty) this.leftToRight else this.rightToLeft
+    list(Random.nextInt(list.length))
+  }
 }
 
 object DoorType {
+  val Door = DoorType("door", List("you go through the door"))
 
-  case object Door extends DoorType {
-    override def describe(leftToRight: Boolean): String = "you go though the door"
-
-    override val name = "door"
-  }
-
-  case object Stairs extends DoorType {
-    override val name = "staircase"
-
-    override def describe(leftToRight: Boolean): String =
-      if (leftToRight) "you climb the stairs"
-      else "you descend the stairs"
-
-    // TODO: pick a word randomly!
-  }
-
+  val Stairs = DoorType("staircase", List("you climb the stairs"), List("you descend the stairs"))
 }
