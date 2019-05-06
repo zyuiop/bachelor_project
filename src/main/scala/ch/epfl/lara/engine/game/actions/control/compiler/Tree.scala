@@ -9,9 +9,9 @@ object Tree {
 
   sealed trait Expression extends Positional
 
-  case class Ite(cond: LogicalExpression, thenn: Expression, elze: Expression) extends Expression
+  case class Ite(cond: Value, thenn: Expression, elze: Expression) extends Expression
 
-  case class When(cond: LogicalExpression, when: Expression) extends Expression
+  case class When(cond: Value, when: Expression) extends Expression
 
   case class Do(what: Value, immediate: Boolean) extends Expression
 
@@ -20,14 +20,6 @@ object Tree {
   case class Sequence(list: List[Expression]) extends Expression
 
   case class EmptyExpr() extends Expression
-
-  sealed trait LogicalExpression extends Positional
-
-  case class And(left: LogicalExpression, right: LogicalExpression) extends LogicalExpression
-
-  case class Or(left: LogicalExpression, right: LogicalExpression) extends LogicalExpression
-
-  case class Not(e: LogicalExpression) extends LogicalExpression
 
 
   sealed trait Value extends Positional
@@ -45,19 +37,26 @@ object Tree {
   case class Multiplication(left: Value, right: Value) extends Operation
   case class Division(left: Value, right: Value) extends Operation
 
+  case class And(left: Value, right: Value) extends Operation
+
+  case class Or(left: Value, right: Value) extends Operation
+
+  case class Not(e: Value) extends Value
+
+
   sealed trait Literal extends Value
 
   case class IntLiteral(value: Int) extends Literal
 
   case class StringLiteral(value: String) extends Literal
 
-  case class BooleanLiteral(value: Boolean) extends Literal with Comparison
+  case class BooleanLiteral(value: Boolean) extends Literal
 
   case class NullLiteral() extends Literal
 
 
 
-  sealed trait Comparison extends LogicalExpression
+  sealed trait Comparison extends Value
 
   case class Eq(left: Value, right: Value) extends Comparison
 

@@ -140,7 +140,7 @@ object Game {
         |}
         |
         |/* Every hour */
-        |if (time % 3600 == 0 && (lost == null || lost == false)) {
+        |if (time % 3600 == 0 && (lost == null || !lost)) {
         | do "go south"
         | do "go east"
         | if (room.inventory.content.peanut != null) {
@@ -156,7 +156,7 @@ object Game {
         | do "go north"
         |}
         |
-        |if (lost != null && lost == true && time % 90 == 0) {
+        |if (lost != null && lost && time % 90 == 0) {
         |  sentenceNum := ((time % 270) / 90)
         |  if (sentenceNum == 0) do "say I want to see my familly back..."
         |  else if (sentenceNum == 1) do "say HELP! I AM LOST!"

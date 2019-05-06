@@ -12,18 +12,11 @@ object Parser extends Parsers {
   override type Elem = Tokens.Token
 
   def identifier: Parser[Tree.Identifier] = positioned {
-    def identifierPart: Parser[Tree.Identifier] = positioned {
+    chainl1(positioned {
       accept("identifier", { case Identifier(id) => Tree.Identifier(List(id)) })
-    }
-
-    def dotParser: Parser[(Tree.Identifier, Tree.Identifier) => Tree.Identifier] = {
-      Dot() ^^^ { (l: Tree.Identifier, r: Tree.Identifier) =>
-        Tree.Identifier(l.parts ::: r.parts)
-      }
-    }
-
-
-    chainl1(identifierPart, dotParser)
+    }, Dot() ^^^ { (l: Tree.Identifier, r: Tree.Identifier) =>
+      Tree.Identifier(l.parts ::: r.parts)
+    })
   }
 
   def literals: Parser[Tree.Literal] = positioned {
@@ -35,55 +28,47 @@ object Parser extends Parsers {
     })
   }
 
-  def concat: Parser[Tree.Value] = positioned {
-    def operator = Plus() | Minus() | Div() | Mod() | Times()
+  def operation: Parser[Tree.Value] = positioned {
+    def parValue = (LPar() ~! valueWithOp ~! RPar()) ^^ { case _ ~ v ~ _ => v }
 
-    chainl1(identifier | literals | parValue, value, operator ^^ {
-      case Plus() => (l: Tree.Value, r: Tree.Value) => Tree.Sum(l, r)
-      case Minus() => (l: Tree.Value, r: Tree.Value) => Tree.Difference(l, r)
+    def notValue = Not() ~! valueWithOp ^^ { case not ~ e => Tree.Not(e) }
+
+    def simpleValue = identifier | literals | parValue | notValue
+
+    def lowestPriorityOp: Parser[Tree.Value] = chainl1(simpleValue, lowestPriorityOp, (Div() | Mod() | Times()) ^^ {
       case Div() => (l: Tree.Value, r: Tree.Value) => Tree.Division(l, r)
       case Mod() => (l: Tree.Value, r: Tree.Value) => Tree.Module(l, r)
       case Times() => (l: Tree.Value, r: Tree.Value) => Tree.Multiplication(l, r)
     })
-  }
 
-  def parValue = (LPar() ~! value ~! RPar()) ^^ { case _ ~ v ~ _ => v}
-
-  def value: Parser[Tree.Value] = positioned(concat | identifier | literals | parValue)
-
-  def comparison: Parser[Tree.Comparison] = positioned {
-    def comparisonOperator = positioned(Eq() | Neq() | Lte() | Lt() | Hte() | Ht() | In())
-
-    def comp = positioned(value ~ comparisonOperator ~ value ^^ {
-      case l ~ Eq() ~ r => Tree.Eq(l, r)
-      case l ~ Neq() ~ r => Tree.Neq(l, r)
-      case l ~ Lte() ~ r => Tree.Lte(l, r)
-      case l ~ Lt() ~ r => Tree.Lt(l, r)
-      case l ~ Hte() ~ r => Tree.Hte(l, r)
-      case l ~ Ht() ~ r => Tree.Ht(l, r)
-      case l ~ In() ~ r => Tree.In(l, r)
+    def lpOp: Parser[Tree.Value] = chainl1(lowestPriorityOp, lpOp, (Plus() | Minus()) ^^ {
+      case Plus() => (l: Tree.Value, r: Tree.Value) => Tree.Sum(l, r)
+      case Minus() => (l: Tree.Value, r: Tree.Value) => Tree.Difference(l, r)
     })
 
-    def boolLit = positioned(accept("boolean", { case BooleanLiteral(b) => Tree.BooleanLiteral(b) }))
+    def mpOp: Parser[Tree.Value] = chainl1(lpOp, mpOp, (Eq() | Neq() | Lte() | Lt() | Hte() | Ht() | In()) ^^ {
+      case Eq() => (l: Tree.Value, r: Tree.Value) => Tree.Eq(l, r)
+      case Neq() => (l: Tree.Value, r: Tree.Value) => Tree.Neq(l, r)
+      case Lte() => (l: Tree.Value, r: Tree.Value) => Tree.Lte(l, r)
+      case Lt() => (l: Tree.Value, r: Tree.Value) => Tree.Lt(l, r)
+      case Hte() => (l: Tree.Value, r: Tree.Value) => Tree.Hte(l, r)
+      case Ht() => (l: Tree.Value, r: Tree.Value) => Tree.Ht(l, r)
+      case In() => (l: Tree.Value, r: Tree.Value) => Tree.In(l, r)
+    })
 
-    comp | boolLit
+    def hpOp: Parser[Tree.Value] = chainl1(mpOp, hpOp, (Or() | And()) ^^ {
+      case Or() => (l: Tree.Value, r: Tree.Value) => Tree.Or(l, r)
+      case And() => (l: Tree.Value, r: Tree.Value) => Tree.And(l, r)
+    })
+
+
+    hpOp
   }
 
-  def logicalExpr: Parser[Tree.LogicalExpression] = positioned {
-    def notExpr = Not() ~ logicalExpr ^^ { case not ~ e => Tree.Not(e) }
 
-    def orExpr = basic ~ Or() ~ logicalExpr ^^ { case l ~ or ~ r => Tree.Or(l, r) }
+  def valueWithOp: Parser[Tree.Value] = positioned(operation)
 
-    def andExpr = basic ~ And() ~ logicalExpr ^^ { case l ~ and ~ r => Tree.And(l, r) }
-
-    def parExpr = LPar() ~ logicalExpr ~ RPar() ^^ { case l ~ e ~ r => e }
-
-    def basic = parExpr | notExpr | comparison
-
-    orExpr | andExpr | basic
-  }
-
-  def block: Parser[Tree.Expression] = LBracket() ~ singleExpr.* ~ RBracket() ^^ { case _ ~ e ~ _ => {
+  def block: Parser[Tree.Expression] = LBracket() ~! singleExpr.* ~! RBracket() ^^ { case _ ~ e ~ _ => {
     if (e.isEmpty) Tree.EmptyExpr()
     else if (e.size == 1) e.head
     else Tree.Sequence(e)
@@ -91,33 +76,32 @@ object Parser extends Parsers {
   }
 
   def parseIte: Parser[Tree.Ite] = positioned {
-
-    If() ~! LPar() ~! logicalExpr ~! RPar() ~! singleExpr ~! (Else() ~! singleExpr).? ^^ {
+    If() ~! LPar() ~! valueWithOp ~! RPar() ~! singleExpr ~! (Else() ~! singleExpr).? ^^ {
       case _ ~ _ ~ log ~ _ ~ thenn ~ Some(_ ~ elze) => Tree.Ite(log, thenn, elze)
       case _ ~ _ ~ log ~ _ ~ thenn ~ _ => Tree.Ite(log, thenn, Tree.EmptyExpr())
     }
   }
 
   def parseWhen: Parser[Tree.When] = positioned {
-    When() ~! LPar() ~! logicalExpr ~! RPar() ~! singleExpr ^^ {
+    When() ~! LPar() ~! valueWithOp ~! RPar() ~! singleExpr ^^ {
       case _ ~ _ ~ cond ~ _ ~ act => Tree.When(cond, act)
     }
   }
 
   def parseDo: Parser[Tree.Do] = positioned {
-    Do() ~ DoNow().? ~ value ^^ {
+    Do() ~! DoNow().? ~! valueWithOp ^^ {
       case _ ~ Some(_) ~ v => Tree.Do(v, true)
       case _ ~ None ~ v => Tree.Do(v, false)
     }
   }
 
   def parseSet: Parser[Tree.Set] = positioned {
-    identifier ~! Set() ~! value ^^ {
+    identifier ~! Set() ~! valueWithOp ^^ {
       case id ~ _ ~ v => Tree.Set(id, v)
     }
   }
 
-  def singleExpr = positioned(parseIte | parseDo | parseSet | block)
+  def singleExpr: Parser[Tree.Expression] = positioned(parseIte | parseDo | parseSet | block)
 
   def expr: Parser[Tree.Expression] = positioned {
     rep1(singleExpr | parseWhen) ^^ { // When only allowed at top level !
@@ -145,9 +129,9 @@ object Parser extends Parsers {
     }
   }
 
-  def parseLogicalExpression(tokens: Seq[Token]): Either[CompileError, Tree.LogicalExpression] = {
+  def parseLogicalExpression(tokens: Seq[Token]): Either[CompileError, Tree.Value] = {
     val reader = new TokenReader(tokens)
-    phrase(logicalExpr)(reader) match {
+    phrase(valueWithOp)(reader) match {
       case NoSuccess(msg, next) => Left(CompileError(Location(next.pos.line, next.pos.column), msg))
       case Success(result, next) => Right(result)
     }

@@ -105,7 +105,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case Ite(cond, left, right) =>
         interrupt()
 
-        if (runCondition(cond)) {
+        if (valueAsBoolean(resolve(cond))) {
           schedule(left)
         } else schedule(right)
       case Do(act, immediate) =>
@@ -145,7 +145,7 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       return
 
     triggers.foreach(t => {
-      if (runCondition(t.cond)) {
+      if (valueAsBoolean(resolve(t.cond))) {
         interrupt(moreEnv)
         schedule(t.when)
       }
@@ -161,26 +161,27 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     checkTriggers(moreEnv)
   }
 
-  private def runCondition(cond: LogicalExpression)(implicit env: Environment): Boolean = {
-    cond match {
-      case And(l, r) => runCondition(l) && runCondition(r)
-      case Or(l, r) => runCondition(l) || runCondition(r)
-      case Not(e) => !runCondition(e)
-      case c: Comparison => checkComparison(c)
-    }
+  private def valueAsBoolean(value: TypedValue[_]) = value match {
+    case BooleanValue(b) => b
+    case t @ UnknownTypeValue(v) if t.canBeBoolean => v.toBoolean
+    case _ => throw new UnsupportedOperationException("unsupported boolean operation on " + value)
   }
 
   private def resolveOp(operation: Operation)(implicit env: Environment): TypedValue[_] = {
-    val (left, right) = (resolve(operation.left), resolve(operation.right))
+    val (left, right) = (() => resolve(operation.left), () => resolve(operation.right))
 
-    def numericOp(comb: (Int, Int) => Int) = (left, right) match {
+    def numericOp(comb: (Int, Int) => Int) = (left(), right()) match {
       case (IntValue(l), IntValue(r)) => IntValue(comb(l, r))
       case (l @ UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(comb(lv.toInt, r))
       case (IntValue(l), r @ UnknownTypeValue(rv)) if r.canBeInt => IntValue(comb(rv.toInt, l))
-      case _ => throw new UnsupportedOperationException("unsupported operation on " + left + " and " + right)
+      case _ => throw new UnsupportedOperationException("unsupported int operation on " + left + " and " + right)
     }
 
-    def setOrNumericOp(setOp: (collection.Set[String], collection.Set[String]) => collection.Set[String], stringOp: (String, String) => String, comb: (Int, Int) => Int): TypedValue[_] = (left, right) match {
+    def booleanOp(comb: (() => Boolean, () => Boolean) => Boolean) = {
+      BooleanValue(comb(() => valueAsBoolean(left()), () => valueAsBoolean(right())))
+    }
+
+    def setOrNumericOp(setOp: (collection.Set[String], collection.Set[String]) => collection.Set[String], stringOp: (String, String) => String, comb: (Int, Int) => Int): TypedValue[_] = (left(), right()) match {
       case (SetValue(l1), SetValue(l2)) => SetValue(setOp(l1, l2))
       case (SetValue(lst), v) => SetValue(setOp(lst, Predef.Set(v.asString)))
       case (v, SetValue(lst)) => SetValue(setOp(lst, Predef.Set(v.asString)))
@@ -196,11 +197,15 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case m: Multiplication => numericOp(_ * _)
       case d: Division => numericOp(_ / _)
       case m: Module => numericOp(_ % _)
+      case _: And => booleanOp(_() && _())
+      case _: Or => booleanOp(_() || _())
     }
   }
 
   private def resolve(value: Value)(implicit env: Environment): TypedValue[_] = value match {
     case op: Operation => resolveOp(op)
+    case c: Comparison => BooleanValue(checkComparison(c))
+    case Not(n) => BooleanValue(! valueAsBoolean(resolve(n)))
     case StringLiteral(s) => StringValue(s)
     case BooleanLiteral(b) => BooleanValue(b)
     case IntLiteral(i) => IntValue(i)
@@ -218,7 +223,6 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
   }
 
   def checkComparison(condition: Comparison)(implicit env: Environment): Boolean = condition match {
-    case BooleanLiteral(value) => value
     case Eq(left: Value, right: Value) =>
       val (l, r) = (tryResolve(left), tryResolve(right))
 

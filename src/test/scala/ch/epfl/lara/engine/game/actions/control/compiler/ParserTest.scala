@@ -10,7 +10,7 @@ import scala.collection.immutable.List
   */
 class ParserTest extends FlatSpec with Matchers {
 
-  def compileCondition(condition: String): Either[CompileError, LogicalExpression] = {
+  def compileCondition(condition: String): Either[CompileError, Value] = {
     for {
       tokens <- Lexer(condition).right
       tree <- Parser.parseLogicalExpression(tokens).right
@@ -27,7 +27,7 @@ class ParserTest extends FlatSpec with Matchers {
 
   "The parser" should "parse easy conditions" in {
 
-    compileCondition(""""peanut" in player.inventory._names && event.type == "enters" + " " + room.name || "peanuts" in characters.`Shop Keeper`.inventory""") should be(
+    compileCondition("""("peanut" in player.inventory._names && event.type == "enters" + " " + room.name || "peanuts" in characters.`Shop Keeper`.inventory)""") should be(
       Right(Tree.And(
         Tree.In(
           Tree.StringLiteral("peanut"),
@@ -43,7 +43,7 @@ class ParserTest extends FlatSpec with Matchers {
           )
         ))))
 
-    compileCondition("""trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItem""") should be(Right(
+    compileCondition("""(trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItem)""") should be(Right(
       And(
         Eq(Identifier(List("trigger", "type")), StringLiteral("InventoryTradeRequest")),
         Not(In(StringLiteral("peanut"), Identifier(List("trigger", "content", "sentItem"))))
@@ -52,18 +52,24 @@ class ParserTest extends FlatSpec with Matchers {
   }
 
   it should "parse binary conditions" in {
-    compileCondition("""true || false && false || true""") should be(Right(
+    compileCondition("""(true || false && false || true)""") should be(Right(
       Or(BooleanLiteral(true),
         And(BooleanLiteral(false),
           Or(BooleanLiteral(false), BooleanLiteral(true))))
     ))
 
-    compileCondition("""(true || false) && (false || true)""") should be(Right(
+    compileCondition("""((true || false) && (false || true))""") should be(Right(
       And(
         Or(BooleanLiteral(true), BooleanLiteral(false)),
         Or(BooleanLiteral(false), BooleanLiteral(true)))
     ))
 
+  }
+
+  it should "parse a basic operation" in {
+    compileCondition("""(1 + 2 + 3 - id)""") should be (Right(
+      Sum(IntLiteral(1), Sum(IntLiteral(2), Difference(IntLiteral(3), Identifier(List("id")))))
+    ))
   }
 
   it should "parse a basic chain of expressions" in {
