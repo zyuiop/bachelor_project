@@ -1,9 +1,10 @@
 package ch.epfl.lara.engine.game.actions.control.compiler
 
 import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
+import ch.epfl.lara.engine.game.actions.control.compiler.Tree.Expression
 
 import scala.util.parsing.combinator.Parsers
-import scala.util.parsing.input.{NoPosition, Position, Reader}
+import scala.util.parsing.input.{NoPosition, Position, Positional, Reader}
 
 /**
   * @author Louis Vialar
@@ -121,19 +122,14 @@ object Parser extends Parsers {
     override def atEnd: Boolean = tokens.isEmpty
   }
 
-  def apply(tokens: Seq[Token]): Either[CompileError, Tree.Expression] = {
-    val reader = new TokenReader(tokens)
-    positioned(phrase(expr))(reader) match {
+  private def compile[A <: Positional](tokens: Seq[Token], parser: Parser[A]): Either[CompileError, A] = {
+    positioned(phrase(parser))(new TokenReader(tokens)) match {
       case NoSuccess(msg, next) => Left(CompileError(Location(next.pos.line, next.pos.column), msg))
       case Success(result, next) => Right(result)
     }
   }
 
-  def parseLogicalExpression(tokens: Seq[Token]): Either[CompileError, Tree.Value] = {
-    val reader = new TokenReader(tokens)
-    phrase(valueWithOp)(reader) match {
-      case NoSuccess(msg, next) => Left(CompileError(Location(next.pos.line, next.pos.column), msg))
-      case Success(result, next) => Right(result)
-    }
-  }
+  def apply(tokens: Seq[Token]): Either[CompileError, Tree.Expression] = compile(tokens, expr)
+
+  def parseValue(tokens: Seq[Token]): Either[CompileError, Tree.Value] = compile(tokens, valueWithOp)
 }
