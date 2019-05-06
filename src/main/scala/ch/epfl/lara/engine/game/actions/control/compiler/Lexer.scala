@@ -68,12 +68,13 @@ object Lexer extends RegexParsers {
   def lpar = positioned("(" ^^^ LPar())
   def rpar = positioned(")" ^^^ RPar())
   def nulls = positioned("null" ^^^ Null())
+  def set = positioned(":=" ^^^ Set())
 
   def reserved = in | bTrue | bFalse | ifs | elses | when | dos | doNow | nulls
 
   def tokens: Parser[List[Token]] = {
     phrase(
-      rep1(positioned(reserved | identifier | lbrack | rbrack | lpar | rpar | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus | not))
+      rep1(positioned(reserved | identifier | lbrack | rbrack | lpar | rpar | stringLiteral | timeLiteral | intLiteral | and | or | eq | neq | lte | lt | hte | ht | dot | plus | not | set))
     )
   }
 

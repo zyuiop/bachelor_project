@@ -15,6 +15,8 @@ object Tree {
 
   case class Do(what: Value, immediate: Boolean) extends Expression
 
+  case class Set(field: Identifier, value: Value) extends Expression
+
   case class Sequence(list: List[Expression]) extends Expression
 
   case class EmptyExpr() extends Expression

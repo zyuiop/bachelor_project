@@ -47,7 +47,8 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     while (currentState.nextRun <= 0) {
       while (currentState.queue.isEmpty) next()
 
-      execute(this.currentState.queue.dequeue)
+      if (currentState.nextRun <= 0)
+        execute(this.currentState.queue.dequeue)
     }
   }
 
@@ -94,8 +95,11 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
 
     expr match {
       case Ite(cond, left, right) =>
-        if (runCondition(cond)) schedule(left)
-        else schedule(right)
+        interrupt()
+
+        if (runCondition(cond)) {
+          schedule(left)
+        } else schedule(right)
       case Do(act, immediate) =>
         // Compile action
         val action = ActionParser.DefaultParser(resolve(act).asString.split(" ")).get
@@ -108,6 +112,25 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
         // Check the triggers once we did something (no need for conditional branches)
         // We don't reuse the previous env as it's outdated
         checkTriggers()(this.env())
+
+      case Set(field, value) =>
+        val path = field.parts
+        if (path.head == "characters" && path.dropRight(1).last == "attributes") {
+          val key = path.last
+          val entity: CharacterState = path(1) match {
+            case "me" => this.entity
+            case "player" => GameState.registry.player
+            case other => GameState.registry.getEntities(this.entity.currentRoom).find(_.name == other).get
+          }
+
+          entity.changeAttribute(key, resolve(value) match {
+            case NullValue => null
+            case other => other.asString
+          })
+        } else {
+          throw new UnsupportedOperationException("cannot modify " + path)
+        }
+
       case Sequence(exprs) =>
         exprs.foreach(schedule)
       case EmptyExpr() =>
@@ -150,6 +173,9 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       case (SetValue(l1), SetValue(l2)) => SetValue(l1 ++ l2)
       case (SetValue(lst), v) => SetValue(lst + v.asString)
       case (v, SetValue(lst)) => SetValue(lst + v.asString)
+      case (IntValue(l), IntValue(r)) => IntValue(l + r)
+      case (l @ UnknownTypeValue(lv), IntValue(r)) if l.canBeInt => IntValue(lv.toInt + r)
+      case (IntValue(l), r @ UnknownTypeValue(rv)) if r.canBeInt => IntValue(rv.toInt + l)
       case (l, r) => StringValue(l.asString + r.asString)
     }
     case StringLiteral(s) => StringValue(s)
@@ -173,10 +199,11 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
     case Eq(left: Value, right: Value) =>
       val (l, r) = (tryResolve(left), tryResolve(right))
 
+
       if (l.isFailure) {
-        r.isSuccess && r.get.value == NullValue
+        r.isSuccess && r.get == NullValue
       } else if (r.isFailure) {
-        l.isSuccess && l.get.value == NullValue
+        l.isSuccess && l.get == NullValue
       } else {
         l.get.asString == r.get.asString
       }

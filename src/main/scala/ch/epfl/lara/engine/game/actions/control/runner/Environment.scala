@@ -94,9 +94,11 @@ case class ObjectMappingEnvironment(obj: Any) extends Environment {
 }
 
 case class ValueEnvironment(value: String) extends Environment {
+  lazy val companion = ObjectMappingEnvironment(value)
+
   override def resolvePath(path: List[String]): Try[TypedValue[_]] = {
     if (path.isEmpty || path.head.isEmpty) Success(UnknownTypeValue(value))
-    else Failure(PathNotFoundException(path.head :: Nil, Set()))
+    else companion.resolvePath(path)
   }
 }
 

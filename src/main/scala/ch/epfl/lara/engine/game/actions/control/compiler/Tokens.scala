@@ -53,5 +53,6 @@ object Tokens {
   case class RPar() extends Token
 
   case class Null() extends Token
+  case class Set() extends Token
 
 }

@@ -129,6 +129,12 @@ object Game {
     val dummyNPC2 = PPC(
       new CharacterState(rooms.getRoom("1st-floor-dining-room"), Center, "Child", out = emptyStream),
         """
+          |
+          |if (characters.me.attributes.moved == null) {
+          | characters.me.attributes.moved := 0
+          | do "wait 100"
+          | do "say creating.."
+          |}
           |do "say Hello, who are you?"
           |do "wait 10"
           |do "open cellar"
@@ -137,6 +143,12 @@ object Game {
           |do "go east"
           |do "drop 1 peanut"
           |do "say I love peanut butter!"
+          |
+          |characters.me.attributes.moved := characters.me.attributes.moved + 1
+          |
+          |when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigger.content.toLowerCase && trigger.sentBy.name != "Child") {
+          | do "say Hello! I've moved " + characters.me.attributes.moved + " peanuts... That's a hard work you know?"
+          |}
           |do "go west"
         """.stripMargin
     )

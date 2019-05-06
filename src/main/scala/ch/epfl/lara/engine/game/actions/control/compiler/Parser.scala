@@ -86,7 +86,7 @@ object Parser extends Parsers {
 
     If() ~ LPar() ~ logicalExpr ~ RPar() ~ singleExpr ~ (Else() ~ singleExpr).? ^^ {
       case _ ~ _ ~ log ~ _ ~ thenn ~ Some(_ ~ elze) => Tree.Ite(log, thenn, elze)
-      case _ ~ _ ~ log ~ _ ~ thenn ~ None => Tree.Ite(log, thenn, Tree.EmptyExpr())
+      case _ ~ _ ~ log ~ _ ~ thenn ~ _ => Tree.Ite(log, thenn, Tree.EmptyExpr())
     }
   }
 
@@ -103,7 +103,13 @@ object Parser extends Parsers {
     }
   }
 
-  def singleExpr = positioned(parseIte | parseDo | block)
+  def parseSet: Parser[Tree.Set] = positioned {
+    identifier ~ Set() ~ value ^^ {
+      case id ~ _ ~ v => Tree.Set(id, v)
+    }
+  }
+
+  def singleExpr = positioned(parseIte | parseDo | parseSet | block)
 
   def expr: Parser[Tree.Expression] = positioned {
     rep1(singleExpr | parseWhen) ^^ { // When only allowed at top level !
