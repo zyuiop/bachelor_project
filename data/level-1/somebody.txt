@@ -30,7 +30,8 @@ when (trigger != null && trigger.__name == "ReleasedControl") {
 }
 
 when (trigger != null && trigger.__name == "TakenControl") {
- initRoom := room.id
+ if (lost == null ||!lost)
+    initRoom := room.id
 }
 
 when (trigger != null && trigger.__name == "InventoryTradeRequest") {
