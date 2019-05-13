@@ -3,8 +3,8 @@ package ch.epfl.lara.engine.game.data
 import java.io.{File, PrintStream, Reader}
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.runner.ConditionExecutionContext
+import ch.epfl.lara.engine.game.control.ActionCompiler
+import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.interactables.{DescriptiveItem, InventoryHolderItem, Switch}

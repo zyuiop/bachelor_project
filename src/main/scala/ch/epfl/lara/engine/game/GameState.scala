@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game
 
-import ch.epfl.lara.engine.game.actions.control.runner.ConditionExecutionContext
+import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.data.LevelDescriptor
 import ch.epfl.lara.engine.game.entities.{CharacterState, EntitiesRegistry}
 import ch.epfl.lara.engine.game.environment.RoomRegistry

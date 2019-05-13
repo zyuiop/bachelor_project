@@ -1,6 +1,6 @@
-package ch.epfl.lara.engine.game.actions.control.runner
+package ch.epfl.lara.engine.game.control.runner
 
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
+import ch.epfl.lara.engine.game.control.compiler.Tree._
 
 import scala.util.Try
 

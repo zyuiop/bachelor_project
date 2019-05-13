@@ -2,8 +2,8 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.runner.CharacterExecutionContext
+import ch.epfl.lara.engine.game.control.ActionCompiler
+import ch.epfl.lara.engine.game.control.runner.CharacterExecutionContext
 import ch.epfl.lara.engine.game.messaging.Message
 
 /**

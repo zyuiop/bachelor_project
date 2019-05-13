@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.actions.control.compiler
+package ch.epfl.lara.engine.game.control.compiler
 
 /**
   * @author Louis Vialar

@@ -1,8 +1,8 @@
-package ch.epfl.lara.engine.game.actions.control
+package ch.epfl.lara.engine.game.control
 
-import ch.epfl.lara.engine.game.actions.control.compiler.Tokens.Token
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
-import ch.epfl.lara.engine.game.actions.control.compiler.{CompileError, Lexer, Parser}
+import ch.epfl.lara.engine.game.control.compiler.Tokens.Token
+import ch.epfl.lara.engine.game.control.compiler.Tree._
+import ch.epfl.lara.engine.game.control.compiler.{CompileError, Lexer, Parser}
 
 /**
   * Compiles a list of actions for a NPC

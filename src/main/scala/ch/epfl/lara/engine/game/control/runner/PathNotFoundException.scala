@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.actions.control.runner
+package ch.epfl.lara.engine.game.control.runner
 
 import scala.util.{Failure, Try}
 

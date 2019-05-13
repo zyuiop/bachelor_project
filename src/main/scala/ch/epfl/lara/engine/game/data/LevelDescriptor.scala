@@ -1,8 +1,8 @@
 package ch.epfl.lara.engine.game.data
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.runner.ConditionExecutionContext
+import ch.epfl.lara.engine.game.control.ActionCompiler
+import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.environment.RoomRegistry
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage

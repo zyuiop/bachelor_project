@@ -1,7 +1,7 @@
-package ch.epfl.lara.engine.game.actions.control.compiler
+package ch.epfl.lara.engine.game.control.compiler
 
-import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
-import ch.epfl.lara.engine.game.actions.control.compiler.Tree.Expression
+import ch.epfl.lara.engine.game.control.compiler.Tokens._
+import ch.epfl.lara.engine.game.control.compiler.Tree.Expression
 
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input.{NoPosition, Position, Positional, Reader}

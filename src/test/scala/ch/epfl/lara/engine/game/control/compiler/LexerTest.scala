@@ -1,7 +1,7 @@
-package ch.epfl.lara.engine.game.actions.control.compiler
+package ch.epfl.lara.engine.game.control.compiler
 
-import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
+import ch.epfl.lara.engine.game.control.ActionCompiler
+import ch.epfl.lara.engine.game.control.compiler.Tokens._
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.immutable.List

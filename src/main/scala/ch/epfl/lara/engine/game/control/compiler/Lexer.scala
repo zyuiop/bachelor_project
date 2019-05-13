@@ -1,6 +1,6 @@
-package ch.epfl.lara.engine.game.actions.control.compiler
+package ch.epfl.lara.engine.game.control.compiler
 
-import ch.epfl.lara.engine.game.actions.control.compiler.Tokens._
+import ch.epfl.lara.engine.game.control.compiler.Tokens._
 
 import scala.util.parsing.combinator.RegexParsers
 import scala.util.parsing.input.CharSequenceReader
