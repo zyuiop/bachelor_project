@@ -1,6 +1,7 @@
 package ch.epfl.lara.engine.game.data
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.control.ActionCompiler
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.environment.RoomRegistry
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
@@ -30,6 +31,11 @@ case class LevelDescriptor(rooms: RoomRegistry, entities: List[CharacterState], 
 
     // Init player
     player.spawn()
+
+    // Compile transition
+    val transition = ActionCompiler.compileValue(data.endCondition)
+
+    println(data.startText)
 
     println(player.currentRoom.describe())
 
