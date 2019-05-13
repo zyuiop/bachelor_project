@@ -85,7 +85,11 @@ object LevelParser extends BaseParser {
   def door: Parser[DoorBuilder] = "[door]" ~ properties ^^ {
     case _ ~ props =>
       // Keys
-      val openCondition = props.get("openCondition").map(ActionCompiler.compileValue).map(v => new ConditionExecutionContext(v)).map(v => (c: CharacterState) => v.checkCondition(v.characterEnv(c))).getOrElse(_ => true)
+      val openCondition = props.get("openCondition")
+        .map(ActionCompiler.compileValue)
+        .map(v => new ConditionExecutionContext(v))
+        .map(v => (c: CharacterState) => v.checkCondition(v.characterEnv(c)))
+        .getOrElse((_: CharacterState) => true)
 
 
        (doorTypeGetter: String => DoorType) =>
