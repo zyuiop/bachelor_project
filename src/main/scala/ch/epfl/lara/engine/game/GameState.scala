@@ -10,7 +10,14 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class GameState(val level: RoomRegistry, val startTime: Int = 0) {
+class GameState(val level: RoomRegistry, val startTime: Int, val currency: Pickable) {
+
+  if (GameState.instance.nonEmpty) {
+    GameState.instance.get.destroy
+  }
+
+  private def destroy = ()
+
   GameState.instance = Some(this)
 
   val scheduler: Scheduler = new Scheduler(startTime)
@@ -26,7 +33,7 @@ class GameState(val level: RoomRegistry, val startTime: Int = 0) {
 object GameState {
   private var instance: Option[GameState] = None
 
-  val Currency: Pickable = Pickable("coin")
+  def Currency: Pickable = get.currency
 
   def get: GameState = instance.get
 

@@ -3,8 +3,9 @@ package ch.epfl.lara.engine.game.environment
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.items.interactables.Switch
 import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Item, Pickable, Switch}
+import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Item, Pickable}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
 import scala.collection.mutable
@@ -66,4 +67,7 @@ class Room(val id: String, val name: String, val ambient: String,
     .filter(_.isInstanceOf[Switch]).map(_.asInstanceOf[Switch])
     .map(switch => switch.name -> switch.currentState)
     .toMap
+
+
+  override def toString = s"Room($id, $name)"
 }

@@ -47,7 +47,7 @@ object Position {
         case "east" => East
         case "west" => West
         case "center" => Center
-        case _ => throw new IllegalArgumentException("invalid orientation")
+        case _ => throw new IllegalArgumentException("invalid orientation " + orientation)
       }
     }
   }

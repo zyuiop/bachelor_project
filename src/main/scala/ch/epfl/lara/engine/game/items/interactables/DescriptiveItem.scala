@@ -1,7 +1,7 @@
-package ch.epfl.lara.engine.game.items
+package ch.epfl.lara.engine.game.items.interactables
 
 import ch.epfl.lara.engine.game.entities.CharacterState
-import ch.epfl.lara.engine.game.messaging.Message.SwitchChangeState
+import ch.epfl.lara.engine.game.items.{Interactable, Item}
 
 /**
   * An item that simply prints a text when somebody interacts with it.

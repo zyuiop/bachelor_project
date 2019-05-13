@@ -1,9 +1,9 @@
-[params]
+[character]
 room = "1st-floor-dining-room"
 position = "Center"
 name = "Child"
 
-[program]
+[programStart]
 
 if (moved == null) {
  moved := 0
@@ -27,3 +27,5 @@ when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigge
  do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
 }
 do "go west"
+
+[programEnd]

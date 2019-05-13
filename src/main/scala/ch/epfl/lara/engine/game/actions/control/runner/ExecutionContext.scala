@@ -14,7 +14,7 @@ import scala.util.Try
   * @author Louis Vialar
   */
 class ExecutionContext(program: Expression, triggers: List[When], entity: CharacterState) extends MessageHandler {
-  private var currentTime = GameState.scheduler.currentTime
+  private var currentTime = 0
 
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
     // Shortcuts for self attributes

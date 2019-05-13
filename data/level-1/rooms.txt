@@ -1,0 +1,53 @@
+
+[room]
+id = "street"
+name = "42nd Street"
+ambient = "The sun is rising. The crowd is moving between buildings."
+
+[room]
+id = "store"
+name = "Convenience Store"
+ambient = "Day to day items are around the shelves"
+inv.peanut = "5"
+
+[room]
+id = "1st-floor"
+name = "1st Floor"
+ambient = "Boxes"
+
+[room]
+id = "1st-floor-dining-room"
+name = "Dining Room"
+ambient = "A sweet Dining Room, with a window facing the street"
+
+[item]
+name = "cellar"
+type = "inventory"
+position = "South"
+inv.peanut = 99999
+
+[item]
+name = "table"
+type = "inventory"
+position = "Center"
+inv.peanut = 3
+
+[room]
+id = "1st-floor-kitchen"
+name = "Kitchen"
+ambient = "There are peanuts everywhere..."
+
+[item]
+name = "bin"
+type = "inventory"
+position = "East"
+
+[room]
+id = "1st-floor-bathroom"
+name = "Bathroom"
+ambient = "It's quite clean"
+
+[room]
+id = "1st-floor-bedroom"
+name = "Bedroom"
+ambient = "The bed is not properly cleaned"

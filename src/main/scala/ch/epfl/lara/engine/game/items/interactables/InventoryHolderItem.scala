@@ -1,7 +1,8 @@
-package ch.epfl.lara.engine.game.items
+package ch.epfl.lara.engine.game.items.interactables
 
 import java.io.PrintStream
 
+import ch.epfl.lara.engine.game.items.{Interactable, InteractableInventory, Item, Pickable}
 import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
 
 /**

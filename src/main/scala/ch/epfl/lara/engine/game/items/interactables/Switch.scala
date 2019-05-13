@@ -1,5 +1,7 @@
-package ch.epfl.lara.engine.game.items
+package ch.epfl.lara.engine.game.items.interactables
+
 import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.items.{Interactable, Item}
 import ch.epfl.lara.engine.game.messaging.Message.SwitchChangeState
 
 /**
@@ -17,9 +19,9 @@ class Switch(states: Seq[String], stateTransitions: Map[String, String], val nam
     * @return the time the interaction took
     */
   override def interact(state: CharacterState): Int = {
-    val transition = stateTransitions(currentState)
     val nextStateIndex = states.indexOf(currentState) + 1
     val nextState = if (nextStateIndex >= states.size) states.head else states(nextStateIndex)
+    val transition = stateTransitions(nextState)
 
     state.ps.println(transition)
     state.currentRoom ! SwitchChangeState(name, currentState, nextState)

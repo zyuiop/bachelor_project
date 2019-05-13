@@ -1,10 +1,10 @@
-[params]
+[character]
 room = "1st-floor"
 name = "Somebody"
 position = "Center"
 type = "PPC"
 
-[program]
+[programStart]
 
 do "wait 1"
 
@@ -70,3 +70,5 @@ if (lost != null && lost && time % 90 == 0) {
   else if (sentenceNum == 2) do "say (whining) Where am I... Please..."
   else do "say Please? Can anybody help me?"
 }
+
+[programEnd]

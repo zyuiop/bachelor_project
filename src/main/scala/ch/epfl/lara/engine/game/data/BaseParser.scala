@@ -13,7 +13,9 @@ class BaseParser extends RegexParsers {
 
   def stringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
 
-  def keyValue = simpleIdentifier ~ "=" ~! stringLiteral ^^ { case l ~ eq ~ r => (l, r) }
+  def intLiteral: Parser[String] = """[0-9]+""".r ^^ (v => v)
+
+  def keyValue = simpleIdentifier ~ "=" ~! (stringLiteral | intLiteral) ^^ { case l ~ eq ~ r => (l, r) }
 
   def properties = keyValue.+ ^^ { l => l.toMap }
 
