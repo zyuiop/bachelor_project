@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.data
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.runner.GlobalConditionExecutionContext
+import ch.epfl.lara.engine.game.actions.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.environment.RoomRegistry
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
@@ -21,8 +21,8 @@ case class LevelDescriptor(rooms: RoomRegistry, entities: List[CharacterState], 
     // Init new GameState
     val startTime = data.startTime
 
-    val state = new GameState(rooms, startTime, data.currency, this, new GlobalConditionExecutionContext(success),
-      new GlobalConditionExecutionContext(failure))
+    val state = new GameState(rooms, startTime, data.currency, this, new ConditionExecutionContext(success),
+      new ConditionExecutionContext(failure))
 
     // Init routines
     routines.foreach { case RoutineDescriptor(start, every, message) =>

@@ -2,12 +2,13 @@ package ch.epfl.lara.engine.game.actions.control.runner
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree
+import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
 /**
   * @author Louis Vialar
   */
-class GlobalConditionExecutionContext(program: Tree.Value) extends BaseExecutionContext {
+class ConditionExecutionContext(program: Tree.Value) extends BaseExecutionContext {
   private def currentTime = GameState.scheduler.currentTime
 
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
@@ -21,11 +22,13 @@ class GlobalConditionExecutionContext(program: Tree.Value) extends BaseExecution
         )),
         "rooms" -> PassByNameEnvironment(() =>
           MapEnvironment(GameState.level.rooms.mapValues(l => ObjectMappingEnvironment(l)))),
-        "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
+        "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState.get))
       ) ++ additionnal)
 
-  def checkCondition(): Boolean = {
+  def checkCondition(additionnal: Map[String, Environment] = Map()): Boolean = {
     implicit val env: Environment = this.env()
     valueAsBoolean(resolve(program))
   }
+
+  def characterEnv(character: CharacterState) = Map("self" -> PassByNameEnvironment(() => ObjectMappingEnvironment(character)))
 }

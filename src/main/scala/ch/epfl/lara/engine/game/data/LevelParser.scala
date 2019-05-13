@@ -3,6 +3,8 @@ package ch.epfl.lara.engine.game.data
 import java.io.{File, PrintStream, Reader}
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.control.ActionCompiler
+import ch.epfl.lara.engine.game.actions.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.interactables.{DescriptiveItem, InventoryHolderItem, Switch}
@@ -83,17 +85,11 @@ object LevelParser extends BaseParser {
   def door: Parser[DoorBuilder] = "[door]" ~ properties ^^ {
     case _ ~ props =>
       // Keys
-      val keys = multiVal("key", props)
-      val attrs = prefixed("attr", props)
+      val openCondition = props.get("openCondition").map(ActionCompiler.compileValue).map(v => new ConditionExecutionContext(v)).map(v => (c: CharacterState) => v.checkCondition(v.characterEnv(c))).getOrElse(_ => true)
 
-      val opening = if (keys.isEmpty && attrs.isEmpty) (_: CharacterState) => true else (state: CharacterState) => {
-        // TODO: room for improvement (ability to have OR conditions)
-        keys.forall(keyItem => state.inventory.getItemByName(keyItem).isSuccess) &&
-          attrs.forall(pair => state.attributes.contains(pair._1) && state.attributes(pair._1) == pair._2)
-      }
 
        (doorTypeGetter: String => DoorType) =>
-        Door(props("left"), props("right"), Position.parse(props("leftPos")), Position.parse(props("rightPos")), doorTypeGetter(props("doorType")), opening)
+        Door(props("left"), props("right"), Position.parse(props("leftPos")), Position.parse(props("rightPos")), doorTypeGetter(props("doorType")), openCondition)
   }
 
   def program = (not(guard("[programEnd]")) ~ ".+".r).* ~! "[programEnd]" ^^ { case l ~ _ => l.map(_._2).mkString("\n") }
