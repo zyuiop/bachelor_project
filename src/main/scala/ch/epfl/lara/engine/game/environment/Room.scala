@@ -3,9 +3,8 @@ package ch.epfl.lara.engine.game.environment
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.entities.Interactable
 import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.items.{Inventory, Item, Pickable}
+import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Item, Pickable, Switch}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
 import scala.collection.mutable
@@ -28,9 +27,9 @@ class Room(val id: String, val name: String, val ambient: String,
 
   def describe(): String = {
     def describeDoors: String = {
-      GameState.level.rooms.getDoors(this).map {
+      GameState.level.getDoors(this).map {
         case (pos, door) =>
-          val targetRoom = GameState.level.rooms.getRoom(door.getTargetRoom(this)).name
+          val targetRoom = GameState.level.getRoom(door.getTargetRoom(this)).name
           s"At the $pos there is a ${door.doorType.name} leading to $targetRoom"
       }.mkString("\n")
     }
@@ -62,4 +61,9 @@ class Room(val id: String, val name: String, val ambient: String,
       else Some(m.head._2)
     })
   }
+
+  def switches: Map[String, String] = interactable.values.flatMap(_.values)
+    .filter(_.isInstanceOf[Switch]).map(_.asInstanceOf[Switch])
+    .map(switch => switch.name -> switch.currentState)
+    .toMap
 }

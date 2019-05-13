@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.{CharacterState, GameState}
+import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.environment.{Position, Room}
 import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage, TradeRequestResult}

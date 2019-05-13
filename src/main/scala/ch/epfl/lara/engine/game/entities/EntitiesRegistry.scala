@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game
+package ch.epfl.lara.engine.game.entities
 
 import ch.epfl.lara.engine.game.environment.Room
 

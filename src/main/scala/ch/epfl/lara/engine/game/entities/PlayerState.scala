@@ -1,6 +1,5 @@
-package ch.epfl.lara.engine.game
+package ch.epfl.lara.engine.game.entities
 
-import ch.epfl.lara.engine.game.entities.PPC
 import ch.epfl.lara.engine.game.environment.{Center, Position, Room}
 import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}

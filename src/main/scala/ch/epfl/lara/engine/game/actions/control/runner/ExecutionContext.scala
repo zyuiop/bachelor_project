@@ -4,7 +4,8 @@ import ch.epfl.lara.engine.game.actions.ActionParser
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.scheduler.Scheduler
-import ch.epfl.lara.engine.game.{CharacterState, GameState}
+import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.entities.CharacterState
 
 import scala.collection.mutable
 import scala.util.Try

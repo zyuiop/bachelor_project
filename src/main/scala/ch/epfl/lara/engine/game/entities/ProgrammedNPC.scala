@@ -2,7 +2,6 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.CharacterState
 import ch.epfl.lara.engine.game.actions.control.ActionCompiler
 import ch.epfl.lara.engine.game.actions.control.runner.ExecutionContext
 import ch.epfl.lara.engine.game.messaging.Message

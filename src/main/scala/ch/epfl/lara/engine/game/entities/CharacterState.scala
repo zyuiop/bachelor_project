@@ -1,13 +1,13 @@
-package ch.epfl.lara.engine.game
+package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.entities.Interactable
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
 import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
+import ch.epfl.lara.engine.game.{GameState, environment}
 
 import scala.collection.mutable
 
@@ -55,7 +55,7 @@ class CharacterState(startRoom: Room,
   }
 
   def getDoor(position: environment.Position): Option[Door] = {
-    GameState.level.rooms.getDoors(_currentRoom).get(position)
+    GameState.level.getDoors(_currentRoom).get(position)
   }
 
   def spawn(): Unit = {

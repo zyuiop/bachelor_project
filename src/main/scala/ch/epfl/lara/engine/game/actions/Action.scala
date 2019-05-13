@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.actions
 
-import ch.epfl.lara.engine.game.CharacterState
+import ch.epfl.lara.engine.game.entities.CharacterState
 
 /**
   * @author Louis Vialar

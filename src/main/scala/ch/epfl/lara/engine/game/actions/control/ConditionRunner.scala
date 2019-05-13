@@ -4,7 +4,7 @@ import java.lang.reflect.{Field, Method}
 
 import ch.epfl.lara.engine.game.actions.control.compiler.Tree._
 import ch.epfl.lara.engine.game.messaging.Message
-import ch.epfl.lara.engine.game.{CharacterState, GameState}
+import ch.epfl.lara.engine.game.GameState
 
 import scala.util.{Failure, Success, Try}
 

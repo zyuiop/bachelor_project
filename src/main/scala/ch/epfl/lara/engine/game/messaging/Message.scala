@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.messaging
 
-import ch.epfl.lara.engine.game.CharacterState
+import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.items.Pickable
 import ch.epfl.lara.engine.game.messaging.Message.{SystemMessage, TradeRequestResult}
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
@@ -39,6 +39,8 @@ object Message {
 
   case class TakenControl(sentBy: CharacterState) extends Message
   case class ReleasedControl(sentBy: CharacterState) extends Message
+
+  case class SwitchChangeState(switchId: String, sourceState: String, targetState: String) extends Message
 }
 
 object Request {

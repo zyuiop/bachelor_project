@@ -2,7 +2,8 @@ package ch.epfl.lara.engine.game.actions
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.{CharacterState, GameState}
+import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.environment.Position
 import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
 
@@ -20,7 +21,7 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
             inState.stopInteracting()
 
           val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
-          val room = GameState.level.rooms.getRoom(roomId)
+          val room = GameState.level.getRoom(roomId)
 
           inState.ps.println(room.describe())
 

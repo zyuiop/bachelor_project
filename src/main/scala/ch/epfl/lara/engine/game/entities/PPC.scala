@@ -1,6 +1,5 @@
 package ch.epfl.lara.engine.game.entities
 
-import ch.epfl.lara.engine.game.CharacterState
 import ch.epfl.lara.engine.game.messaging.Message
 import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}
 

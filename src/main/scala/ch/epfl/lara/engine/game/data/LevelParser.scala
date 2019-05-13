@@ -2,8 +2,8 @@ package ch.epfl.lara.engine.game.data
 
 import java.io.Reader
 
+import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.environment._
-import ch.epfl.lara.engine.game.{CharacterState, LevelMap}
 
 /**
   * @author Louis Vialar
@@ -51,18 +51,18 @@ object LevelParser extends BaseParser {
 
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
-      LevelMap(RoomRegistry(
+      RoomRegistry(
         rooms.map(_.asInstanceOf[Room]),
         doors map { case f: ((String => DoorType) => Door) => f(doorTypes) },
-        true)) // TODO: Remove when possible
+        true) // TODO: Remove when possible
     }
   }
 
-  def apply(content: String): LevelMap = {
+  def apply(content: String): RoomRegistry = {
     parse(file, content).get
   }
 
-  def apply(content: Reader): LevelMap = {
+  def apply(content: Reader): RoomRegistry = {
     parse(file, content).get
   }
 }

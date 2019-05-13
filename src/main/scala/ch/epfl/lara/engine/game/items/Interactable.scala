@@ -1,6 +1,6 @@
-package ch.epfl.lara.engine.game.entities
+package ch.epfl.lara.engine.game.items
 
-import ch.epfl.lara.engine.game.CharacterState
+import ch.epfl.lara.engine.game.entities.CharacterState
 
 /**
   * @author Louis Vialar

@@ -4,10 +4,9 @@ import java.io.{File, OutputStream, PrintStream}
 
 import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.data.{CharacterParser, LevelParser}
-import ch.epfl.lara.engine.game.entities.{PPC, ProgrammedNPC, TraderNPC}
+import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
-import ch.epfl.lara.engine.game.items.mutable.InventoryHolderItem
-import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, Pickable}
+import ch.epfl.lara.engine.game.items.{ImmutableInventoryImpl, InventoryHolderItem, Pickable}
 
 import scala.annotation.tailrec
 import scala.io.{Source, StdIn}
@@ -42,7 +41,7 @@ object Game {
       )
     ), Seq())
 
-    val map = LevelMap(rooms.rooms ++ hardcodedRooms)
+    val map = rooms ++ hardcodedRooms
 
     new GameState(map, 6 * 3600) // 6 AM
 
@@ -62,16 +61,16 @@ object Game {
       println(s"The sky is now dark...")
     })
 
-    val dummyNPC0 = CharacterParser(Source.fromFile(new File("data/level-1/shopkeeper.txt")).mkString)(map.rooms.getRoom)
-    val dummyNPC1 = CharacterParser(Source.fromFile(new File("data/level-1/somebody.txt")).mkString)(map.rooms.getRoom)
-    val dummyNPC2 = CharacterParser(Source.fromFile(new File("data/level-1/child.txt")).mkString)(map.rooms.getRoom)
+    val dummyNPC0 = CharacterParser(Source.fromFile(new File("data/level-1/shopkeeper.txt")).mkString)(map.getRoom)
+    val dummyNPC1 = CharacterParser(Source.fromFile(new File("data/level-1/somebody.txt")).mkString)(map.getRoom)
+    val dummyNPC2 = CharacterParser(Source.fromFile(new File("data/level-1/child.txt")).mkString)(map.getRoom)
 
     dummyNPC0.spawn()
     dummyNPC1.spawn()
     dummyNPC2.spawn()
 
     // Create Player State
-    val state = new PlayerState(map.rooms.getRoom("street"), Map(GameState.Currency -> 1000, peanut -> 50, Pickable("nut") -> 10))
+    val state = new PlayerState(map.getRoom("street"), Map(GameState.Currency -> 1000, peanut -> 50, Pickable("nut") -> 10))
     state.spawn()
 
     println(state.currentRoom.describe())

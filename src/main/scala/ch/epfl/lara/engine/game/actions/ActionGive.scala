@@ -1,9 +1,9 @@
 package ch.epfl.lara.engine.game.actions
 
+import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.items.Inventory
-import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
-import ch.epfl.lara.engine.game.{CharacterState, GameState, PlayerState}
 
 import scala.util.Try
 

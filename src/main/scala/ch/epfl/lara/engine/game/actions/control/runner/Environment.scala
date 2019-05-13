@@ -103,5 +103,7 @@ case class ValueEnvironment(value: String) extends Environment {
 }
 
 case class PassByNameEnvironment(env: () => Environment) extends Environment {
-  override def resolvePath(path: List[String]): Try[TypedValue[_]] = env.apply().resolvePath(path)
+  lazy val computed: Environment = env.apply()
+
+  override def resolvePath(path: List[String]): Try[TypedValue[_]] = computed.resolvePath(path)
 }

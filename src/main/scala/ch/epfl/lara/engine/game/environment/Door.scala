@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.environment
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.CharacterState
+import ch.epfl.lara.engine.game.entities.CharacterState
 
 import scala.util.Random
 
