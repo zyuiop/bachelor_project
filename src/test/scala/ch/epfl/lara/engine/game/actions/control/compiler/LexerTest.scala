@@ -35,12 +35,12 @@ class LexerTest extends FlatSpec with Matchers {
     Lexer("15:00:00").right.get should be(List(IntLiteral(54000)))
     Lexer("time >= 6:00:00") should be(Right(List(
       Identifier("time"),
-      Hte(),
+      Gte(),
       IntLiteral(21600)
     )))
     Lexer("time >= 6:00:00 && time < 18:00:00") should be(Right(List(
       Identifier("time"),
-      Hte(),
+      Gte(),
       IntLiteral(21600),
       And(),
       Identifier("time"),

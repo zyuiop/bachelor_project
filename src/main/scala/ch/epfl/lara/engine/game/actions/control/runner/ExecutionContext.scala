@@ -237,9 +237,9 @@ class ExecutionContext(program: Expression, triggers: List[When], entity: Charac
       resolveAsNumber(left) <= resolveAsNumber(right)
     case Lt(left: Value, right: Value) =>
       resolveAsNumber(left) < resolveAsNumber(right)
-    case Ht(left: Value, right: Value) =>
+    case Gt(left: Value, right: Value) =>
       resolveAsNumber(left) > resolveAsNumber(right)
-    case Hte(left: Value, right: Value) =>
+    case Gte(left: Value, right: Value) =>
       resolveAsNumber(left) >= resolveAsNumber(right)
     case In(left: Value, right: Value) =>
       val l = resolve(left)

@@ -48,9 +48,9 @@ object Lexer extends RegexParsers {
 
   def lt = positioned("<" ^^^ Lt())
 
-  def ht = positioned(">" ^^^ Ht())
+  def ht = positioned(">" ^^^ Gt())
 
-  def hte = positioned(">=" ^^^ Hte())
+  def hte = positioned(">=" ^^^ Gte())
 
   def dot = positioned("." ^^^ Dot())
 

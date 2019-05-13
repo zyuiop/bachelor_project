@@ -47,13 +47,13 @@ object Parser extends Parsers {
       case Minus() => (l: Tree.Value, r: Tree.Value) => Tree.Difference(l, r)
     })
 
-    def mpOp: Parser[Tree.Value] = chainl1(lpOp, mpOp, (Eq() | Neq() | Lte() | Lt() | Hte() | Ht() | In()) ^^ {
+    def mpOp: Parser[Tree.Value] = chainl1(lpOp, mpOp, (Eq() | Neq() | Lte() | Lt() | Gte() | Gt() | In()) ^^ {
       case Eq() => (l: Tree.Value, r: Tree.Value) => Tree.Eq(l, r)
       case Neq() => (l: Tree.Value, r: Tree.Value) => Tree.Neq(l, r)
       case Lte() => (l: Tree.Value, r: Tree.Value) => Tree.Lte(l, r)
       case Lt() => (l: Tree.Value, r: Tree.Value) => Tree.Lt(l, r)
-      case Hte() => (l: Tree.Value, r: Tree.Value) => Tree.Hte(l, r)
-      case Ht() => (l: Tree.Value, r: Tree.Value) => Tree.Ht(l, r)
+      case Gte() => (l: Tree.Value, r: Tree.Value) => Tree.Gte(l, r)
+      case Gt() => (l: Tree.Value, r: Tree.Value) => Tree.Gt(l, r)
       case In() => (l: Tree.Value, r: Tree.Value) => Tree.In(l, r)
     })
 

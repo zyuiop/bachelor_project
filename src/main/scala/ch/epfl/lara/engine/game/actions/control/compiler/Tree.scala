@@ -66,9 +66,9 @@ object Tree {
 
   case class Lt(left: Value, right: Value) extends Comparison
 
-  case class Ht(left: Value, right: Value) extends Comparison
+  case class Gt(left: Value, right: Value) extends Comparison
 
-  case class Hte(left: Value, right: Value) extends Comparison
+  case class Gte(left: Value, right: Value) extends Comparison
 
   case class In(left: Value, right: Value) extends Comparison
 
