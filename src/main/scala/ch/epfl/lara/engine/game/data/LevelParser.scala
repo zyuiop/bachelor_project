@@ -146,9 +146,10 @@ object LevelParser extends BaseParser {
       val startText = multiVal("startText", props).mkString("\n")
       val endText = multiVal("endText", props).mkString("\n")
 
-      val endCondition = props("endCondition")
+      val levelSuccess = props("levelSuccess")
+      val levelFailure = props("levelFailure")
 
-      LevelData(Pickable(currencyItem), levelName, startText, endText, endCondition, startTime)
+      LevelData(Pickable(currencyItem), levelName, startText, endText, levelSuccess, levelFailure, startTime)
   }
 
   def file = rep(room | door | doorType | routine | character | player | level) ^^ {

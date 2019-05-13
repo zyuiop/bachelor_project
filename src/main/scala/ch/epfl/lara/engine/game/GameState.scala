@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game
 
+import ch.epfl.lara.engine.game.actions.control.runner.GlobalConditionExecutionContext
+import ch.epfl.lara.engine.game.data.LevelDescriptor
 import ch.epfl.lara.engine.game.entities.{CharacterState, EntitiesRegistry}
 import ch.epfl.lara.engine.game.environment.RoomRegistry
 import ch.epfl.lara.engine.game.items.Pickable
@@ -10,7 +12,8 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class GameState(val level: RoomRegistry, val startTime: Int, val currency: Pickable) {
+class GameState(val level: RoomRegistry, val startTime: Int, val currency: Pickable, val levelData: LevelDescriptor,
+                val levelSuccess: GlobalConditionExecutionContext, val levelFailure: GlobalConditionExecutionContext) {
 
   if (GameState.instance.nonEmpty) {
     GameState.instance.get.destroy
@@ -24,9 +27,9 @@ class GameState(val level: RoomRegistry, val startTime: Int, val currency: Picka
   val attributes: mutable.Map[String, String] = mutable.Map()
   val registry: EntitiesRegistry = new EntitiesRegistry
 
-  def isLevelComplete(playerState: CharacterState): Boolean = false
+  def isLevelComplete: Boolean = levelSuccess.checkCondition()
 
-  def isLevelFailed(playerState: CharacterState): Boolean = false
+  def isLevelFailed: Boolean = levelFailure.checkCondition()
 
 }
 

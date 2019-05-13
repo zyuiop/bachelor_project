@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.entities
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.control.ActionCompiler
-import ch.epfl.lara.engine.game.actions.control.runner.ExecutionContext
+import ch.epfl.lara.engine.game.actions.control.runner.CharacterExecutionContext
 import ch.epfl.lara.engine.game.messaging.Message
 
 /**
@@ -17,7 +17,7 @@ class ProgrammedNPC(startState: CharacterState,
 ) with NPC {
   private val (prog, triggers) = ActionCompiler.compileProgram(program)
 
-  protected val ec = new ExecutionContext(prog, triggers, this)
+  protected val ec = new CharacterExecutionContext(prog, triggers, this)
 
   override def spawn(): Unit = {
     super.spawn()

@@ -2,11 +2,12 @@
 
 name = "Test Level"
 currency = "coin"
-endCondition = ""
+levelFailure = "totalTime > 86400"
 startTime = "6:00:00"
+levelSuccess = "characters.Child.attributes.success != null && characters.Child.attributes.success"
 
 [player]
 
-room = "street"
+room = "1st-floor-kitchen"
 inv.coin = 1000
 inv.nut = 10

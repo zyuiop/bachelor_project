@@ -50,8 +50,17 @@ object Game {
       return
     }
 
-    // Check for level transitions
-    GameState.level
+    if (GameState.get.isLevelComplete) {
+      printStream.println(GameState.get.levelData.data.endText)
+      printStream.println("Level success!")
+      Thread.sleep(1000)
+      // TODO: load next level
+      return
+    } else if (GameState.get.isLevelFailed) {
+      printStream.println("Level failed...")
+      Thread.sleep(1000)
+      GameState.get.levelData.startLevel()
+    }
 
     // Run action
     val nextStep = StdIn.readLine("> ").split(" ")

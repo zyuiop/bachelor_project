@@ -2,6 +2,7 @@
 room = "1st-floor-dining-room"
 position = "Center"
 name = "Child"
+type = "PPC"
 
 [programStart]
 
@@ -27,5 +28,14 @@ when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigge
  do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
 }
 do "go west"
+
+when (trigger != null && trigger.__name == "ReleasedControl") {
+ if (room.id == "1st-floor-bedroom") {
+   success := true
+   do "say I'm going to bed now!"
+   do "wait 10000"
+ }
+}
+
 
 [programEnd]
