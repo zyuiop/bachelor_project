@@ -11,7 +11,11 @@ import scala.util.parsing.combinator.RegexParsers
 class BaseParser extends RegexParsers {
   def simpleIdentifier: Parser[String] = "[a-zA-Z_][a-zA-Z0-9._]*".r
 
-  def stringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
+  def shortStringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
+
+  def longStringLiteral: Parser[String] = "\"\"\".*\"\"\"".r ^^ { str => str drop 3 dropRight 3 }
+
+  def stringLiteral = longStringLiteral ||| shortStringLiteral
 
   def intLiteral: Parser[String] = """[0-9]+""".r ^^ (v => v)
 

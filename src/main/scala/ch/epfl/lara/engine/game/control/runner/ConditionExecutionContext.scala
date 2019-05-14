@@ -26,7 +26,7 @@ class ConditionExecutionContext(program: Tree.Value) extends BaseExecutionContex
       ) ++ additionnal)
 
   def checkCondition(additionnal: Map[String, Environment] = Map()): Boolean = {
-    implicit val env: Environment = this.env()
+    implicit val env: Environment = this.env(additionnal)
     valueAsBoolean(resolve(program))
   }
 

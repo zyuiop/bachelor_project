@@ -1,0 +1,17 @@
+[routine]
+
+start = "06:00:00"
+repeat = 86400
+message = "The sun rises..."
+
+[routine]
+
+start = "18:00:00"
+repeat = 86400
+message = "The sun is going down..."
+
+[routine]
+
+start = "21:30:00"
+repeat = 86400
+message = "The sky is dark..."

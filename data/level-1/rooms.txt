@@ -1,53 +1,38 @@
-
 [room]
-id = "street"
-name = "42nd Street"
-ambient = "The sun is rising. The crowd is moving between buildings."
 
-[room]
-id = "store"
-name = "Convenience Store"
-ambient = "Day to day items are around the shelves"
-inv.peanut = "5"
-
-[room]
-id = "1st-floor"
-name = "1st Floor"
-ambient = "Boxes"
-
-[room]
-id = "1st-floor-dining-room"
-name = "Dining Room"
-ambient = "A sweet Dining Room, with a window facing the street"
+id = "lab-control"
+name = "Laboratory Control Room"
+ambient = "You are in a small room. All the walls are white, and lit by a very bright light coming from the white ceiling. On the west wall, you can see a glass overlooking to an other small room. A lot of computers and monitors are installed on the other parts of the room."
 
 [item]
-name = "cellar"
-type = "inventory"
-position = "South"
-inv.peanut = 99999
 
-[item]
-name = "table"
-type = "inventory"
-position = "Center"
-inv.peanut = 3
-
-[room]
-id = "1st-floor-kitchen"
-name = "Kitchen"
-ambient = "There are peanuts everywhere..."
-
-[item]
-name = "bin"
-type = "inventory"
+name = "computer"
+type = "descriptive"
+lore = "You look at the computer, and see a lot of lines and digits moving really quickly. It seems this computer monitors signals but you can't really tell what signals."
 position = "East"
 
-[room]
-id = "1st-floor-bathroom"
-name = "Bathroom"
-ambient = "It's quite clean"
+[item]
+
+name = "glass"
+type = "descriptive"
+lore = "Through the glass, you can see an other small room. As there is no light in this room, there is not a lot of things you can see..."
+position = "West"
 
 [room]
-id = "1st-floor-bedroom"
-name = "Bedroom"
-ambient = "The bed is not properly cleaned"
+
+id = "lab-portal-room"
+name = "Experiment Room"
+ambient = "The room is smaller than the control room, and almost empty. There is a metallic chair at the center of the room."
+
+[item]
+
+name = "chair"
+id = "chair"
+position = "Center"
+type = "switch"
+
+states.0 = "raised"
+states.1 = "seated"
+
+transitions.seated = "You seat on the chair."
+transitions.raised = "You stand up."

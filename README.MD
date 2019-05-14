@@ -148,7 +148,8 @@ Depending on the type, there are more properties:
 - `type == inventory`: the item will be an inventory holder (a cupboard, ...)
     - `inv` (inventory): the content of the held inventory
 - `type == switch`: the item will be a switch, meaning an item that changes state when one interacts
-    - `states` (map): all the states this switch can have, in order (if you have 4 states, transitions will always be 1 -> 2 -> 3 -> 4 -> 1 -> 2 ...). The values should be the text displayed when the switch takes the key state.
+    - `states` (list): all the states this switch can have, in order (if you have 4 states, transitions will always be 1 -> 2 -> 3 -> 4 -> 1 -> 2 ...). 
+    - `transitions` (map): the messages displayed when the state changes. The values should be the text displayed when the switch takes the key state.
     - `id` (string): an id for the item, used in programs to find it easily. It should be unique.
     - `time` (optional int): the time (in seconds) it takes to use the switch
 - `type == descriptive`: the item will simply show a text when used

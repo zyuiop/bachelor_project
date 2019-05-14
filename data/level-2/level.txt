@@ -1,0 +1,13 @@
+[level]
+
+name = "Test Level"
+currency = "coin"
+levelFailure = "totalTime > 86400"
+startTime = "6:00:00"
+levelSuccess = "characters.Child.attributes.success != null && characters.Child.attributes.success"
+
+[player]
+
+room = "1st-floor-kitchen"
+inv.coin = 1000
+inv.nut = 10

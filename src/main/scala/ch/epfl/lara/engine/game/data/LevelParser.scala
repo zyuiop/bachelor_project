@@ -29,11 +29,12 @@ object LevelParser extends BaseParser {
 
         new InventoryHolderItem(name, inventory)
       } else if (itemType == "switch") {
-        val states = this.prefixed("states", props) // map states.<stateName> = transition to this state
+        val states = this.multiVal("states", props) // map states.<stateName> = transition to this state
+        val transitions = this.prefixed("transitions", props) // map states.<stateName> = transition to this state
         val id = props("id")
         val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
 
-        new Switch(states.keySet.toSeq, states, id, name, time)
+        new Switch(states, transitions, id, name, time)
       } else if (itemType == "descriptive") {
         val lore = props("lore")
         val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
