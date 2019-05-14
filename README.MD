@@ -4,11 +4,7 @@ A Computer Science undergraduate project, written in spring 2019.
 
 ## Goals
 
-The initial goal of the project was to build a text-based game based on real historic facts. The idea was to "generate" the
-game automatically, using a large dataset of events and historical characters. However, this proved to be too difficult
-in the current state of research. We therefore adopted a new idea.
-
-The project instead focused on building a game in which the main character, the player, could control other characters, to change
+The project focuses on building a game in which the main character, the player, can control other characters, to change
 their timeline.
 
 ## Engine concepts
