@@ -442,45 +442,45 @@ and `"leaf3" in node` resolves to false.
 Some node types are redundant in the environments. Here are their main properties:
 - `inventory`: a node with one leaf per item in the inventory. The leaf value will be the amount available.
 - `character`: represents a character in the game
- - `name` (`string`): the name of the character
- - `attributes`: a node with only leaves, that can be freely set. See the attributes as variables of a character.
- - `inventory` (`inventory`): the entity inventory
- - `currentRoom` (`room`): the room the entity is in
- - `currentPosition` (`string`): the current position of the entity in the room (cardinal point)
- - `currentOpenInventory` (`list`): a list, containing either 0 or 1 inventory, corresponding to the inventory the character is interacting with
- - `activeRequests` (`list`): a list of `message`, the requests not yet answered
+     - `name` (`string`): the name of the character
+     - `attributes`: a node with only leaves, that can be freely set. See the attributes as variables of a character.
+     - `inventory` (`inventory`): the entity inventory
+     - `currentRoom` (`room`): the room the entity is in
+     - `currentPosition` (`string`): the current position of the entity in the room (cardinal point)
+     - `currentOpenInventory` (`list`): a list, containing either 0 or 1 inventory, corresponding to the inventory the character is interacting with
+     - `activeRequests` (`list`): a list of `message`, the requests not yet answered
 - `room`: a room in the game
- - `inventory` (`inventory`): the room inventory (the items on the floor, basically)
- - `id` (`string`): the identifier of the room
- - `name` (`string`): the name of the room
- - `ambient` (`string`): the ambient text of the room
- - `describe` (`string`): the complete description of the room
- - `switches`: a node containing a leaf for each switch in the room. The leaf contains the switch value, and not the switch itself.
+     - `inventory` (`inventory`): the room inventory (the items on the floor, basically)
+     - `id` (`string`): the identifier of the room
+     - `name` (`string`): the name of the room
+     - `ambient` (`string`): the ambient text of the room
+     - `describe` (`string`): the complete description of the room
+     - `switches`: a node containing a leaf for each switch in the room. The leaf contains the switch value, and not the switch itself.
 - `message`: a signal sent between characters.
- - `__name` (`string`): the name of the message 
- - There are different types of `message`. Here is their names, that can be used for the `on` interrupt and compared with the `__name` property.
-   - `TalkingMessage`: somebody in the room talked
-    - `sentBy` (`character`): the character that sent the message
-    - `content` (`string`): the message sent
-   - `SystemMessage`: a message sent by the system (i.e. "The sun rises", ...)
-    - `content` (`string`): the message sent
-   - `RoomMovement`: somebody entered or left the room
-    - `sentBy` (`character`): the character that entered or left
-    - `entering` (`boolean`): if `true` the character entered the room, if `false` it left.
-   - `TakenControl` or `ReleasedControl`: a player took/released control of this entity
-    - `sentBy` (`character`): the player who took/released control
-   - `SwitchChangeState`: a switch in the room changed state
-    - `switchId` (`string`): the id of the switch
-    - `sourceState` (`string`): the previous state of the switch
-    - `targetState` (`string`): the new state of the switch
-   - `InventoryTradeRequest`: a trade request
-    - `sentBy` (`character`): the character that sent the request
-    - `target` (`character`): the character that received the request
-    - `sentItems` (`inventory`): the items that `sentBy` wants to give to `target`
-    - `requestedItems` (`inventory`): the items that `sentBy` wants `target` to provide
-   - `TradeRequestResult`: the result of a trade request
-    - `request` (`InventoryTradeRequest`): the initial request
-    - `success` (`boolean`): `true` if the trade was accepted, `false` if it wasn't
+     - `__name` (`string`): the name of the message 
+     - There are different types of `message`. Here is their names, that can be used for the `on` interrupt and compared with the `__name` property.
+           - `TalkingMessage`: somebody in the room talked
+                - `sentBy` (`character`): the character that sent the message
+                - `content` (`string`): the message sent
+           - `SystemMessage`: a message sent by the system (i.e. "The sun rises", ...)
+                - `content` (`string`): the message sent
+           - `RoomMovement`: somebody entered or left the room
+                - `sentBy` (`character`): the character that entered or left
+                - `entering` (`boolean`): if `true` the character entered the room, if `false` it left.
+           - `TakenControl` or `ReleasedControl`: a player took/released control of this entity
+                - `sentBy` (`character`): the player who took/released control
+           - `SwitchChangeState`: a switch in the room changed state
+                - `switchId` (`string`): the id of the switch
+                - `sourceState` (`string`): the previous state of the switch
+                - `targetState` (`string`): the new state of the switch
+           - `InventoryTradeRequest`: a trade request
+                - `sentBy` (`character`): the character that sent the request
+                - `target` (`character`): the character that received the request
+                - `sentItems` (`inventory`): the items that `sentBy` wants to give to `target`
+                - `requestedItems` (`inventory`): the items that `sentBy` wants `target` to provide
+           - `TradeRequestResult`: the result of a trade request
+                - `request` (`InventoryTradeRequest`): the initial request
+                - `success` (`boolean`): `true` if the trade was accepted, `false` if it wasn't
 
 The following nodes are present in all the environments
  
@@ -488,12 +488,12 @@ The following nodes are present in all the environments
 maximum value)
 - `totalTime` (`int`): the total time of the level, namely all the seconds elapsed since the day 1 of the level at 0h00:00
 - `state`: the state of the game _(some additional properties are not documented)_
- - `currency`: the item used as the currency in the game
- - `level`: the map _(some additional properties are not documented)_
-  - `rooms`: a map of the rooms, where the key is the id of the room and the value is a `room`
- - `registry`: a registry of all the characters in the game
-  - `player` (`character`): the player
-  - `entities`: a list of all the characters in the game
+     - `currency`: the item used as the currency in the game
+     - `level`: the map _(some additional properties are not documented)_
+        - `rooms`: a map of the rooms, where the key is the id of the room and the value is a `room`
+     - `registry`: a registry of all the characters in the game
+          - `player` (`character`): the player
+          - `entities`: a list of all the characters in the game
  
 #### Character environment
 
