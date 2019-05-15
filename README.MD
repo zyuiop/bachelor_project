@@ -459,28 +459,28 @@ Some node types are redundant in the environments. Here are their main propertie
 - `message`: a signal sent between characters.
      - `__name` (`string`): the name of the message 
      - There are different types of `message`. Here is their names, that can be used for the `on` interrupt and compared with the `__name` property.
-           - `TalkingMessage`: somebody in the room talked
-                - `sentBy` (`character`): the character that sent the message
-                - `content` (`string`): the message sent
-           - `SystemMessage`: a message sent by the system (i.e. "The sun rises", ...)
-                - `content` (`string`): the message sent
-           - `RoomMovement`: somebody entered or left the room
-                - `sentBy` (`character`): the character that entered or left
-                - `entering` (`boolean`): if `true` the character entered the room, if `false` it left.
-           - `TakenControl` or `ReleasedControl`: a player took/released control of this entity
-                - `sentBy` (`character`): the player who took/released control
-           - `SwitchChangeState`: a switch in the room changed state
-                - `switchId` (`string`): the id of the switch
-                - `sourceState` (`string`): the previous state of the switch
-                - `targetState` (`string`): the new state of the switch
-           - `InventoryTradeRequest`: a trade request
-                - `sentBy` (`character`): the character that sent the request
-                - `target` (`character`): the character that received the request
-                - `sentItems` (`inventory`): the items that `sentBy` wants to give to `target`
-                - `requestedItems` (`inventory`): the items that `sentBy` wants `target` to provide
-           - `TradeRequestResult`: the result of a trade request
-                - `request` (`InventoryTradeRequest`): the initial request
-                - `success` (`boolean`): `true` if the trade was accepted, `false` if it wasn't
+          - `TalkingMessage`: somebody in the room talked
+               - `sentBy` (`character`): the character that sent the message
+               - `content` (`string`): the message sent
+          - `SystemMessage`: a message sent by the system (i.e. "The sun rises", ...)
+               - `content` (`string`): the message sent
+          - `RoomMovement`: somebody entered or left the room
+               - `sentBy` (`character`): the character that entered or left
+               - `entering` (`boolean`): if `true` the character entered the room, if `false` it left.
+          - `TakenControl` or `ReleasedControl`: a player took/released control of this entity
+               - `sentBy` (`character`): the player who took/released control
+          - `SwitchChangeState`: a switch in the room changed state
+               - `switchId` (`string`): the id of the switch
+               - `sourceState` (`string`): the previous state of the switch
+               - `targetState` (`string`): the new state of the switch
+          - `InventoryTradeRequest`: a trade request
+               - `sentBy` (`character`): the character that sent the request
+               - `target` (`character`): the character that received the request
+               - `sentItems` (`inventory`): the items that `sentBy` wants to give to `target`
+               - `requestedItems` (`inventory`): the items that `sentBy` wants `target` to provide
+          - `TradeRequestResult`: the result of a trade request
+               - `request` (`InventoryTradeRequest`): the initial request
+               - `success` (`boolean`): `true` if the trade was accepted, `false` if it wasn't
 
 The following nodes are present in all the environments
  
