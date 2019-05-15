@@ -27,7 +27,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
             .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
         )),
         "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
-        "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
+        "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState.get))
       ) ++ additionnal)
 
   case class BranchState(stack: mutable.ArrayStack[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])

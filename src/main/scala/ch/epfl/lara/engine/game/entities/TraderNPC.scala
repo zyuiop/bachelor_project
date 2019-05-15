@@ -52,7 +52,7 @@ class TraderNPC(room: Room, position: Position, name: String, startInventory: Ma
           if (inventory.canTake(pickable, amt)) {
             val finalPrice = price * amt
 
-            sentBy ! InventoryTradeRequest(this, sentBy, Map(pickable -> amt), Map(GameState.Currency -> finalPrice))
+            sentBy ! InventoryTradeRequest(this, sentBy, Map(pickable -> amt), Map(GameState.currency -> finalPrice))
           } else {
             sentBy ! TalkingMessage(this, "I don't have enough of this! Sorry...")
           }

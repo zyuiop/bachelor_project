@@ -36,7 +36,7 @@ class GameState(val level: RoomRegistry, val startTime: Int, val currency: Picka
 object GameState {
   private var instance: Option[GameState] = None
 
-  def Currency: Pickable = get.currency
+  def currency: Pickable = get.currency
 
   def get: GameState = instance.get
 
