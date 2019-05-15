@@ -5,9 +5,6 @@ position = "Center"
 type = "PPC"
 
 [programStart]
-
-do "wait 1"
-
 when (trigger != null && trigger.__name == "RoomMovement" && trigger.entering == true) {
   if (lost == null || !lost) {
    if (time >= 6:00:00 && time < 18:00:00) {
@@ -47,7 +44,7 @@ when (trigger != null && trigger.__name == "InventoryTradeRequest") {
 }
 
 /* Every hour */
-if (time % 3600 == 0 && (lost == null || !lost)) {
+when (time % 3600 == 0 && (lost == null || !lost)) {
  do "go south"
  do "go east"
  if (room.inventory.content.peanut != null) {
@@ -63,12 +60,15 @@ if (time % 3600 == 0 && (lost == null || !lost)) {
  do "go north"
 }
 
-if (lost != null && lost && time % 90 == 0) {
+when (lost != null && lost && time % 90 == 0) {
   sentenceNum := ((time % 270) / 90)
   if (sentenceNum == 0) do "say I want to see my familly again..."
   else if (sentenceNum == 1) do "say HELP! I AM LOST!"
   else if (sentenceNum == 2) do "say (whining) Where am I... Please..."
   else do "say Please? Can anybody help me?"
 }
+
+/* Base program */
+do "wait 1"
 
 [programEnd]

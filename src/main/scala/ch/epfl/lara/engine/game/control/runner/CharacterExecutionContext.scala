@@ -32,7 +32,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
 
   case class BranchState(stack: mutable.ArrayStack[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])
 
-  private var currentState = BranchState(mutable.Queue(), 0, Map())
+  private var currentState = BranchState(mutable.ArrayStack(program), 0, Map())
 
   private var branches = List[BranchState]()
   private var stopped = true
@@ -54,7 +54,11 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
     checkTriggers()(env())
 
     while (currentState.nextRun <= 0) {
-      while (currentState.stack.isEmpty) next()
+      while (currentState.stack.isEmpty && branches.nonEmpty) next()
+
+      if (currentState.stack.isEmpty && branches.isEmpty)
+        return // Nothing to run
+
 
       if (currentState.nextRun <= 0)
         execute(this.currentState.stack.pop())
@@ -89,8 +93,6 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
     if (branches.nonEmpty) {
       currentState = branches.head
       branches = branches.tail
-    } else {
-      currentState.stack.push(program)
     }
   }
 
