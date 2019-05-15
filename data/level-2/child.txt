@@ -6,36 +6,42 @@ type = "PPC"
 
 [programStart]
 
-if (moved == null) {
- moved := 0
+while (true) {
+ if (moved == null) {
+  moved := 0
+ }
+
+ if (characters.`1` != null) {
+  do "say Hello, who are you?"
+ }
+
+ do "open cellar"
+ do "take 1 peanut"
+ do "quit"
+ do "go east"
+ do "drop 1 peanut"
+
+ if (characters.`1` != null) {
+  do "say I love peanut butter!"
+ }
+
+ moved := moved + 1
+
+ do "go west"
 }
 
-if (characters.`1` != null) {
- do "say Hello, who are you?"
-}
-do "open cellar"
-do "take 1 peanut"
-do "quit"
-do "go east"
-do "drop 1 peanut"
-if (characters.`1` != null) {
- do "say I love peanut butter!"
+on (TalkingMessage) {
+ if ("hello" in trigger.content.toLowerCase && trigger.sentBy.name != "Child") {
+   do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
+ }
 }
 
-moved := moved + 1
-
-when (trigger != null && trigger.__name == "TalkingMessage" && "hello" in trigger.content.toLowerCase && trigger.sentBy.name != "Child") {
- do "say Hello! I've moved " + moved + " peanuts... That's a hard work you know?"
-}
-do "go west"
-
-when (trigger != null && trigger.__name == "ReleasedControl") {
+on (ReleasedControl) {
  if (room.id == "1st-floor-bedroom") {
    success := true
    do "say I'm going to bed now!"
    do "wait 10000"
  }
 }
-
 
 [programEnd]

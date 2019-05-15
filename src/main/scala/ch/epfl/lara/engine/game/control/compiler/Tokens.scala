@@ -49,6 +49,7 @@ object Tokens {
   case class While() extends Token("while")
   case class Else() extends Token("else")
   case class When() extends Token("when")
+  case class On() extends Token("on")
 
   case class LBracket() extends Token("{")
   case class RBracket() extends Token("}")

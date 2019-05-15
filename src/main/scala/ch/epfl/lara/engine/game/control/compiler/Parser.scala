@@ -95,6 +95,14 @@ object Parser extends Parsers {
     }
   }
 
+  def parseOn: Parser[Tree.On] = positioned {
+    def evName = accept("event name", { case Identifier(evName) => Tree.Identifier(List(evName)) })
+
+    On() ~! LPar() ~! chainl1(evName, Or() ^^^ { (l: Tree.Identifier, r: Tree.Identifier) => Tree.Identifier(l.parts ::: r.parts)}) ~! RPar() ~! singleExpr ^^ {
+      case _ ~ _ ~ triggers ~ _ ~ act => Tree.On(triggers, act)
+    }
+  }
+
   def parseDo: Parser[Tree.Do] = positioned {
     Do() ~! DoNow().? ~! valueWithOp ^^ {
       case _ ~ Some(_) ~ v => Tree.Do(v, true)
@@ -111,7 +119,7 @@ object Parser extends Parsers {
   def singleExpr: Parser[Tree.Expression] = positioned(parseIte | parseDo | parseSet | parseWhile | block)
 
   def expr: Parser[Tree.Expression] = positioned {
-    rep1(singleExpr | parseWhen) ^^ { // When only allowed at top level !
+    rep1(singleExpr | parseWhen | parseOn) ^^ { // When only allowed at top level !
       elems =>
         if (elems.length > 1) Tree.Sequence(elems)
         else elems.head

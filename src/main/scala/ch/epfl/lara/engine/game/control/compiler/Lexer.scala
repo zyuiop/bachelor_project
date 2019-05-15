@@ -79,6 +79,7 @@ object Lexer extends RegexParsers {
   def whiles = positioned("while" ^^^ While())
 
   def when = positioned("when" ^^^ When())
+  def on = positioned("on" ^^^ On())
 
   def lbrack = positioned("{" ^^^ LBracket())
 
@@ -97,7 +98,7 @@ object Lexer extends RegexParsers {
   def set = positioned(":=" ^^^ Set())
 
 
-  def reserved = in | bTrue | whiles | bFalse | ifs | elses | when | dos | doNow | nulls
+  def reserved = in | bTrue | whiles | bFalse | ifs | on | elses | when | dos | doNow | nulls
 
   def tokens: Parser[List[Token]] = {
     phrase(

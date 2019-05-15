@@ -5,19 +5,21 @@ position = "Center"
 type = "PPC"
 
 [programStart]
-when (trigger != null && trigger.__name == "RoomMovement" && trigger.entering == true) {
-  if (lost == null || !lost) {
-   if (time >= 6:00:00 && time < 18:00:00) {
-    do "say Hello you!"
-   } else {
-    do "say What are you doing here?"
-   }
-  } else if (lost != null && lost == true) {
-   do "say I am lost... help me go back home please...!"
+on (RoomMovement) {
+ if (trigger.entering == true) {
+      if (lost == null || !lost) {
+       if (time >= 6:00:00 && time < 18:00:00) {
+        do "say Hello you!"
+       } else {
+        do "say What are you doing here?"
+       }
+      } else if (lost != null && lost == true) {
+       do "say I am lost... help me go back home please...!"
+      }
   }
 }
 
-when (trigger != null && trigger.__name == "ReleasedControl") {
+on (ReleaseControl) {
  if (room.id == initRoom) {
    lost := false
  } else {
@@ -26,12 +28,12 @@ when (trigger != null && trigger.__name == "ReleasedControl") {
  }
 }
 
-when (trigger != null && trigger.__name == "TakenControl") {
+on (TakenControl) {
  if (lost == null ||!lost)
     initRoom := room.id
 }
 
-when (trigger != null && trigger.__name == "InventoryTradeRequest") {
+on (InventoryTradeRequest) {
  do now "say Hmm... let's see what you're offering me... " + trigger.sentItems.`0` + ", I see..."
  if ("peanut" in trigger.sentItems) {
    do now "refuse"

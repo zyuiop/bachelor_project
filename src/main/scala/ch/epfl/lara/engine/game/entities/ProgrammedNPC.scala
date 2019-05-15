@@ -15,9 +15,9 @@ class ProgrammedNPC(startState: CharacterState,
   startState.currentRoom, startState.currentPosition, startState.name,
   startState.inventory.getContent, startState.attributes, new PrintStream(_ => ())
 ) with NPC {
-  private val (prog, triggers) = ActionCompiler.compileProgram(program)
+  private val (prog, triggers, ons) = ActionCompiler.compileProgram(program)
 
-  protected val ec = new CharacterExecutionContext(prog, triggers, this)
+  protected val ec = new CharacterExecutionContext(prog, triggers, ons, this)
 
   override def spawn(): Unit = {
     super.spawn()

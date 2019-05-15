@@ -12,7 +12,7 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class CharacterExecutionContext(program: Expression, triggers: List[When], entity: CharacterState) extends BaseExecutionContext with MessageHandler {
+class CharacterExecutionContext(program: Expression, triggers: List[When], interrupts: List[On], entity: CharacterState) extends BaseExecutionContext with MessageHandler {
   private var currentTime = 0
 
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
@@ -34,6 +34,8 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
 
   private var currentState = BranchState(mutable.ArrayStack(program), 0, Map())
 
+  private val interruptMap = interrupts.flatMap(on => on.conds.parts.map(part => (part, on))).groupBy(_._1).mapValues(_.map(_._2.doo))
+
   private var branches = List[BranchState]()
   private var stopped = true
   private var scheduled = false
@@ -51,8 +53,14 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
     currentTime = currentTick
 
     // Check the triggers every tick
-    checkTriggers()(env())
+    triggers.foreach(t => {
+      if (valueAsBoolean(resolve(t.cond)(env()))) {
+        interrupt()
+        schedule(t.when)
+      }
+    })
 
+    // Run the rest of the tick
     while (currentState.nextRun <= 0) {
       while (currentState.stack.isEmpty && branches.nonEmpty) next()
 
@@ -142,31 +150,28 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
 
       case Sequence(exprs) =>
         // Add all expressions to the stack
-        // Last expression is added first, as we are in a LIFO collecion
+        // Reverse the expressions as we need to add the last expression first (LIFO stack)
         exprs.reverse.foreach(schedule)
       case EmptyExpr() =>
     }
   }
 
-  private def checkTriggers(moreEnv: Map[String, Environment] = Map())(implicit env: Environment): Unit = {
+  def handle(message: Message): Unit = {
     if (stopped)
       return
 
-    triggers.foreach(t => {
-      if (valueAsBoolean(resolve(t.cond))) {
+    val interrupts = interruptMap.getOrElse(message.getClass.getSimpleName, Nil)
+
+    if (interrupts.nonEmpty) {
+      val moreEnv = Map(
+        "trigger" -> ObjectMappingEnvironment(message)
+      )
+
+      interrupts.foreach(i => {
         interrupt(moreEnv)
-        schedule(t.when)
-      }
-    })
-  }
-
-  def handle(message: Message) = {
-    val moreEnv = Map(
-      "trigger" -> ObjectMappingEnvironment(message)
-    )
-    implicit val env: Environment = this.env(moreEnv)
-
-    checkTriggers(moreEnv)
+        schedule(i)
+      })
+    }
   }
 
 }

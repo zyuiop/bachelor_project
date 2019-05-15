@@ -27,14 +27,20 @@ object ActionCompiler {
     }
   }
 
-  def compileProgram(program: String): (Expression, List[When]) =
+  def compileProgram(program: String): (Expression, List[When], List[On]) =
     compile(program, Parser.apply) match {
       // parseIte | parseDo | block | when
-      case e: When => (EmptyExpr(), e :: Nil)
+      case e: When => (EmptyExpr(), e :: Nil, Nil)
+      case e: On => (EmptyExpr(), Nil, e :: Nil)
       case Sequence(list) =>
-        val (whens, expr) = list.partition(_.isInstanceOf[When])
-        (Sequence(expr), whens.map(_.asInstanceOf[When]))
-      case code => (code, Nil)
+        val (expr, whens, ons) = list.foldLeft((List.empty[Expression], List.empty[When], List.empty[On])) {
+          case ((e, w, o), expression: When) => (e, expression :: w, o)
+          case ((e, w, o), expression: On) => (e, w, expression :: o)
+          case ((e, w, o), expression: Expression) => (expression :: e, w, o)
+        }
+
+        (if (expr.isEmpty) EmptyExpr() else if (expr.size == 1) expr.head else Sequence(expr.reverse), whens, ons)
+      case code => (code, Nil, Nil)
     }
 
   def compileValue(value: String): Value =
