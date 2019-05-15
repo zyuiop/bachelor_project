@@ -61,4 +61,16 @@ class LexerTest extends FlatSpec with Matchers {
           BooleanLiteral(false), Or(), BooleanLiteral(true)
     )))
   }
+
+  it should "parse int literals" in {
+
+    Lexer("""10""") should be(Right(List(
+      IntLiteral(10)
+    )))
+
+    Lexer("""-10""") should be(Right(List(
+      IntLiteral(-10)
+    )))
+
+  }
 }

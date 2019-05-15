@@ -34,7 +34,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
 
   private var currentState = BranchState(mutable.ArrayStack(program), 0, Map())
 
-  private val interruptMap = interrupts.flatMap(on => on.conds.parts.map(part => (part, on))).groupBy(_._1).mapValues(_.map(_._2.doo))
+  private val interruptMap = interrupts.flatMap(on => on.conds.parts.map(part => (part, on))).groupBy(_._1).mapValues(_.sortBy(_._2.priority).map(_._2.doo))
 
   private var branches = List[BranchState]()
   private var stopped = true

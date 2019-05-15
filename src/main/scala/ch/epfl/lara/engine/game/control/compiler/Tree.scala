@@ -13,9 +13,9 @@ object Tree {
 
   case class While(cond: Value, doo: Expression) extends Expression
 
-  case class When(cond: Value, when: Expression) extends Expression
+  case class When(cond: Value, when: Expression, priority: Int = 0) extends Expression
 
-  case class On(conds: Identifier, doo: Expression) extends Expression
+  case class On(conds: Identifier, doo: Expression, priority: Int = 0) extends Expression
 
   case class Do(what: Value, immediate: Boolean) extends Expression
 

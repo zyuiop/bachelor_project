@@ -24,7 +24,7 @@ object Lexer extends RegexParsers {
   }
 
   def intLiteral: Parser[IntLiteral] = positioned {
-    """[0-9]+""".r ^^ { str => IntLiteral(str.toInt) }
+    """-?[0-9]+""".r ^^ { str => if (str.head == '-') IntLiteral(- str.tail.toInt) else IntLiteral(str.toInt) }
   }
 
   def timeLiteral: Parser[IntLiteral] = positioned {

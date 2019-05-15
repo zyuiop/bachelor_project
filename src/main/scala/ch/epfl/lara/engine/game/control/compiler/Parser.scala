@@ -89,17 +89,20 @@ object Parser extends Parsers {
     }
   }
 
+  def priorityBlock = LPar() ~! accept("int literal", { case IntLiteral(i) => i }) ~! RPar() ^^ { case _ ~ i ~ _ => i }
+
   def parseWhen: Parser[Tree.When] = positioned {
-    When() ~! LPar() ~! valueWithOp ~! RPar() ~! singleExpr ^^ {
-      case _ ~ _ ~ cond ~ _ ~ act => Tree.When(cond, act)
+    When() ~! LPar() ~! valueWithOp ~! RPar() ~! priorityBlock.? ~! singleExpr ^^ {
+      case _ ~ _ ~ cond ~ _ ~ prio ~ act => Tree.When(cond, act, prio.getOrElse(0))
     }
   }
 
   def parseOn: Parser[Tree.On] = positioned {
     def evName = accept("event name", { case Identifier(evName) => Tree.Identifier(List(evName)) })
+    def evTriggers = chainl1(evName, Or() ^^^ { (l: Tree.Identifier, r: Tree.Identifier) => Tree.Identifier(l.parts ::: r.parts)})
 
-    On() ~! LPar() ~! chainl1(evName, Or() ^^^ { (l: Tree.Identifier, r: Tree.Identifier) => Tree.Identifier(l.parts ::: r.parts)}) ~! RPar() ~! singleExpr ^^ {
-      case _ ~ _ ~ triggers ~ _ ~ act => Tree.On(triggers, act)
+    On() ~! LPar() ~! evTriggers ~! RPar() ~! priorityBlock.? ~!  singleExpr ^^ {
+      case _ ~ _ ~ triggers ~ _ ~ prio ~ act => Tree.On(triggers, act, prio.getOrElse(0))
     }
   }
 

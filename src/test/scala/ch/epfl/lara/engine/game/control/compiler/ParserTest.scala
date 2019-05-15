@@ -143,7 +143,7 @@ class ParserTest extends FlatSpec with Matchers {
             Do(StringLiteral("thanks"), false)
           ))
         )
-      )
+      ), List()
     ))
   }
 
@@ -158,11 +158,11 @@ class ParserTest extends FlatSpec with Matchers {
         |   do now "something else"
         |
         |do "something" + "with" + concat
-        |when (cond == true && false) {
+        |when (cond == true && false)(-10) {
         |do "say cheese"
         |do "thanks"
         |}
-        |when (cond == false && true) {
+        |when (cond == false && true)(10) {
         |do "say helooo"
         |do "thanks"
         |}
@@ -182,16 +182,18 @@ class ParserTest extends FlatSpec with Matchers {
       Sequence(List(
         Do(StringLiteral("say cheese"), false),
         Do(StringLiteral("thanks"), false)
-      ))
+      )),
+      -10
     ),
       When(
         And(Eq(Identifier(List("cond")), BooleanLiteral(false)), BooleanLiteral(true)),
         Sequence(List(
           Do(StringLiteral("say helooo"), false),
           Do(StringLiteral("thanks"), false)
-        ))
+        )),
+        10
       )
-    )
+    ), List()
     ))
   }
 

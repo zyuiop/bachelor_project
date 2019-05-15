@@ -39,7 +39,7 @@ object ActionCompiler {
           case ((e, w, o), expression: Expression) => (expression :: e, w, o)
         }
 
-        (if (expr.isEmpty) EmptyExpr() else if (expr.size == 1) expr.head else Sequence(expr.reverse), whens, ons)
+        (if (expr.isEmpty) EmptyExpr() else if (expr.size == 1) expr.head else Sequence(expr.reverse), whens.sortBy(_.priority), ons)
       case code => (code, Nil, Nil)
     }
 
