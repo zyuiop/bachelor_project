@@ -11,6 +11,8 @@ object Tree {
 
   case class Ite(cond: Value, thenn: Expression, elze: Expression) extends Expression
 
+  case class While(cond: Value, doo: Expression) extends Expression
+
   case class When(cond: Value, when: Expression) extends Expression
 
   case class Do(what: Value, immediate: Boolean) extends Expression

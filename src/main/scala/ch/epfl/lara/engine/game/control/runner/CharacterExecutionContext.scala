@@ -30,7 +30,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
         "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState))
       ) ++ additionnal)
 
-  case class BranchState(queue: mutable.Queue[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])
+  case class BranchState(stack: mutable.ArrayStack[Expression], var nextRun: Int, var moreEnv: Map[String, Environment])
 
   private var currentState = BranchState(mutable.Queue(), 0, Map())
 
@@ -54,10 +54,10 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
     checkTriggers()(env())
 
     while (currentState.nextRun <= 0) {
-      while (currentState.queue.isEmpty) next()
+      while (currentState.stack.isEmpty) next()
 
       if (currentState.nextRun <= 0)
-        execute(this.currentState.queue.dequeue)
+        execute(this.currentState.stack.pop())
     }
   }
 
@@ -74,12 +74,12 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
   }
 
   private def schedule(expr: Expression) = {
-    currentState.queue.enqueue(expr)
+    currentState.stack.push(expr)
   }
 
   private def interrupt(moreEnv: Map[String, Environment] = Map()) = {
     branches = currentState :: branches
-    currentState = BranchState(mutable.Queue(), 0, moreEnv)
+    currentState = BranchState(mutable.ArrayStack(), 0, moreEnv)
   }
 
   /**
@@ -90,7 +90,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
       currentState = branches.head
       branches = branches.tail
     } else {
-      currentState.queue.enqueue(program)
+      currentState.stack.push(program)
     }
   }
 
@@ -103,9 +103,15 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
 
     expr match {
       case Ite(cond, left, right) =>
-        interrupt()
-
         schedule(if (valueAsBoolean(resolve(cond))) left else right)
+      case While(cond, act) =>
+        if (valueAsBoolean(resolve(cond))) {
+          // Re-schedule the while
+          schedule(expr)
+
+          // Schedule the action
+          schedule(act)
+        }
       case Do(act, immediate) =>
         // Compile action
         val action = ActionParser.DefaultParser(resolve(act).asString.split(" ")).get
@@ -133,7 +139,9 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], entit
         }
 
       case Sequence(exprs) =>
-        exprs.foreach(schedule)
+        // Add all expressions to the stack
+        // Last expression is added first, as we are in a LIFO collecion
+        exprs.reverse.foreach(schedule)
       case EmptyExpr() =>
     }
   }

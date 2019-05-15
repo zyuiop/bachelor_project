@@ -83,6 +83,12 @@ object Parser extends Parsers {
     }
   }
 
+  def parseWhile: Parser[Tree.While] = positioned {
+    While() ~! LPar() ~! valueWithOp ~! RPar() ~! singleExpr ^^ {
+      case _ ~ _ ~ log ~ _ ~ doo => Tree.While(log, doo)
+    }
+  }
+
   def parseWhen: Parser[Tree.When] = positioned {
     When() ~! LPar() ~! valueWithOp ~! RPar() ~! singleExpr ^^ {
       case _ ~ _ ~ cond ~ _ ~ act => Tree.When(cond, act)
@@ -102,7 +108,7 @@ object Parser extends Parsers {
     }
   }
 
-  def singleExpr: Parser[Tree.Expression] = positioned(parseIte | parseDo | parseSet | block)
+  def singleExpr: Parser[Tree.Expression] = positioned(parseIte | parseDo | parseSet | parseWhile | block)
 
   def expr: Parser[Tree.Expression] = positioned {
     rep1(singleExpr | parseWhen) ^^ { // When only allowed at top level !

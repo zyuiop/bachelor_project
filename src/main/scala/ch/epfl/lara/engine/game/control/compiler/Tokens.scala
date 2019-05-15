@@ -46,6 +46,7 @@ object Tokens {
   case class BooleanLiteral(value: Boolean) extends Token("Boolean Literal")
 
   case class If() extends Token("if")
+  case class While() extends Token("while")
   case class Else() extends Token("else")
   case class When() extends Token("when")
 
