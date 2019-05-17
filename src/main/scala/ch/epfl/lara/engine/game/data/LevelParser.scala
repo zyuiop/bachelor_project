@@ -133,7 +133,9 @@ object LevelParser extends BaseParser {
         val room = rooms(props("room"))
         val inv = inventory("inv", props)
 
-        new PlayerState(room, inv)
+        (ps: PrintStream) => {
+          new PlayerState(room, ps, inv)
+        }
       }
   }
 
@@ -165,8 +167,6 @@ object LevelParser extends BaseParser {
       if (players.size != 1) throw new IllegalArgumentException("Cannot have more than 1 player descriptor")
       if (levels.size != 1) throw new IllegalArgumentException("Cannot have more than 1 level descriptor")
 
-      println(routines)
-
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
       val reg = RoomRegistry(
@@ -174,7 +174,8 @@ object LevelParser extends BaseParser {
         doors map { case f: DoorBuilder => f(doorTypes) })
 
       LevelDescriptor(reg, characters.map(_.asInstanceOf[CharaBuilder].apply(reg.getRoom)),
-        routines.map(_.asInstanceOf[RoutineDescriptor]), levels.head.asInstanceOf[LevelData], players.head.asInstanceOf[PlayerBuilder](reg.getRoom))
+        routines.map(_.asInstanceOf[RoutineDescriptor]), levels.head.asInstanceOf[LevelData],
+        players.head.asInstanceOf[PlayerBuilder](reg.getRoom))
     }
   }
 
@@ -182,7 +183,7 @@ object LevelParser extends BaseParser {
 
   abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
-  abstract class PlayerBuilder extends ((String => Room) => PlayerState) {}
+  abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {

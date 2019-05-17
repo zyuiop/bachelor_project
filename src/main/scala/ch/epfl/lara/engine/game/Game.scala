@@ -1,100 +1,77 @@
 package ch.epfl.lara.engine.game
 
-import java.io.{File, FileFilter, PrintStream}
+import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions._
-import ch.epfl.lara.engine.game.data.{LevelDescriptor, LevelParser}
-import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
-
-import scala.annotation.tailrec
-import scala.io.StdIn
+import ch.epfl.lara.engine.game.data.LevelsManager
+import ch.epfl.lara.engine.game.entities.PlayerState
 
 /**
   * @author Louis Vialar
   */
-object Game {
-  println("Loading files...")
+abstract class Game {
+  implicit val printStream: PrintStream
 
-  private val levels: Array[LevelDescriptor] = new File("data")
-    .listFiles(new FileFilter {
-      override def accept(pathname: File): Boolean = pathname.isDirectory && pathname.getName.startsWith("level-")
-    })
-    .map(file => (file.getName.drop(6).toInt, LevelParser.readLevel(file)))
-    .sortBy(_._1)
-    .map(_._2)
+  private var _onFinishGame: () => Unit = () => ()
+  private var _onQuitGame: () => Unit = () => ()
 
-  println("Done! Loaded " + levels.length + " levels.")
+  def onFinishGame_=(func: () => Unit): Unit = this._onFinishGame = func
 
-  private var currentLevel = 0
+  def onQuitGame_=(func: () => Unit): Unit = this._onQuitGame = func
 
-  private def startNextLevel: Option[PlayerState] = {
-    currentLevel += 1
-    if (levels.length < currentLevel) {
-      println()
-      println("Congratulations! You completed the game! Why not try it again while following an other path?")
-      None
-    } else {
-      val level = levels(currentLevel - 1)
+  def onFinishGame = this._onFinishGame
 
-      Some(level.startLevel())
-    }
-  }
-
-
-  private var running: Boolean = true
-
-  private implicit val printStream: PrintStream = Console.out
-
-  def main(args: Array[String]): Unit = {
-    startNextLevel.foreach(loop)
-  }
+  def onQuitGame = this._onQuitGame
 
   private val systemActionsParser = ActionParser(
     ActionSaveGame // TODO: add quit, ...
   )
 
-  def saveGame(state: CharacterState) = ???
+  def saveGame() = ???
 
-  def loadGame(): CharacterState = ???
+  def loadGame() = ???
 
-  def quitGame(): Unit = {
-    running = false
+  /**
+    * Reference to the current player state
+    */
+  private var state: PlayerState = _
+
+  def startGame() = {
+    state = LevelsManager.startNextLevel.get
   }
 
-  val parser: ActionParser = ActionParser.DefaultParser union systemActionsParser
-
-  @tailrec
-  def loop(state: CharacterState): Unit = {
-    if (!running) {
-      printStream.println("Good bye!")
-      return
-    }
-
+  private def checkLevelState(): Unit = {
     if (GameState.get.isLevelComplete) {
       printStream.println(GameState.get.levelData.data.endText)
       printStream.println("Level success!")
       Thread.sleep(1000)
-      val next = startNextLevel
+      val next = LevelsManager.startNextLevel
       if (next.nonEmpty)
-        loop(next.get)
+        state = next.get
+      else _onFinishGame()
     } else if (GameState.get.isLevelFailed) {
       printStream.println("Level failed...")
       Thread.sleep(1000)
-      loop(GameState.get.levelData.startLevel())
-    } else {
-
-      // Run action
-      val nextStep = StdIn.readLine("> ").split(" ")
-      val action = parser(nextStep)
-
-      if (action.isSuccess) {
-        val time = action.get.execute(state)
-        GameState.get.scheduler.addTime(time)
-        loop(state)
-      } else {
-        println(action.failed.get.getMessage)
-        loop(state)
-      }
+      state = LevelsManager.restartLevel
     }
   }
+
+  final def runCommand(command: String): Unit = {
+    // Run action
+    val action = parser(command split " ")
+
+    println(command + "; " + parser + "; " + action)
+
+    if (action.isSuccess) {
+      val time = action.get.execute(state)
+      GameState.get.scheduler.addTime(time)
+    } else {
+      printStream.println(action.failed.get.getMessage)
+    }
+
+    // Check if level is finished
+    checkLevelState
+  }
+
+  val parser: ActionParser = ActionParser.DefaultParser union systemActionsParser
 }

@@ -10,7 +10,7 @@ import scala.util.Try
   */
 case object ActionSaveGame extends Action with ActionBuilder {
   override def apply(inState: CharacterState): Int = {
-    Game.saveGame(inState)
+    // TODO Game.saveGame(inState)
     0
   }
 

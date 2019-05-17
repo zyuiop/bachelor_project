@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.data
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
@@ -11,9 +13,9 @@ import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
   * @author Louis Vialar
   */
 case class LevelDescriptor(rooms: RoomRegistry, entities: List[CharacterState], routines: List[RoutineDescriptor],
-                           data: LevelData, player: PlayerState) {
+                           data: LevelData, playerBuilder: PrintStream => PlayerState) {
 
-  def startLevel() = {
+  def startLevel(implicit printStream: PrintStream) = {
     // Compile transition
     val success = ActionCompiler.compileValue(data.levelSuccess)
     val failure = ActionCompiler.compileValue(data.levelFailure)
@@ -35,13 +37,15 @@ case class LevelDescriptor(rooms: RoomRegistry, entities: List[CharacterState], 
     // Init characters
     entities.foreach(_.spawn())
 
+    val player = playerBuilder(printStream)
+
     // Init player
     player.spawn()
 
 
-    println(data.startText)
+    printStream.println(data.startText)
 
-    println(player.currentRoom.describe())
+    printStream.println(player.currentRoom.describe())
 
     player
   }

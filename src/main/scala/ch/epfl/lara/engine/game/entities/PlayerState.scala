@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.entities
 
+import java.io.PrintStream
+
 import ch.epfl.lara.engine.game.environment.{Center, Position, Room}
 import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}
@@ -7,7 +9,7 @@ import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl
 /**
   * @author Louis Vialar
   */
-class PlayerState(startRoom: Room, startInventory: Map[Pickable, Int] = Map()) extends CharacterState(startRoom, Center, "you", startInventory = startInventory) {
+class PlayerState(startRoom: Room, out: PrintStream, startInventory: Map[Pickable, Int] = Map()) extends CharacterState(startRoom, Center, "you", startInventory = startInventory, out = out) {
   private var _controlled: Option[PPC] = None
 
   def controlled: Option[PPC] = _controlled

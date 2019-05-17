@@ -19,9 +19,6 @@ case class RoomRegistry(rooms: Map[String, Room], doors: Map[String, List[Door]]
   private lazy val invalidDoors: Iterable[Door] = {
     doors.values.flatten.filterNot(d => rooms.contains(d.left) && rooms.contains(d.right))
   }
-
-  // TODO: to remove once we don't need to define rooms in the code
-  def ++ (other: RoomRegistry) = RoomRegistry(rooms ++ other.rooms, doors ++ other.doors)
 }
 
 object RoomRegistry {
@@ -37,12 +34,10 @@ object RoomRegistry {
     }
   }
 
-  // TODO: delete lenient argument once we don't need hardcoded rooms
-
-  def apply(rooms: Seq[Room], doors: Seq[Door], lenient: Boolean = false): RoomRegistry = {
+  def apply(rooms: Seq[Room], doors: Seq[Door]): RoomRegistry = {
     val registry = RoomRegistry(addRooms(Map(), rooms), addDoors(Map(), doors))
 
-    if (!registry.areDoorsValid && !lenient) {
+    if (!registry.areDoorsValid) {
       val invalidDoors = registry.invalidDoors.map(d => s"(${d.doorType.name} from ${d.left} to ${d.right})").mkString(", \n")
       throw new IllegalArgumentException("some doors go to nowhere: \n" + invalidDoors)
     } else registry
