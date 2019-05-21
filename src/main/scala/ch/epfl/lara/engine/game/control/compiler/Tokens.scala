@@ -55,7 +55,9 @@ object Tokens {
   case class RBracket() extends Token("}")
 
   case class Do() extends Token("do")
-  case class DoNow() extends Token("do now")
+  case class DoNow() extends Token("now")
+  case class DoBlocking() extends Token("blocking")
+
 
   case class LPar() extends Token("(")
   case class RPar() extends Token(")")

@@ -49,6 +49,7 @@ object GameGUI extends Game with JFXApp {
 
   private val textfield = new TextField {
     promptText = "Command..."
+    disable = true
 
     onKeyPressed = { ev =>
       ev.code match {
@@ -131,7 +132,11 @@ object GameGUI extends Game with JFXApp {
 
   textfield.requestFocus()
 
-  startGame()
+  stage.onShown = () => new Thread(() => {
+    startGame()
+
+    runOnFxThread(textfield.disable = false)
+  }).start()
 
   onFinishGame = () => textfield.disable = true
   onQuitGame = () => runOnFxThread(Platform.exit())

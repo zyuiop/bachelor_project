@@ -107,9 +107,8 @@ object Parser extends Parsers {
   }
 
   def parseDo: Parser[Tree.Do] = positioned {
-    Do() ~! DoNow().? ~! valueWithOp ^^ {
-      case _ ~ Some(_) ~ v => Tree.Do(v, true)
-      case _ ~ None ~ v => Tree.Do(v, false)
+    Do() ~! DoNow().? ~! DoBlocking().? ~! valueWithOp ^^ {
+      case _ ~ now ~ blocking ~ v => Tree.Do(v, now.nonEmpty, blocking.nonEmpty)
     }
   }
 

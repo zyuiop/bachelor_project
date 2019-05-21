@@ -65,9 +65,9 @@ class ParserTest extends FlatSpec with Matchers {
         |do "something" + "with" + concat
       """.stripMargin)._1 should be(
       Sequence(List(
-        Do(StringLiteral("something"), false),
-        Do(StringLiteral("something else"), true),
-        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
+        Do(StringLiteral("something"), false, false),
+        Do(StringLiteral("something else"), true, false),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false, false)
       ))
     )
   }
@@ -77,13 +77,13 @@ class ParserTest extends FlatSpec with Matchers {
         |{
         |do "something"
         |do now "something else"
-        |do "something" + "with" + concat
+        |do blocking "something" + "with" + concat
         |}
       """.stripMargin)._1 should be(
       Sequence(List(
-        Do(StringLiteral("something"), false),
-        Do(StringLiteral("something else"), true),
-        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
+        Do(StringLiteral("something"), false, false),
+        Do(StringLiteral("something else"), true, false),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false, true)
       ))
     )
   }
@@ -99,11 +99,11 @@ class ParserTest extends FlatSpec with Matchers {
         |
       """.stripMargin)._1 should be(
       Sequence(List(
-        Do(StringLiteral("say plop"), false),
+        Do(StringLiteral("say plop"), false, false),
         Sequence(List(
-          Do(StringLiteral("something"), false),
-          Do(StringLiteral("something else"), true))),
-        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false)
+          Do(StringLiteral("something"), false, false),
+          Do(StringLiteral("something else"), true, false))),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false, false)
       ))
     )
   }
@@ -127,20 +127,20 @@ class ParserTest extends FlatSpec with Matchers {
         |
       """.stripMargin) should be((
       Sequence(List(
-        Do(StringLiteral("say plop"), false),
+        Do(StringLiteral("say plop"), false, false),
         Ite(And(Eq(Identifier(List("id")), Identifier(List("otherId"))), BooleanLiteral(true)),
-          Do(StringLiteral("something"), false),
+          Do(StringLiteral("something"), false, false),
           Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
-            Do(StringLiteral("something else"), true),
+            Do(StringLiteral("something else"), true, false),
             EmptyExpr())
         ),
-        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false))),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false, false))),
       List(
         When(
           And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
           Sequence(List(
-            Do(StringLiteral("say cheese"), false),
-            Do(StringLiteral("thanks"), false)
+            Do(StringLiteral("say cheese"), false, false),
+            Do(StringLiteral("thanks"), false, false)
           ))
         )
       ), List()
@@ -169,27 +169,27 @@ class ParserTest extends FlatSpec with Matchers {
         |
       """.stripMargin) should be((
       Sequence(List(
-        Do(StringLiteral("say plop"), false),
+        Do(StringLiteral("say plop"), false, false),
         Ite(And(Eq(Identifier(List("id")), Identifier(List("otherId"))), BooleanLiteral(true)),
-          Do(StringLiteral("something"), false),
+          Do(StringLiteral("something"), false, false),
           Ite(Eq(Identifier(List("id")), BooleanLiteral(false)),
-            Do(StringLiteral("something else"), true),
+            Do(StringLiteral("something else"), true, false),
             EmptyExpr())
         ),
-        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false),
+        Do(Sum(StringLiteral("something"), Sum(StringLiteral("with"), Identifier(List("concat")))), false, false),
       )), List(When(
       And(Eq(Identifier(List("cond")), BooleanLiteral(true)), BooleanLiteral(false)),
       Sequence(List(
-        Do(StringLiteral("say cheese"), false),
-        Do(StringLiteral("thanks"), false)
+        Do(StringLiteral("say cheese"), false, false),
+        Do(StringLiteral("thanks"), false, false)
       )),
       -10
     ),
       When(
         And(Eq(Identifier(List("cond")), BooleanLiteral(false)), BooleanLiteral(true)),
         Sequence(List(
-          Do(StringLiteral("say helooo"), false),
-          Do(StringLiteral("thanks"), false)
+          Do(StringLiteral("say helooo"), false, false),
+          Do(StringLiteral("thanks"), false, false)
         )),
         10
       )
@@ -220,24 +220,24 @@ class ParserTest extends FlatSpec with Matchers {
         Or(Eq(Identifier(List("lost")), NullLiteral()), Not(Identifier(List("lost"))))
       ), Sequence(
         List(
-          Do(StringLiteral("go south"), false),
-          Do(StringLiteral("go east"), false),
+          Do(StringLiteral("go south"), false, false),
+          Do(StringLiteral("go east"), false, false),
           Ite(Neq(Identifier(List("room", "inventory", "content", "peanut")), NullLiteral()),
             Sequence(List(
               Set(Identifier(List("count")), Identifier(List("room", "inventory", "content", "peanut"))),
-              Do(StringLiteral("say Argh, so many peanuts again... What a child!"), false),
-              Do(Sum(StringLiteral("take "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false),
-              Do(Sum(StringLiteral("say "), Sum(Identifier(List("count")), StringLiteral(" peanuts, really, can't he start doing something else?"))), false),
-              Do(StringLiteral("open bin"), false),
-              Do(Sum(StringLiteral("drop "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false),
-              Do(StringLiteral("close"), false)
+              Do(StringLiteral("say Argh, so many peanuts again... What a child!"), false, false),
+              Do(Sum(StringLiteral("take "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false, false),
+              Do(Sum(StringLiteral("say "), Sum(Identifier(List("count")), StringLiteral(" peanuts, really, can't he start doing something else?"))), false, false),
+              Do(StringLiteral("open bin"), false, false),
+              Do(Sum(StringLiteral("drop "), Sum(Identifier(List("count")), StringLiteral(" peanuts"))), false, false),
+              Do(StringLiteral("close"), false, false)
 
 
             ))
             , EmptyExpr()),
 
-          Do(StringLiteral("go west"), false),
-          Do(StringLiteral("go north"), false),
+          Do(StringLiteral("go west"), false, false),
+          Do(StringLiteral("go north"), false, false),
         )
       )
         ,

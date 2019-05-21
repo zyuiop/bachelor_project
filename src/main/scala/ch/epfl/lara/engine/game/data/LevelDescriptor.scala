@@ -47,6 +47,9 @@ case class LevelDescriptor(rooms: RoomRegistry, entities: List[CharacterState], 
 
     printStream.println(player.currentRoom.describe())
 
+    // Start scheduler
+    state.scheduler.runCurrentTick()
+
     player
   }
 }

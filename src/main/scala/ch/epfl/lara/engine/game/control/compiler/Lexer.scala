@@ -85,9 +85,11 @@ object Lexer extends RegexParsers {
 
   def rbrack = positioned("}" ^^^ RBracket())
 
-  def dos = positioned("do " ^^^ Do())
+  def dos = positioned("do" ^^^ Do())
 
-  def doNow = positioned("now " ^^^ DoNow())
+  def doNow = positioned("now" ^^^ DoNow())
+
+  def doBlocking = positioned("blocking" ^^^ DoBlocking())
 
   def lpar = positioned("(" ^^^ LPar())
 
@@ -98,7 +100,7 @@ object Lexer extends RegexParsers {
   def set = positioned(":=" ^^^ Set())
 
 
-  def reserved = in | bTrue | whiles | bFalse | ifs | on | elses | when | dos | doNow | nulls
+  def reserved = in | bTrue | whiles | bFalse | ifs | on | elses | when | dos | doNow | doBlocking | nulls
 
   def tokens: Parser[List[Token]] = {
     phrase(

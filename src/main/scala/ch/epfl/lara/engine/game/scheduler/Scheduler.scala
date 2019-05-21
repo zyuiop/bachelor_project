@@ -44,6 +44,10 @@ class Scheduler(startTime: Int) {
     }
   }
 
+  def runCurrentTick(): Unit = {
+    runTick(currentTime)
+  }
+
   def addTime(diff: Int): Unit = {
     val (wait, every) = if (diff > 5000) (1, 10) else if (diff > 200) (5000 / diff, 10) else (25, 1) // if (diff > 500) 10 else 50 // * 1000 vs * 100 vs * 20
 

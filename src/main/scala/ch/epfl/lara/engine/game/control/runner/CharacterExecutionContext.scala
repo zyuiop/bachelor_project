@@ -77,7 +77,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
     stopped = false
     if (scheduled) return
 
-    GameState.scheduler.runRegular(1, 1)(runTick)
+    GameState.scheduler.runRegular(0, 1)(runTick)
     scheduled = true
   }
 
@@ -122,14 +122,19 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
           // Schedule the action
           schedule(act)
         }
-      case Do(act, immediate) =>
+      case Do(act, immediate, blocking) =>
         // Compile action
         val action = ActionParser.DefaultParser(resolve(act).asString.split(" ")).get
+
+        println("Action " + act + " imm " + immediate + " bloc " + blocking)
 
         val time = action.execute(entity)
 
         if (!immediate)
           suspendFor(time)
+
+        if (blocking)
+          GameState.scheduler.runOnce(0)((_, _) => GameState.scheduler.addTime(time))
       case Set(field, value) =>
         val path = field.parts
         if (path.length == 1 || (path.length == 3 && path.head == "characters" && path(2) == "attributes")) {

@@ -7,10 +7,13 @@ type = "NPC"
 
 [programStart]
 
-do "say Hello, welcome to this experiment."
-do "say As you may know, we, the EPFL Time Machine Laboratory, have been working for a few years on a machine that can, well, travel in time."
-do "say For now, the fact that our machine works is a complete secret. We don't want bad people to put their hands on this machine..."
+do blocking "say Hello, welcome to this experiment."
+do blocking "wait 10"
+do blocking "say As you may know, we, the EPFL Time Machine Laboratory, have been working for a few years on a machine that can, well, travel in time."
+do blocking "wait 10"
+do blocking "say For now, the fact that our machine works is a complete secret. We don't want bad people to put their hands on this machine..."
 done := true
-do "say When you are ready, you can move to the other room and sit on the chair. The experiment will start just after."
+do blocking "wait 10"
+do blocking "say When you are ready, you can move to the other room and sit on the chair. The experiment will start just after."
 
 [programEnd]

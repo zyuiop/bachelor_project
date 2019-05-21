@@ -7,6 +7,17 @@ A Computer Science undergraduate project, written in spring 2019.
 The project focuses on building a game in which the main character, the player, can control other characters, to change
 their timeline.
 
+## Playing the game
+
+The game is text based, meaning that the world is described to you and that you describe what you do textually. To do so
+there are multiple "commands".
+
+- `go <direction>` moves your character in the given direction
+- `control <character>` takes control of an other character
+- `give <item> to <character>` gives an item of your inventory to a character
+- `use <object>` uses an object in the room
+tbc
+
 ## Engine concepts
 
 The engine was made to allow anyone to write their own games with little code. It has a few important components.
