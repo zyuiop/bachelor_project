@@ -1,8 +1,7 @@
-package ch.epfl.lara.engine.game.actions
-
-import java.io.PrintStream
+package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.environment.Position
 import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
@@ -17,9 +16,6 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
     inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
       case Some(door) =>
         if (door.isOpen(inState)) {
-          if (inState.currentInteract.nonEmpty)
-            inState.stopInteracting()
-
           val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
           val room = GameState.level.getRoom(roomId)
 

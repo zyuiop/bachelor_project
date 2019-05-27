@@ -1,5 +1,6 @@
-package ch.epfl.lara.engine.game.actions
+package ch.epfl.lara.engine.game.actions.general
 
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.messaging.Request
 

@@ -1,5 +1,6 @@
-package ch.epfl.lara.engine.game.actions
+package ch.epfl.lara.engine.game.actions.general
 
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 
 import scala.util.Try
@@ -24,7 +25,6 @@ case object ActionControlStop extends Action with ActionBuilder {
       player.release()
       5
     }
-    0
   }
 
   override val triggeringKeywords: Set[String] = Set("leave", "release")

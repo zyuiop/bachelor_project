@@ -1,7 +1,6 @@
-package ch.epfl.lara.engine.game.actions
+package ch.epfl.lara.engine.game.actions.general
 
-import java.io.PrintStream
-
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.CharacterState
 
 import scala.util.Try

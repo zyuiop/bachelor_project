@@ -2,15 +2,14 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.actions.{Action, ActionInterceptor, ActionParser}
+import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
-import ch.epfl.lara.engine.game.items.{Interactable, InventoryLike, Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Inventory, InventoryLike, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 import ch.epfl.lara.engine.game.{GameState, environment}
 
 import scala.collection.mutable
-import scala.util.Try
 
 /**
   * @author Louis Vialar
@@ -31,7 +30,7 @@ class CharacterState(startRoom: Room,
 
   def inventory: InventoryLike = _inventory
 
-  private val interacts: mutable.ArrayStack[Interactable] = new mutable.ArrayStack[Interactable]()
+  private val interacts: mutable.ArrayStack[ComplexInteractable] = new mutable.ArrayStack[ComplexInteractable]()
 
   private var _currentRoom: Room = startRoom
   private var _currentPosition: Position = startPosition
@@ -67,28 +66,11 @@ class CharacterState(startRoom: Room,
     GameState.registry.removeEntity(this)
   }
 
-  def startInteracting(interactWith: Interactable): Unit = interacts.push(interactWith)
+  def startInteracting(interactWith: ComplexInteractable): Unit = interacts.push(interactWith)
 
   def stopInteracting(): Unit = interacts.pop()
 
-  def currentInteract: Option[Interactable] = if (interacts.nonEmpty) Some(interacts.top) else None
-
-  /**
-    * Return the inventory the player interacts with, or, if none, the room inventory
-    */
-  def currentInventory: Option[InventoryLike] = {
-    val ci = currentInteract
-    if (ci.isDefined)
-      ci.filter(_.isInstanceOf[InventoryLike]).map(_.asInstanceOf[InventoryLike])
-    else Some(_currentRoom.inventory)
-  }
-
-  /**
-    * Return the inventory the player interacts with
-    */
-  def currentOpenInventory: Option[InventoryLike] =
-    currentInteract.filter(_.isInstanceOf[InventoryLike]).map(_.asInstanceOf[InventoryLike])
-
+  def currentInteract: Option[ComplexInteractable] = if (interacts.nonEmpty) Some(interacts.top) else None
 
   implicit def ps: PrintStream = out
 

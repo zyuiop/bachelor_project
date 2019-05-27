@@ -1,6 +1,7 @@
-package ch.epfl.lara.engine.game.actions
+package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.items.InventoryLike
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest

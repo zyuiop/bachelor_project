@@ -1,5 +1,7 @@
 package ch.epfl.lara.engine.game.actions
 
+import ch.epfl.lara.engine.game.actions.general._
+
 import scala.util.{Failure, Try}
 
 /**
@@ -18,7 +20,7 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder]]) extends ActionB
 
     val keyword = input(0).toLowerCase()
     val act = actions.getOrElse(keyword, Nil)
-    val first: Try[Action] = Failure(new IllegalArgumentException("command not found"))
+    val first: Try[Action] = Failure(new IllegalArgumentException("Action not found... Maybe you can't to that here?"))
     act.foldLeft(first)((tr, ab) => tr.orElse(ab.apply(input)))
   }
 

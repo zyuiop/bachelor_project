@@ -1,6 +1,7 @@
-package ch.epfl.lara.engine.game.actions
+package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState}
 
 import scala.util.Try
