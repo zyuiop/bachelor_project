@@ -1,116 +1,44 @@
 package ch.epfl.lara.engine.game.items
 
-import java.io.PrintStream
-
-import scala.util.{Failure, Success, Try}
+import scala.collection.mutable
 
 /**
+  * Represents an inventory
+  *
   * @author Louis Vialar
   */
-trait Inventory {
-  def nonEmpty: Boolean = getContent.nonEmpty
+class Inventory(initialContent: Map[Pickable, Int], val name: String) extends InventoryLike {
+  private val content = mutable.Map(initialContent.toList: _*)
 
-  def printContent(implicit printStream: PrintStream): Unit = {
-    val c = getContent
+  def take(o: Pickable, quantity: Int): Inventory = {
+    if (quantity < 0)
+      throw new IllegalArgumentException("quantity < 0")
 
-    if (c.isEmpty) printEmpty
-    else for ((item, quantity) <- c)
-      printStream.println(s"\t$quantity\t*\t${item.displayName}")
+    if (content.getOrElse(o, 0) < quantity)
+      throw new IllegalStateException("insufficient quantity")
+
+    content
+      .transform((pickable, amount) => if (pickable == o) amount - quantity else amount)
+      .retain((_, amount) => amount > 0)
+
+    this
   }
 
-  val name: String
+  def add(o: Pickable, quantity: Int): Inventory = {
+    if (quantity < 0)
+      throw new IllegalArgumentException("quantity < 0")
 
-  def printEmpty(implicit ps: PrintStream): Unit = {
-    ps.println(s"\tThe $name is empty...")
+    if (content.contains(o))
+      content
+        .transform((pickable, amount) => if (pickable == o) amount + quantity else amount)
+    else content put(o, quantity)
+
+    this
   }
 
-  def printOpen(implicit ps: PrintStream): Unit = {
-    ps.println(s"You open the $name.")
-  }
+  def canTake(o: Pickable, quantity: Int): Boolean =
+    quantity > 0 && content.getOrElse(o, 0) >= quantity
 
-  def printClose(implicit ps: PrintStream): Unit = {
-    ps.println(s"You close the $name.")
-  }
-
-  def getContent: Map[Pickable, Int]
-
-  /**
-    * Take an item in this inventory, returning the updated inventory
-    *
-    * @param o        the item to take
-    * @param quantity the amount of this item to take
-    * @return the updated inventory
-    */
-  def take(o: Pickable, quantity: Int): Inventory
-
-  /**
-    * Add an item to this inventory, returning the updated inventory
-    *
-    * @param o        the item to add
-    * @param quantity the amount of this item to add
-    * @return the updated inventory
-    */
-  def add(o: Pickable, quantity: Int): Inventory
-
-  /**
-    * Check if an item can be taken from this inventory
-    *
-    * @param o        the item to take
-    * @param quantity the quantity we wish to take
-    * @return true if we can take this quantity of this item
-    */
-  def canTake(o: Pickable, quantity: Int): Boolean
-
-  /**
-    * Transfer objects from the current inventory to an other one. This operation returns a triple, containing the
-    * success status of the operation, the updated source inventory, and the updated target inventory.
-    *
-    * @param target   the target inventory
-    * @param o        the object to transfer
-    * @param quantity the quantity of objects to transfer
-    * @return a triple (success, source, target)
-    */
-  def transferTo(target: Inventory, o: Pickable, quantity: Int): (Boolean, Inventory, Inventory) = {
-    if (canTake(o, quantity)) {
-      (true, take(o, quantity), target.add(o, quantity))
-    } else (false, this, target)
-  }
-
-  def getItemByName(itemName: String): Try[Pickable] = {
-    val acceptableItems = getContent.keySet.filter(i => i.displayName == itemName || i.displayName + "s" == itemName)
-
-    if (acceptableItems.isEmpty)
-      Failure(new IllegalArgumentException("there is no item by that name here..."))
-    else if (acceptableItems.size > 1)
-      Failure(new IllegalArgumentException("there are multiple items by that name here..."))
-    else Success(acceptableItems.head)
-  }
+  override def getContent: Map[Pickable, Int] = content.toMap
 }
 
-object Inventory {
-  val empty: Inventory = new Inventory {
-    override val name = "Empty Inventory"
-
-    override def getContent: Map[Pickable, Int] = Map.empty
-
-    override def take(o: Pickable, quantity: Int): Inventory = throw new IllegalArgumentException("not enough items in inventory")
-
-    override def add(o: Pickable, quantity: Int): Inventory = throw new IllegalStateException("cannot add in empty inventory")
-
-    override def canTake(o: Pickable, quantity: Int): Boolean = false
-  }
-
-  def extractItemNameAndQuantity(input: Array[String], defaultQuantity: Int = 1): (String, Int) = {
-    val (quantity, itemNameParts) =
-      if (input.head.forall(c => c.isDigit))
-        (input.head.toInt, input drop 1)
-      else if (input.head.equalsIgnoreCase("a"))
-        (1, input drop 1)
-      else
-        (defaultQuantity, input)
-
-    val itemName = (itemNameParts mkString " ").toLowerCase
-
-    (itemName, quantity)
-  }
-}

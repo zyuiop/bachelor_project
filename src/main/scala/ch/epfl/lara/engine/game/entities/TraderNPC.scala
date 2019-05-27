@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.environment.{Position, Room}
-import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{InventoryLike, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage, TradeRequestResult}
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
@@ -40,7 +40,7 @@ class TraderNPC(room: Room, position: Position, name: String, startInventory: Ma
   private def handleMessage(message: Message): Unit = message match {
     case TalkingMessage(sentBy, content) =>
       if (content.toLowerCase().startsWith("buy")) {
-        val (pickableName, amt) = Inventory.extractItemNameAndQuantity(content.split(" ").drop(1))
+        val (pickableName, amt) = InventoryLike.extractItemNameAndQuantity(content.split(" ").drop(1))
         val item = inventory.getItemByName(pickableName)
         val priceOpt = item.toOption.flatMap(prices.get)
 

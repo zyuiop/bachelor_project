@@ -58,7 +58,7 @@ abstract class Game {
 
   final def runCommand(command: String): Unit = {
     // Run action
-    val action = parser(command split " ")
+    val action = state.updateParser(parser)(command split " ")
 
     println(command + "; " + parser + "; " + action)
 

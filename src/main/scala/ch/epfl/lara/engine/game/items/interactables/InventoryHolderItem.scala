@@ -2,13 +2,12 @@ package ch.epfl.lara.engine.game.items.interactables
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.items.{Interactable, InteractableInventory, Item, Pickable}
-import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
+import ch.epfl.lara.engine.game.items.{Interactable, InteractableInventory, Item, Inventory, Pickable}
 
 /**
   * @author Louis Vialar
   */
-class InventoryHolderItem(name: String, initialItems: Map[Pickable, Int]) extends MutableInventoryImpl(initialItems, name) with Item with Interactable with InteractableInventory {
+class InventoryHolderItem(name: String, initialItems: Map[Pickable, Int]) extends Inventory(initialItems, name) with Item with Interactable with InteractableInventory {
   override def printContent(implicit printStream: PrintStream): Unit = {
     printStream.println(s"In the $name you find:")
     super.printContent

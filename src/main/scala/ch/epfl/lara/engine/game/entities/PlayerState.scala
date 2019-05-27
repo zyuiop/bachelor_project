@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.entities
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.environment.{Center, Position, Room}
-import ch.epfl.lara.engine.game.items.{Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{InventoryLike, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}
 
 /**
@@ -24,7 +24,7 @@ class PlayerState(startRoom: Room, out: PrintStream, startInventory: Map[Pickabl
     _controlled = None
   }
 
-  override def inventory: Inventory = controlled.map(_.inventory).getOrElse(_inventory)
+  override def inventory: InventoryLike = controlled.map(_.inventory).getOrElse(_inventory)
 
   override def currentRoom_=(target: Room): Unit = {
     super.currentRoom_=(target)

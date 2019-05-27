@@ -35,6 +35,10 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder]]) extends ActionB
   }
 
   def union(other: ActionParser): ActionParser = addBuilders(other)
+
+  def alterResult(modifier: Try[Action] => Try[Action]): ActionParser = new ActionParser(actions) {
+    override def apply(input: Array[String]): Try[Action] = modifier(super.apply(input))
+  }
 }
 
 object ActionParser {
@@ -45,8 +49,7 @@ object ActionParser {
   private def buildersToMap(builders: Seq[ActionBuilder]) = builders.flatMap(b => b.triggeringKeywords.map((_, b))).groupBy(_._1).mapValues(_.map(_._2))
 
   val DefaultParser: ActionParser = ActionParser(
-    ActionUseDoor, ActionInteract, ActionWait, ActionSay, ActionTime, ActionInventoryList, ActionStopInteract,
-    ActionInventoryMove,
+    ActionUseDoor, ActionInteract, ActionWait, ActionSay, ActionTime, ActionControlStop,
     ActionControl,
     ActionGive,
     ActionRequestReply

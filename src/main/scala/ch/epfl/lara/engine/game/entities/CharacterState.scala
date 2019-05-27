@@ -2,14 +2,15 @@ package ch.epfl.lara.engine.game.entities
 
 import java.io.PrintStream
 
+import ch.epfl.lara.engine.game.actions.{Action, ActionInterceptor, ActionParser}
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
-import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{Interactable, InventoryLike, Inventory, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 import ch.epfl.lara.engine.game.{GameState, environment}
 
 import scala.collection.mutable
+import scala.util.Try
 
 /**
   * @author Louis Vialar
@@ -19,16 +20,16 @@ class CharacterState(startRoom: Room,
                      val name: String,
                      startInventory: Map[Pickable, Int] = Map.empty,
                      startAttributes: Map[String, String] = Map.empty,
-                     out: PrintStream = Console.out) extends MessageHandler {
+                     out: PrintStream = Console.out) extends MessageHandler with ActionInterceptor {
 
-  protected val _inventory: Inventory = new MutableInventoryImpl(startInventory, "inventory") {
+  protected val _inventory: InventoryLike = new Inventory(startInventory, "inventory") {
     override def printContent(implicit printStream: PrintStream): Unit = {
       printStream.println("Your inventory contains:")
       super.printContent(printStream)
     }
   }
 
-  def inventory: Inventory = _inventory
+  def inventory: InventoryLike = _inventory
 
   private val interacts: mutable.ArrayStack[Interactable] = new mutable.ArrayStack[Interactable]()
 
@@ -75,18 +76,18 @@ class CharacterState(startRoom: Room,
   /**
     * Return the inventory the player interacts with, or, if none, the room inventory
     */
-  def currentInventory: Option[Inventory] = {
+  def currentInventory: Option[InventoryLike] = {
     val ci = currentInteract
     if (ci.isDefined)
-      ci.filter(_.isInstanceOf[Inventory]).map(_.asInstanceOf[Inventory])
+      ci.filter(_.isInstanceOf[InventoryLike]).map(_.asInstanceOf[InventoryLike])
     else Some(_currentRoom.inventory)
   }
 
   /**
     * Return the inventory the player interacts with
     */
-  def currentOpenInventory: Option[Inventory] =
-    currentInteract.filter(_.isInstanceOf[Inventory]).map(_.asInstanceOf[Inventory])
+  def currentOpenInventory: Option[InventoryLike] =
+    currentInteract.filter(_.isInstanceOf[InventoryLike]).map(_.asInstanceOf[InventoryLike])
 
 
   implicit def ps: PrintStream = out
@@ -99,7 +100,7 @@ class CharacterState(startRoom: Room,
       out.println(content)
 
     case RoomMovement(sentBy, entering) =>
-      out.println(Console.YELLOW + sentBy.name + " " + (if (entering) "enters" else "leaves") + " the room." + Console.RESET)
+      out.println((if (entering) Console.GREEN else Console.RED) + sentBy.name + " " + (if (entering) "enters" else "leaves") + " the room." + Console.RESET)
 
     case r: Request =>
       receivedRequests.put(r.requestId, r)
@@ -123,7 +124,11 @@ class CharacterState(startRoom: Room,
     else None
   }
 
-  //
+  override def updateParser(previousParser: ActionParser): ActionParser = {
+    val parser = currentRoom.updateParser(previousParser)
+
+    currentInteract.foldRight(parser)((i, p) => i.updateParser(p))
+  }
 }
 
 

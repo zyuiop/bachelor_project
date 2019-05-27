@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.actions
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
-import ch.epfl.lara.engine.game.items.Inventory
+import ch.epfl.lara.engine.game.items.InventoryLike
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 
 import scala.util.Try
@@ -12,11 +12,6 @@ import scala.util.Try
   */
 case class ActionGive(objectName: String, quantity: Int, characterName: String) extends Action {
   override def apply(inState: CharacterState): Int = {
-    if (inState.currentOpenInventory.nonEmpty) {
-      inState.ps.println("You cannot do that here!")
-      return 0
-    }
-
     val characters =
       GameState.registry.getEntities(inState.currentRoom)
         .filter(_.name.toLowerCase.startsWith(characterName.toLowerCase))
@@ -64,7 +59,7 @@ object ActionGive extends ActionBuilder {
     }
 
     val (left, right) = input splitAt toIndex
-    val (item, quantity) = Inventory.extractItemNameAndQuantity(left drop 1)
+    val (item, quantity) = InventoryLike.extractItemNameAndQuantity(left drop 1)
     val personName = right drop 1 dropWhile (s => s.toLowerCase == "the") mkString " "
 
     ActionGive(item, quantity, personName)

@@ -3,21 +3,19 @@ package ch.epfl.lara.engine.game.environment
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
 import ch.epfl.lara.engine.game.items.interactables.Switch
-import ch.epfl.lara.engine.game.items.mutable.MutableInventoryImpl
-import ch.epfl.lara.engine.game.items.{Interactable, Inventory, Item, Pickable}
+import ch.epfl.lara.engine.game.items._
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
-
-import scala.collection.mutable
 
 /**
   * @author Louis Vialar
   */
 class Room(val id: String, val name: String, val ambient: String,
            initialItems: Map[Pickable, Int] = Map(),
-           interactable: Map[String, Map[Position, Item with Interactable]] = Map()) extends MessageHandler  {
+           interactable: Map[String, Map[Position, Item with Interactable]] = Map()) extends MessageHandler with ActionInterceptor {
 
-  val inventory: Inventory = new MutableInventoryImpl(initialItems, "floor") {
+  val inventory: InventoryLike with InventoryInterceptor = new Inventory(initialItems, "floor") with InventoryInterceptor {
     override def printContent(implicit printStream: PrintStream): Unit = {
       printStream.println("On the floor, you find:")
       super.printContent
@@ -25,6 +23,8 @@ class Room(val id: String, val name: String, val ambient: String,
 
     override def printEmpty(implicit ps: PrintStream): Unit = ps.println("\tNothing. There is nothing on the floor.")
   }
+
+  override def updateParser(previousParser: ActionParser): ActionParser = inventory.updateParser(previousParser)
 
   def describe(): String = {
     def describeDoors: String = {
