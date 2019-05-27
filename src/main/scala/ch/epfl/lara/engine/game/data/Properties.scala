@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.api.data
+package ch.epfl.lara.engine.game.data
 
 import ch.epfl.lara.engine.game.items.Pickable
 

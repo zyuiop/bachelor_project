@@ -19,7 +19,7 @@ abstract class Game {
 
   val lp = Engine.Instance.levelParser
 
-  import ch.epfl.lara.engine.api.data.Properties._
+  import ch.epfl.lara.engine.game.data.Properties._
 
   lp
     .registerItemType("inventory") { props => new InventoryHolderItem(props("name"), props.inventory("inv")) }

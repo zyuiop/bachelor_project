@@ -1,6 +1,5 @@
 package ch.epfl.lara.engine.game.data
 
-import ch.epfl.lara.engine.api.data.Properties
 import ch.epfl.lara.engine.game.items.Pickable
 
 import scala.util.parsing.combinator.RegexParsers

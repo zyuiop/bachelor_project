@@ -17,7 +17,7 @@ import scala.io.Source
   */
 object LevelParserImpl extends BaseParser with LevelParser {
 
-  import ch.epfl.lara.engine.api.data.Properties._
+  import Properties._
 
   private val itemTypes: mutable.Map[String, Map[String, String] => Item] = mutable.Map()
 
