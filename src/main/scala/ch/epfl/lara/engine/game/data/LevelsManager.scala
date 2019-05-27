@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.entities.PlayerState
 /**
   * @author Louis Vialar
   */
-object LevelsManager {
+class LevelsManager {
   println("Loading files...")
 
   private val levels: Array[LevelDescriptor] = new File("data")
