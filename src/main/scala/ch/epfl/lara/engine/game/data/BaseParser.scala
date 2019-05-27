@@ -1,5 +1,6 @@
 package ch.epfl.lara.engine.game.data
 
+import ch.epfl.lara.engine.api.data.Properties
 import ch.epfl.lara.engine.game.items.Pickable
 
 import scala.util.parsing.combinator.RegexParsers
@@ -7,7 +8,7 @@ import scala.util.parsing.combinator.RegexParsers
 /**
   * @author Louis Vialar
   */
-class BaseParser extends RegexParsers {
+class BaseParser extends RegexParsers with Properties {
   def identifier: Parser[String] = {
     def simpleIdentifier = "[a-zA-Z_][a-zA-Z0-9_]*".r ^^ { str => str }
 
@@ -38,13 +39,9 @@ class BaseParser extends RegexParsers {
     * @param map    the map in which the search will be ran
     * @return a map, containing only the `k`->`v` pairs for which `prefix`.`k` is a key of `map`
     */
-  def prefixed(prefix: String, map: Map[String, String]): Map[String, String] = {
-    val len = prefix.length + 1
-    map.filter(_._1.startsWith(prefix + ".")).map(pair => pair._1.drop(len) -> pair._2)
-  }
+  def prefixed(prefix: String, map: Map[String, String]): Map[String, String] = map.prefixed(prefix)
 
-  def inventory(prefix: String, map: Map[String, String]): Map[Pickable, Int] =
-    prefixed(prefix, map).map(pair => Pickable(pair._1) -> pair._2.toInt)
+  def inventory(prefix: String, map: Map[String, String]): Map[Pickable, Int] = map.inventory(prefix)
 
   /**
     * Extract all the values whose keys prefixed with a given string from a map, removing the prefix from the key
@@ -53,8 +50,7 @@ class BaseParser extends RegexParsers {
     * @param map    the map in which the search will be ran
     * @return a list, containing only the strings for which the key s verifies `prefix`.`s` is a key of `map`
     */
-  def multiVal(prefix: String, map: Map[String, String]): List[String] =
-    prefixed(prefix, map).values.toList
+  def multiVal(prefix: String, map: Map[String, String]): List[String] = map.multiVal(prefix)
 
 
 }
