@@ -1,24 +1,40 @@
 package ch.epfl.lara.engine.game.items.interactables
 
-import ch.epfl.lara.engine.game.entities.CharacterState
-import ch.epfl.lara.engine.game.items.{Interactable, Pickable}
+import java.io.PrintStream
+
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Pickable}
 
 /**
   * @author Louis Vialar
   */
-class BookItem extends Pickable with Interactable {
-  /**
-    * Computes the result of the player interacting with this entity
-    *
-    * @param state the state of the player interacting
-    * @return the time the interaction took
-    */
-  override def interact(state: CharacterState): Int = {
-    0
+class BookItem(override val displayName: String, pages: Map[String, String]) extends Pickable with ComplexInteractable {
+  handle("open", "go", "read") { (state, args) =>
+    val sectionName = (if (args.head == "to") args drop 1 else args) mkString " "
+
+    val (section, time) = pages
+      .get(sectionName.toLowerCase)
+      .map(content => (s"Section $sectionName reads:\n$content\n", content.length / 5))
+      .getOrElse(("There is no such section...", 15)) // it takes time to search for a section that doesn't exist :o
+
+    state.ps.println(section)
+    time
   }
 
-  /**
-    * The name under which this item can be referenced from the command line
-    */
-  override val displayName: String = "Book"
+  handle("list", "contents", "table") { (state, _) =>
+    printTableOfContents(state.ps)
+    4
+  }
+
+  private def printTableOfContents(printStream: PrintStream): Unit = {
+    printStream.println("It contains the following sections: " + pages.keys.mkString("; "))
+  }
+
+  override def printClose(implicit ps: PrintStream): Unit = {
+    ps.println(s"You close the $displayName")
+  }
+
+  override def printOpen(implicit ps: PrintStream): Unit = {
+    ps.println(s"You open the $displayName")
+    printTableOfContents(ps)
+  }
 }

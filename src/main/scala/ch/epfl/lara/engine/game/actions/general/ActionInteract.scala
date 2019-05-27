@@ -2,6 +2,7 @@ package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.items.Interactable
 
 import scala.util.Try
 
@@ -18,6 +19,14 @@ case class ActionInteract(objectName: String) extends Action {
     } else {
       val item = inState.currentRoom
         .getInteractableItem(objectName, inState.currentPosition)
+        .orElse(
+          inState.inventory.getItemByName(objectName.toLowerCase).toOption.flatMap {
+            case i: Interactable => Some(i)
+            case _ =>
+              println("item is not an interactable")
+              None
+          }
+        )
 
       if (item.isEmpty) {
         inState.ps.println("there is nothing to interact here...")

@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState, ProgrammedNPC, TraderNPC}
 import ch.epfl.lara.engine.game.environment._
-import ch.epfl.lara.engine.game.items.interactables.{DescriptiveItem, InventoryHolderItem, Switch}
+import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, Switch}
 import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.io.Source
@@ -18,10 +18,9 @@ import scala.util.Try
   */
 object LevelParser extends BaseParser {
 
-  def item = "[item]" ~! properties ^^ {
+  def item = "[item]" ~! properties ^? {
     case _ ~ props =>
       val itemType = props("type").toLowerCase()
-      val location = Position.parse(props("position"))
       val name = props("name")
 
       val item: Item with Interactable = if (itemType == "inventory") {
@@ -40,16 +39,24 @@ object LevelParser extends BaseParser {
         val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
 
         new DescriptiveItem(name, lore, time)
+      } else if (itemType == "book") {
+        new BookItem(name, prefixed("pages", props))
       } else {
         throw new IllegalArgumentException("unknown item type " + itemType)
       }
 
-      (location, item)
+      (props.get("position"), item) match {
+        case (Some(location), i) => Some(Position.parse(location), i)
+        case (None, _: Pickable) => None
+        case (None, _) => throw new IllegalArgumentException("missing value position for item " + item + ", props = " + props)
+      }
   }
 
   def room = "[room]" ~ properties ~ item.* ^^ {
-    case _ ~ props ~ items =>
+    case _ ~ props ~ optItems =>
       val startInv = inventory("inv", props)
+
+      val items = optItems filter (_.isDefined) map (_.get)
 
       val interactables: Map[String, Map[Position, Item with Interactable]] =
         items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
@@ -155,7 +162,7 @@ object LevelParser extends BaseParser {
       LevelData(Pickable(currencyItem), levelName, startText, endText, levelSuccess, levelFailure, startTime)
   }
 
-  def file = rep(room | door | doorType | routine | character | player | level) ^^ {
+  def file = phrase(rep(room | door | doorType | routine | character | player | level)) ^^ {
     l => {
       val (types, r1) = l.partition(_.isInstanceOf[DoorType])
       val (rooms, r2) = r1.partition(_.isInstanceOf[Room])

@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
 import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
-import ch.epfl.lara.engine.game.items.{ComplexInteractable, Inventory, InventoryLike, Pickable}
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Inventory, InventoryLike, Item, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 import ch.epfl.lara.engine.game.{GameState, environment}

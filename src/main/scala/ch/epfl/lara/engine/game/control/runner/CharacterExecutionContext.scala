@@ -125,13 +125,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
       case Do(act, immediate, blocking) =>
         // Compile action
         val command = resolve(act).asString.split(" ")
-
-        println(s"compile $command")
-
         val action = entity.updateParser(ActionParser.DefaultParser)(command).get
-
-        println(s"Action $act imm $immediate bloc $blocking")
-
         val time = action.execute(entity)
 
         if (!immediate)

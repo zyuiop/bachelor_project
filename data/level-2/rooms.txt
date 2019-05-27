@@ -38,9 +38,16 @@ name = "Kitchen"
 ambient = "There are peanuts everywhere..."
 
 [item]
+name = "cookbook"
+type = "book"
+pages.`mushroom soup` = """Take 3 mushrooms and 500mL of water.\n\n1. Put the water on the fire\n2. Cut the mushrooms\n3. Put the mushrooms in the hot water\n4. Wait 10mn\n5. The soup is ready!"""
+pages.`peanut butter` = """Crush the peanuts. Extract the oil. I actually have no idea how peanut butter is made!"""
+
+[item]
 name = "bin"
 type = "inventory"
 position = "East"
+inv.cookbook = 1
 
 [room]
 id = "1st-floor-bathroom"
