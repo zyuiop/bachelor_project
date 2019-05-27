@@ -2,51 +2,42 @@ package ch.epfl.lara.engine.game.data
 
 import java.io.{File, PrintStream, Reader}
 
-import ch.epfl.lara.engine.game.GameState
+import ch.epfl.lara.engine.api.data.LevelParser
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
-import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState, ProgrammedNPC, TraderNPC}
+import ch.epfl.lara.engine.game.entities._
 import ch.epfl.lara.engine.game.environment._
-import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, Switch}
 import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
+import scala.collection.mutable
 import scala.io.Source
-import scala.util.Try
 
 /**
   * @author Louis Vialar
   */
-object LevelParser extends BaseParser {
+object LevelParserImpl extends BaseParser with LevelParser {
+
+  import ch.epfl.lara.engine.api.data.Properties._
+
+  private val itemTypes: mutable.Map[String, Map[String, String] => Item] = mutable.Map()
+
+  override def registerItemType(name: String)(builder: Map[String, String] => Item): LevelParser = {
+    itemTypes.put(name, builder)
+    this
+  }
 
   def item = "[item]" ~! properties ^? {
     case _ ~ props =>
       val itemType = props("type").toLowerCase()
-      val name = props("name")
+      val typeParser = itemTypes.get(itemType)
 
-      val item: Item with Interactable = if (itemType == "inventory") {
-        val inventory = this.inventory("inv", props)
-
-        new InventoryHolderItem(name, inventory)
-      } else if (itemType == "switch") {
-        val states = this.multiVal("states", props) // map states.<stateName> = transition to this state
-        val transitions = this.prefixed("transitions", props) // map states.<stateName> = transition to this state
-        val id = props("id")
-        val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
-
-        new Switch(states, transitions, id, name, time)
-      } else if (itemType == "descriptive") {
-        val lore = props("lore")
-        val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
-
-        new DescriptiveItem(name, lore, time)
-      } else if (itemType == "book") {
-        new BookItem(name, prefixed("pages", props))
-      } else {
+      if (typeParser.isEmpty)
         throw new IllegalArgumentException("unknown item type " + itemType)
-      }
+
+      val item: Item = typeParser.get(props)
 
       (props.get("position"), item) match {
-        case (Some(location), i) => Some(Position.parse(location), i)
+        case (Some(location), i: Interactable) => Some(Position.parse(location), i)
         case (None, _: Pickable) => None
         case (None, _) => throw new IllegalArgumentException("missing value position for item " + item + ", props = " + props)
       }
@@ -54,7 +45,7 @@ object LevelParser extends BaseParser {
 
   def room = "[room]" ~ properties ~ item.* ^^ {
     case _ ~ props ~ optItems =>
-      val startInv = inventory("inv", props)
+      val startInv = props.inventory("inv")
 
       val items = optItems filter (_.isDefined) map (_.get)
 
@@ -67,8 +58,8 @@ object LevelParser extends BaseParser {
   def doorType = "[doortype]" ~ properties ^^ {
     case _ ~ props =>
       val n = props("name")
-      val leftToRight = multiVal("leftToRight", props)
-      val rightToLeft = multiVal("rightToLeft", props)
+      val leftToRight = props.multiVal("leftToRight")
+      val rightToLeft = props.multiVal("rightToLeft")
 
       new DoorType(n, leftToRight, rightToLeft)
   }
@@ -100,7 +91,7 @@ object LevelParser extends BaseParser {
         .getOrElse((_: CharacterState) => true)
 
 
-       (doorTypeGetter: String => DoorType) =>
+      (doorTypeGetter: String => DoorType) =>
         Door(props("left"), props("right"), Position.parse(props("leftPos")), Position.parse(props("rightPos")), doorTypeGetter(props("doorType")), openCondition)
   }
 
@@ -116,14 +107,14 @@ object LevelParser extends BaseParser {
 
         val kind = props.getOrElse("type", "npc").toLowerCase()
 
-        val inv = inventory("inv", props)
+        val inv = props.inventory("inv")
 
         if (kind == "trader") {
-          val prices = inventory("price", props)
+          val prices = props.inventory("price")
 
           new TraderNPC(room, position, name, inv, prices)
         } else {
-          val attr = prefixed("attr", props)
+          val attr = props.prefixed("attr")
           val cstate = new CharacterState(room, position, name, inv, attr, new PrintStream(_ => ()))
 
           val program = prog.map(_._2).getOrElse("")
@@ -138,7 +129,7 @@ object LevelParser extends BaseParser {
     case _ ~ props =>
       (rooms: String => Room) => {
         val room = rooms(props("room"))
-        val inv = inventory("inv", props)
+        val inv = props.inventory("inv")
 
         (ps: PrintStream) => {
           new PlayerState(room, ps, inv)
@@ -153,8 +144,8 @@ object LevelParser extends BaseParser {
       val startTime = getTime(props("startTime"))
       val currencyItem = props("currency")
 
-      val startText = multiVal("startText", props).mkString("\n")
-      val endText = multiVal("endText", props).mkString("\n")
+      val startText = props.multiVal("startText").mkString("\n")
+      val endText = props.multiVal("endText").mkString("\n")
 
       val levelSuccess = props("levelSuccess")
       val levelFailure = props("levelFailure")
@@ -188,9 +179,9 @@ object LevelParser extends BaseParser {
 
   abstract class DoorBuilder extends ((String => DoorType) => Door) {}
 
-  abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
-
   abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
+
+  abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {
@@ -214,6 +205,6 @@ object LevelParser extends BaseParser {
       ret
     }).mkString("\n")
 
-    this(input)
+    this (input)
   }
 }

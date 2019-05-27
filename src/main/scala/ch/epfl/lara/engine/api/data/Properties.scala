@@ -5,7 +5,7 @@ import ch.epfl.lara.engine.game.items.Pickable
 /**
   * @author Louis Vialar
   */
-trait Properties {
+object Properties {
   implicit class PropertiesMap(map: Map[String, String]) {
     /**
       * Extract a subset of this map of all the keys prefixed with a given string from a map,
