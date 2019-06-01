@@ -1,8 +1,6 @@
 package ch.epfl.lara.engine.game.data
 
 import java.io.{File, PrintStream, Reader}
-
-import ch.epfl.lara.engine.api.data.LevelParser
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities._
@@ -15,18 +13,22 @@ import scala.io.Source
 /**
   * @author Louis Vialar
   */
-object LevelParserImpl extends BaseParser with LevelParser {
+object LevelParser extends BaseParser {
 
   import Properties._
 
   private val itemTypes: mutable.Map[String, Map[String, String] => Item] = mutable.Map()
 
-  override def registerItemType(name: String)(builder: Map[String, String] => Item): LevelParser = {
+  /**
+    * Add a new item type to the parser
+    * @param name the name of the item type
+    * @param builder the builder, taking a map of properties and returning an item
+    */
+  def registerItemType(name: String)(builder: Map[String, String] => Item): Unit = {
     itemTypes.put(name, builder)
-    this
   }
 
-  def item = "[item]" ~! properties ^? {
+  private def item = "[item]" ~! properties ^? {
     case _ ~ props =>
       val itemType = props("type").toLowerCase()
       val typeParser = itemTypes.get(itemType)
@@ -43,7 +45,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       }
   }
 
-  def room = "[room]" ~ properties ~ item.* ^^ {
+  private def room = "[room]" ~ properties ~ item.* ^^ {
     case _ ~ props ~ optItems =>
       val startInv = props.inventory("inv")
 
@@ -55,7 +57,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       new Room(props("id"), props("name"), props("ambient"), startInv, interactables)
   }
 
-  def doorType = "[doortype]" ~ properties ^^ {
+  private def doorType = "[doortype]" ~ properties ^^ {
     case _ ~ props =>
       val n = props("name")
       val leftToRight = props.multiVal("leftToRight")
@@ -72,7 +74,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
     }
   }
 
-  def routine = "[routine]" ~ properties ^^ {
+  private def routine = "[routine]" ~ properties ^^ {
     case _ ~ props =>
       val start = getTime(props("start"))
       val repeat = props("repeat").toInt
@@ -81,7 +83,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       RoutineDescriptor(start, repeat, message)
   }
 
-  def door: Parser[DoorBuilder] = "[door]" ~ properties ^^ {
+  private def door: Parser[DoorBuilder] = "[door]" ~ properties ^^ {
     case _ ~ props =>
       // Keys
       val openCondition = props.get("openCondition")
@@ -95,9 +97,9 @@ object LevelParserImpl extends BaseParser with LevelParser {
         Door(props("left"), props("right"), Position.parse(props("leftPos")), Position.parse(props("rightPos")), doorTypeGetter(props("doorType")), openCondition)
   }
 
-  def program = (not(guard("[programEnd]")) ~ ".+".r).* ~! "[programEnd]" ^^ { case l ~ _ => l.map(_._2).mkString("\n") }
+  private def program = (not(guard("[programEnd]")) ~ ".+".r).* ~! "[programEnd]" ^^ { case l ~ _ => l.map(_._2).mkString("\n") }
 
-  def character: Parser[CharaBuilder] = "[character]" ~ properties ~ ("[programStart]" ~! program).? ^^ {
+  private def character: Parser[CharaBuilder] = "[character]" ~ properties ~ ("[programStart]" ~! program).? ^^ {
     case _ ~ props ~ prog =>
       (rooms: String => Room) => {
 
@@ -125,7 +127,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       }
   }
 
-  def player: Parser[PlayerBuilder] = "[player]" ~! properties ^^ {
+  private def player: Parser[PlayerBuilder] = "[player]" ~! properties ^^ {
     case _ ~ props =>
       (rooms: String => Room) => {
         val room = rooms(props("room"))
@@ -137,7 +139,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       }
   }
 
-  def level = "[level]" ~! properties ^^ {
+  private def level = "[level]" ~! properties ^^ {
     case _ ~ props =>
       // Keys
       val levelName = props("name")
@@ -153,7 +155,7 @@ object LevelParserImpl extends BaseParser with LevelParser {
       LevelData(Pickable(currencyItem), levelName, startText, endText, levelSuccess, levelFailure, startTime)
   }
 
-  def file = phrase(rep(room | door | doorType | routine | character | player | level)) ^^ {
+  private def file = phrase(rep(room | door | doorType | routine | character | player | level)) ^^ {
     l => {
       val (types, r1) = l.partition(_.isInstanceOf[DoorType])
       val (rooms, r2) = r1.partition(_.isInstanceOf[Room])
@@ -177,11 +179,11 @@ object LevelParserImpl extends BaseParser with LevelParser {
     }
   }
 
-  abstract class DoorBuilder extends ((String => DoorType) => Door) {}
+  private abstract class DoorBuilder extends ((String => DoorType) => Door) {}
 
-  abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
+  private abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
 
-  abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
+  private abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {

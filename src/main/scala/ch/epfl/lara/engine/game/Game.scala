@@ -2,9 +2,9 @@ package ch.epfl.lara.engine.game
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.api.Engine
 import ch.epfl.lara.engine.game.actions._
-import ch.epfl.lara.engine.game.data.LevelsManager
+import ch.epfl.lara.engine.game.actions.general._
+import ch.epfl.lara.engine.game.data.{LevelParser, LevelsManager}
 import ch.epfl.lara.engine.game.entities.PlayerState
 import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, Switch}
 
@@ -14,28 +14,40 @@ import scala.util.Try
   * @author Louis Vialar
   */
 abstract class Game {
-  // init engine
-  Engine.Instance = new EngineImpl
-
-  val lp = Engine.Instance.levelParser
 
   import ch.epfl.lara.engine.game.data.Properties._
 
-  lp
-    .registerItemType("inventory") { props => new InventoryHolderItem(props("name"), props.inventory("inv")) }
-    .registerItemType("switch") { props =>
-      val states = props.multiVal("states") // map states.<stateName> = transition to this state
+  LevelParser.registerItemType("inventory") { props =>
+    new InventoryHolderItem(props("name"), props.inventory("inv"))
+  }
+
+  LevelParser.registerItemType("switch") { props =>
+    val states = props.multiVal("states") // map states.<stateName> = transition to this state
     val transitions = props.prefixed("transitions") // map states.<stateName> = transition to this state
     val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
 
-      new Switch(states, transitions, props("id"), props("name"), time)
-    }
-    .registerItemType("descriptive") { props =>
-      val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
+    new Switch(states, transitions, props("id"), props("name"), time)
+  }
 
-      new DescriptiveItem(props("name"), props("lore"), time)
-    }
-    .registerItemType("book") { props => new BookItem(props("name"), props.prefixed("pages")) }
+  LevelParser.registerItemType("descriptive") { props =>
+    val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
+
+    new DescriptiveItem(props("name"), props("lore"), time)
+  }
+
+  LevelParser.registerItemType("book") { props => new BookItem(props("name"), props.prefixed("pages")) }
+
+  ActionsRegistry.registerActions(
+    ActionUseDoor,
+    ActionInteract,
+    ActionWait,
+    ActionSay,
+    ActionTime,
+    ActionControlStop,
+    ActionControl,
+    ActionGive,
+    ActionRequestReply
+  )
 
   implicit val printStream: PrintStream
 
@@ -102,5 +114,5 @@ abstract class Game {
     checkLevelState
   }
 
-  val parser: ActionParser = ActionParser.DefaultParser union systemActionsParser
+  val parser: ActionParser = ActionsRegistry.actionsParser union systemActionsParser
 }

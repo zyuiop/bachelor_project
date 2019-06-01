@@ -1,7 +1,7 @@
 package ch.epfl.lara.engine.game.control.runner
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.actions.ActionParser
+import ch.epfl.lara.engine.game.actions.{ActionParser, ActionsRegistry}
 import ch.epfl.lara.engine.game.control.compiler.Tree._
 import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
@@ -125,7 +125,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
       case Do(act, immediate, blocking) =>
         // Compile action
         val command = resolve(act).asString.split(" ")
-        val action = entity.updateParser(ActionParser.DefaultParser)(command).get
+        val action = entity.updateParser(ActionsRegistry.actionsParser)(command).get
         val time = action.execute(entity)
 
         if (!immediate)

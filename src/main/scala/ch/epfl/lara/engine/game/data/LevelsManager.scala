@@ -14,7 +14,7 @@ class LevelsManager {
     .listFiles(new FileFilter {
       override def accept(pathname: File): Boolean = pathname.isDirectory && pathname.getName.startsWith("level-")
     })
-    .map(file => (file.getName.drop(6).toInt, LevelParserImpl.readLevel(file)))
+    .map(file => (file.getName.drop(6).toInt, LevelParser.readLevel(file)))
     .sortBy(_._1)
     .map(_._2)
 
