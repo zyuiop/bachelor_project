@@ -30,9 +30,3 @@ case class DoorType(name: String, leftToRight: List[String], rightToLeft: List[S
     list(Random.nextInt(list.length))
   }
 }
-
-object DoorType {
-  val Door = DoorType("door", List("you go through the door"))
-
-  val Stairs = DoorType("staircase", List("you climb the stairs"), List("you descend the stairs"))
-}

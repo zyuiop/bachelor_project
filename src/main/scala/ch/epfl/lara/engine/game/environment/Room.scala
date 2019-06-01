@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
-import ch.epfl.lara.engine.game.items.interactables.Switch
+import ch.epfl.lara.engine.game.items.interactables.SwitchItem
 import ch.epfl.lara.engine.game.items._
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
@@ -55,16 +55,16 @@ class Room(val id: String, val name: String, val ambient: String,
     GameState.registry.getEntities(this).foreach(_ ! message)
   }
 
-  def getInteractableItem(name: String, position: Position): Option[Item with Interactable] = {
+  def getInteractableItem(name: String, position: Option[Position] = None): Option[Item with Interactable] = {
     interactable.get(name.toLowerCase).flatMap(m => {
-      if (m.size > 1) m.get(position)
+      if (m.size > 1) position.flatMap(p => m.get(p))
       else if (m.isEmpty) None
       else Some(m.head._2)
     })
   }
 
   def switches: Map[String, String] = interactable.values.flatMap(_.values)
-    .filter(_.isInstanceOf[Switch]).map(_.asInstanceOf[Switch])
+    .filter(_.isInstanceOf[SwitchItem]).map(_.asInstanceOf[SwitchItem])
     .map(switch => switch.name -> switch.currentState)
     .toMap
 

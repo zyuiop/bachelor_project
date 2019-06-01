@@ -11,25 +11,15 @@ import scala.util.Try
 /**
   * @author Louis Vialar
   */
-case class ActionUseDoor(direction: Option[Position]) extends Action {
+case class ActionUseDoor(direction: Position) extends Action {
   override def apply(inState: CharacterState): Int = {
-    inState.getDoor(direction.getOrElse(inState.currentPosition)) match {
+    inState.getDoor(direction) match {
       case Some(door) =>
         if (door.isOpen(inState)) {
           val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
           val room = GameState.level.getRoom(roomId)
 
-          inState.ps.println(room.describe())
-
-          val prev = inState.currentRoom
-
-          room ! RoomMovement(inState, entering = true)
-
-          inState.currentRoom = room
-
-          prev ! RoomMovement(inState, entering = false)
-
-          inState.currentPosition = pos
+          inState.changeRoom(room)
 
           7
         } else {
@@ -38,7 +28,7 @@ case class ActionUseDoor(direction: Option[Position]) extends Action {
           5
         }
       case None =>
-        inState.ps.println(s"There is no door ${if (direction.isEmpty) "here" else "there"}...")
+        inState.ps.println(s"There is no door here...")
         0
     }
 
@@ -57,9 +47,7 @@ object ActionUseDoor extends ActionBuilder {
     Try {
       val args = if (input.tail.nonEmpty && input.tail.head.toLowerCase == "door") input.tail.tail else input.tail
 
-      val direction =
-        if (args.nonEmpty) Some(Position.parse(args.mkString("-")))
-        else None
+      val direction = Position.parse(args.mkString("-"))
 
       ActionUseDoor(direction)
     }

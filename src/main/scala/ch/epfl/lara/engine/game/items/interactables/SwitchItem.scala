@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.messaging.Message.SwitchChangeState
 /**
   * @author Louis Vialar
   */
-class Switch(states: Seq[String], stateTransitions: Map[String, String], val name: String, override val displayName: String, val interactTime: Int = 3) extends Item with Interactable {
+class SwitchItem(states: Seq[String], stateTransitions: Map[String, String], val name: String, override val displayName: String, val interactTime: Int = 3) extends Item with Interactable {
   private var _currentState = states.head
 
   def currentState: String = _currentState

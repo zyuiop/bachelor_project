@@ -104,7 +104,6 @@ object LevelParser extends BaseParser {
       (rooms: String => Room) => {
 
         val room = rooms(props("room"))
-        val position = Position.parse(props.getOrElse("position", "Center"))
         val name = props("name")
 
         val kind = props.getOrElse("type", "npc").toLowerCase()
@@ -114,10 +113,10 @@ object LevelParser extends BaseParser {
         if (kind == "trader") {
           val prices = props.inventory("price")
 
-          new TraderNPC(room, position, name, inv, prices)
+          new TraderNPC(room, name, inv, prices)
         } else {
           val attr = props.prefixed("attr")
-          val cstate = new CharacterState(room, position, name, inv, attr, new PrintStream(_ => ()))
+          val cstate = new CharacterState(room, name, inv, attr, new PrintStream(_ => ()))
 
           val program = prog.map(_._2).getOrElse("")
 

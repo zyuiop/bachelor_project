@@ -18,7 +18,7 @@ case class ActionInteract(objectName: String) extends Action {
       15
     } else {
       val item = inState.currentRoom
-        .getInteractableItem(objectName, inState.currentPosition)
+        .getInteractableItem(objectName)
         .orElse(
           inState.inventory.getItemByName(objectName.toLowerCase).toOption.flatMap {
             case i: Interactable => Some(i)

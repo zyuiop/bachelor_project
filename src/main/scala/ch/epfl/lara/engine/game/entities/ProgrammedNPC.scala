@@ -12,7 +12,7 @@ import ch.epfl.lara.engine.game.messaging.Message
 
 class ProgrammedNPC(startState: CharacterState,
                     program: String) extends CharacterState(
-  startState.currentRoom, startState.currentPosition, startState.name,
+  startState.currentRoom, startState.name,
   startState.inventory.getContent, startState.attributes, new PrintStream(_ => ())
 ) with NPC {
   private val (prog, triggers, ons) = ActionCompiler.compileProgram(program)

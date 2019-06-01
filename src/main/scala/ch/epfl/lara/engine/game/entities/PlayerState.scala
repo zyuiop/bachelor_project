@@ -9,7 +9,7 @@ import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl
 /**
   * @author Louis Vialar
   */
-class PlayerState(startRoom: Room, out: PrintStream, startInventory: Map[Pickable, Int] = Map()) extends CharacterState(startRoom, Center, "you", startInventory = startInventory, out = out) {
+class PlayerState(startRoom: Room, out: PrintStream, startInventory: Map[Pickable, Int] = Map()) extends CharacterState(startRoom, "you", startInventory = startInventory, out = out) {
   private var _controlled: Option[PPC] = None
 
   def controlled: Option[PPC] = _controlled
@@ -30,12 +30,6 @@ class PlayerState(startRoom: Room, out: PrintStream, startInventory: Map[Pickabl
     super.currentRoom_=(target)
 
     controlled.foreach(_.currentRoom_=(target))
-  }
-
-  override def currentPosition_=(target: Position): Unit = {
-    super.currentPosition_=(target)
-
-    controlled.foreach(_.currentPosition = target)
   }
 
   override def changeAttribute(key: String, value: String): Unit = {

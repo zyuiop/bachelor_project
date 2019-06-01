@@ -15,7 +15,6 @@ import scala.collection.mutable
   * @author Louis Vialar
   */
 class CharacterState(startRoom: Room,
-                     startPosition: Position,
                      val name: String,
                      startInventory: Map[Pickable, Int] = Map.empty,
                      startAttributes: Map[String, String] = Map.empty,
@@ -33,21 +32,26 @@ class CharacterState(startRoom: Room,
   private val interacts: mutable.ArrayStack[ComplexInteractable] = new mutable.ArrayStack[ComplexInteractable]()
 
   private var _currentRoom: Room = startRoom
-  private var _currentPosition: Position = startPosition
   private var _attributes: mutable.Map[String, String] = mutable.Map(startAttributes.toList: _*)
 
   def currentRoom: Room = _currentRoom
 
-  def currentPosition: Position = _currentPosition
+  def changeRoom(room: Room) = {
+    ps.println(room.describe())
+
+    val prev = currentRoom
+
+    room ! RoomMovement(this, entering = true)
+
+    currentRoom = room
+
+    prev ! RoomMovement(this, entering = false)
+  }
 
   def attributes: Map[String, String] = _attributes.toMap
 
   def currentRoom_=(target: Room): Unit = {
     this._currentRoom = target
-  }
-
-  def currentPosition_=(target: Position): Unit = {
-    this._currentPosition = target
   }
 
   def changeAttribute(key: String, value: String): Unit = {

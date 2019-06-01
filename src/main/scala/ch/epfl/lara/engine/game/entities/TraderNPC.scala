@@ -12,15 +12,11 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 /**
   * @author Louis Vialar
   */
-class TraderNPC(room: Room, position: Position, name: String, startInventory: Map[Pickable, Int], val prices: Map[Pickable, Int])
-  extends CharacterState(room, position, name, startInventory, Map(), new PrintStream(_ => ()))
+class TraderNPC(room: Room, name: String, startInventory: Map[Pickable, Int], val prices: Map[Pickable, Int])
+  extends CharacterState(room, name, startInventory, Map(), new PrintStream(_ => ()))
     with NPC {
 
   override def currentRoom_=(target: Room): Unit = {
-    throw new UnsupportedOperationException("Cannot move a trader!")
-  }
-
-  override def currentPosition_=(target: Position): Unit = {
     throw new UnsupportedOperationException("Cannot move a trader!")
   }
 

@@ -6,7 +6,7 @@ import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.actions.general._
 import ch.epfl.lara.engine.game.data.{LevelParser, LevelsManager}
 import ch.epfl.lara.engine.game.entities.PlayerState
-import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, Switch}
+import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, SwitchItem}
 
 import scala.util.Try
 
@@ -26,7 +26,7 @@ abstract class Game {
     val transitions = props.prefixed("transitions") // map states.<stateName> = transition to this state
     val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
 
-    new Switch(states, transitions, props("id"), props("name"), time)
+    new SwitchItem(states, transitions, props("id"), props("name"), time)
   }
 
   LevelParser.registerItemType("descriptive") { props =>
