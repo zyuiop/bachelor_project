@@ -70,6 +70,7 @@ object GameGUI extends Game with JFXApp {
           disable = true
 
           new Thread(() => {
+            printStream.println(Console.BOLD + "-> " + command + Console.RESET)
             runCommand(command)
             runOnFxThread {
               disable = false

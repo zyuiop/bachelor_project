@@ -38,13 +38,6 @@ rightPos = "North"
 doorType = "door"
 
 [door]
-left = "1st-floor-kitchen"
-right = "1st-floor-dining-room"
-leftPos = "West"
-rightPos = "East"
-doorType = "door"
-
-[door]
 left = "1st-floor"
 right = "1st-floor-bedroom"
 leftPos = "West"

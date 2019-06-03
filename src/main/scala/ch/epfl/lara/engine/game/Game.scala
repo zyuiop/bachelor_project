@@ -37,7 +37,8 @@ abstract class Game {
   }
 
   LevelParser.registerItemType("door") { props =>
-    new DoorItem(props("name"), props("target"), props("description"))
+    val name = props("name")
+    new DoorItem(name, props("target"), props.getOrElse("description", s"You go through the $name."))
   }
 
   LevelParser.registerLockType("condition") { (item, props) =>
@@ -47,7 +48,7 @@ abstract class Game {
   LevelParser.registerLockType("lock") { (item, props) =>
     val name = props("name")
     new PhysicalLock(item, name, props.getOrElse("helper", ""), props("code"),
-      props.getOrElse("successMessage", s"You opened the $name!"),
+      props.getOrElse("successMessage", s"You unlocked the $name!"),
       props.getOrElse("failMessage", s"Wrong code! Try again..."),
     )
   }

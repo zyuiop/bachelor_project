@@ -70,7 +70,6 @@ object LevelParser extends BaseParser {
   }
 
 
-
   private def room = "[room]" ~ properties ~ item.* ^^ {
     case _ ~ props ~ optItems =>
       val id = props("id")
@@ -119,9 +118,11 @@ object LevelParser extends BaseParser {
       (doorTypeGetter: String => DoorType) =>
         val dt = doorTypeGetter(props("doorType"))
 
-        val condition: Item with Interactable => Item with Interactable = if (props.contains("openCondition")) {
-          item: Item with Interactable => new InvisibleLock(item, "The door is locked", props("openCondition"))
-        } else _
+        val condition: (Interactable => Interactable) = if (props.contains("openCondition")) {
+          item: Interactable => new InvisibleLock(item, "The door is locked", props("openCondition")).asInstanceOf[Interactable]
+        } else {
+          item: Interactable => item
+        }
 
         Map(
           props("left") -> List((Position.parse(props("leftPos")), condition(new DoorItem(dt.name, props("right"), dt.describe(true))))),

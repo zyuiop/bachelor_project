@@ -32,10 +32,28 @@ type = "inventory"
 position = "Center"
 inv.peanut = 3
 
+[item]
+name = "door"
+type = "door"
+position = "East"
+target = "1st-floor-kitchen"
+
 [room]
 id = "1st-floor-kitchen"
 name = "Kitchen"
 ambient = "There are peanuts everywhere..."
+
+[item]
+name = "door"
+type = "door"
+position = "West"
+target = "1st-floor-dining-room"
+
+[lock]
+type = "lock"
+name = "padlock"
+helper = "It has 5 digits."
+code = "12345"
 
 [item]
 name = "cookbook"

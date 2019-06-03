@@ -24,7 +24,7 @@ abstract class Lock(val locked: Item with Interactable) extends Item with Intera
     * @param state the character accessing the item
     * @return the time the interaction takes
     */
-  abstract def interactLocked(state: CharacterState): Int
+  def interactLocked(state: CharacterState): Int
 
   /**
     * The interaction ran when the lock is unlocked
@@ -38,5 +38,5 @@ abstract class Lock(val locked: Item with Interactable) extends Item with Intera
     * @param state the character accessing the item
     * @return the time the interaction takes
     */
-  abstract def isLocked(state: CharacterState): Boolean
+  def isLocked(state: CharacterState): Boolean
 }
