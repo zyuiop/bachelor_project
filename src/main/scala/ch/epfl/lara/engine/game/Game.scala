@@ -123,7 +123,7 @@ abstract class Game {
     println(command + "; " + parser + "; " + action)
 
     if (action.isSuccess) {
-      val time = action.get.execute(state)
+      val time = action.get.apply(state)
       GameState.get.scheduler.addTime(time)
     } else {
       printStream.println(action.failed.get.getMessage)

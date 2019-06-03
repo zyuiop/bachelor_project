@@ -12,7 +12,5 @@ trait Action extends (CharacterState => Int) {
     * @param inState the state of the level at the beggining
     * @return the time it took to execute this action, in seconds
     */
-  def execute(inState: CharacterState): Int = apply(inState)
-
-  def apply(v1: CharacterState): Int
+  def apply(inState: CharacterState): Int
 }

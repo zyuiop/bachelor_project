@@ -126,7 +126,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
         // Compile action
         val command = resolve(act).asString.split(" ")
         val action = entity.updateParser(ActionsRegistry.actionsParser)(command).get
-        val time = action.execute(entity)
+        val time = action(entity)
 
         if (!immediate)
           suspendFor(time)

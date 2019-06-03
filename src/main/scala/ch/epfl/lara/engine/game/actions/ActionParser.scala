@@ -1,7 +1,5 @@
 package ch.epfl.lara.engine.game.actions
 
-import ch.epfl.lara.engine.game.actions.general._
-
 import scala.util.{Failure, Try}
 
 /**
@@ -31,7 +29,7 @@ class ActionParser(val actions: Map[String, Seq[ActionBuilder]]) extends ActionB
 
   def addBuilders(builders: ActionBuilder*): ActionParser = {
     val buildersMap = ActionParser.buildersToMap(builders)
-    val nActions: Map[String, Seq[ActionBuilder]] = actions ++ buildersMap.map{ case (k, v) => (k, actions.getOrElse(k, Nil) ++ v) }
+    val nActions: Map[String, Seq[ActionBuilder]] = actions ++ buildersMap.map { case (k, v) => (k, actions.getOrElse(k, Nil) ++ v) }
 
     new ActionParser(nActions)
   }

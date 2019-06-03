@@ -20,11 +20,3 @@ trait ActionBuilder {
     */
   val triggeringKeywords: Set[String]
 }
-
-object ActionBuilder {
-  def apply(triggering: Set[String], builder: Array[String] => Try[Action]): ActionBuilder =
-    new ActionBuilder {
-      override def apply(input: Array[String]): Try[Action] = builder(input)
-      override val triggeringKeywords: Set[String] = triggering
-    }
-}
