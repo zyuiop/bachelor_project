@@ -2,11 +2,10 @@ package ch.epfl.lara.engine.game.data
 
 import java.io.{File, PrintStream, Reader}
 
-import ch.epfl.lara.engine.game.control.ActionCompiler
-import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities._
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.interactables.DoorItem
+import ch.epfl.lara.engine.game.items.locks.InvisibleLock
 import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.collection.mutable
@@ -19,26 +18,38 @@ object LevelParser extends BaseParser {
 
   import Properties._
 
-  private val itemTypes: mutable.Map[String, Map[String, String] => Item] = mutable.Map()
+  private val itemTypes: mutable.Map[String, Map[String, String] => Interactable] = mutable.Map()
+  private val lockTypes: mutable.Map[String, (Interactable, Map[String, String]) => Interactable] = mutable.Map()
 
   /**
     * Add a new item type to the parser
-    * @param name the name of the item type
+    *
+    * @param name    the name of the item type
     * @param builder the builder, taking a map of properties and returning an item
     */
-  def registerItemType(name: String)(builder: Map[String, String] => Item): Unit = {
+  def registerItemType(name: String)(builder: Map[String, String] => Interactable): Unit = {
     itemTypes.put(name, builder)
   }
 
-  private def item = "[item]" ~! properties ^? {
-    case _ ~ props =>
+  /**
+    * Add a new lock type to the parser
+    *
+    * @param name    the name of the lock type
+    * @param builder the builder, taking a map of properties and returning a lock
+    */
+  def registerLockType(name: String)(builder: (Interactable, Map[String, String]) => Interactable): Unit = {
+    lockTypes.put(name, builder)
+  }
+
+  private def item = "[item]" ~! properties ~ lock.* ^? {
+    case _ ~ props ~ locks =>
       val itemType = props("type").toLowerCase()
       val typeParser = itemTypes.get(itemType)
 
       if (typeParser.isEmpty)
         throw new IllegalArgumentException("unknown item type " + itemType)
 
-      val item: Item = typeParser.get(props)
+      val item: Item = locks.foldLeft(typeParser.get(props))((item, builder) => builder(item))
 
       (props.get("position"), item) match {
         case (Some(location), i: Interactable) => Some(Position.parse(location), i)
@@ -47,30 +58,32 @@ object LevelParser extends BaseParser {
       }
   }
 
+  private def lock = "[lock]" ~! properties ^? {
+    case _ ~ props =>
+      val lockType = props("type").toLowerCase()
+      val typeParser = lockTypes.get(lockType)
+
+      if (typeParser.isEmpty)
+        throw new IllegalArgumentException("unknown lock type " + lockType)
+
+      item: Interactable => typeParser.get.apply(item, props)
+  }
+
+
+
   private def room = "[room]" ~ properties ~ item.* ^^ {
     case _ ~ props ~ optItems =>
       val id = props("id")
 
       val startInv = props.inventory("inv")
-
-      val items = optItems filter (_.isDefined) map (_.get)
-
-      val interactables: Map[String, Map[Position, Item with Interactable]] =
-        items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
-
       new RoomBuilder(id) {
-        override def apply(v1: List[Door]): Room = {
-          val i: Map[String, Map[Position, Item with Interactable]] = interactables ++ v1.groupBy(_.doorType.name).mapValues(list => list.groupBy(door => {
-            if (door.left == id) door.leftPos
-            else door.rightPos
-          }).mapValues(_.map(door => {
-            if (door.left == id) new DoorItem(door.doorType.name, door.right, door.doorType.describe(true))
-            else new DoorItem(door.doorType.name, door.left, door.doorType.describe(false))
-          }.asInstanceOf[Item with Interactable]).head))
+        override def apply(v1: List[(Position, Item with Interactable)]): Room = {
+          val items = (optItems filter (_.isDefined) map (_.get)) ++ v1
 
-          println("Interactables " + i)
+          val interactables: Map[String, Map[Position, Item with Interactable]] =
+            items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
 
-          new Room(id, props("name"), props("ambient"), startInv, i)
+          new Room(id, props("name"), props("ambient"), startInv, interactables)
         }
       }
   }
@@ -103,16 +116,17 @@ object LevelParser extends BaseParser {
 
   private def door: Parser[DoorBuilder] = "[door]" ~ properties ^^ {
     case _ ~ props =>
-      // Keys
-      val openCondition = props.get("openCondition")
-        .map(ActionCompiler.compileValue)
-        .map(v => new ConditionExecutionContext(v))
-        .map(v => (c: CharacterState) => v.checkCondition(v.characterEnv(c)))
-        .getOrElse((_: CharacterState) => true)
-
-
       (doorTypeGetter: String => DoorType) =>
-        Door(props("left"), props("right"), Position.parse(props("leftPos")), Position.parse(props("rightPos")), doorTypeGetter(props("doorType")), openCondition)
+        val dt = doorTypeGetter(props("doorType"))
+
+        val condition: Item with Interactable => Item with Interactable = if (props.contains("openCondition")) {
+          item: Item with Interactable => new InvisibleLock(item, "The door is locked", props("openCondition"))
+        } else _
+
+        Map(
+          props("left") -> List((Position.parse(props("leftPos")), condition(new DoorItem(dt.name, props("right"), dt.describe(true))))),
+          props("right") -> List((Position.parse(props("rightPos")), condition(new DoorItem(dt.name, props("left"), dt.describe(false)))))
+        )
   }
 
   private def program = (not(guard("[programEnd]")) ~ ".+".r).* ~! "[programEnd]" ^^ { case l ~ _ => l.map(_._2).mkString("\n") }
@@ -186,14 +200,12 @@ object LevelParser extends BaseParser {
 
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
-      val mappedDoors = doors map { case f: DoorBuilder => f(doorTypes) }
+      val mappedDoors = doors.foldLeft(Map.empty[String, List[(Position, Interactable)]])((map, obj) => map ++ obj.asInstanceOf[DoorBuilder](doorTypes))
       val reg = RoomRegistry(
         rooms.map(_.asInstanceOf[RoomBuilder]).map(builder => {
-          val doors = mappedDoors.filter(d => d.left == builder.roomId || d.right == builder.roomId)
-          builder(doors)
-        }),
-        mappedDoors
-        )
+          builder(mappedDoors.getOrElse(builder.roomId, List()))
+        })
+      )
 
       LevelDescriptor(reg, characters.map(_.asInstanceOf[CharaBuilder].apply(reg.getRoom)),
         routines.map(_.asInstanceOf[RoutineDescriptor]), levels.head.asInstanceOf[LevelData],
@@ -201,13 +213,13 @@ object LevelParser extends BaseParser {
     }
   }
 
-  private abstract class DoorBuilder extends ((String => DoorType) => Door) {}
+  private abstract class DoorBuilder extends ((String => DoorType) => Map[String, List[(Position, Item with Interactable)]]) {}
 
   private abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
 
   private abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
-  private abstract class RoomBuilder(val roomId: String) extends (List[Door] => Room) {}
+  private abstract class RoomBuilder(val roomId: String) extends (List[(Position, Item with Interactable)] => Room) {}
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {

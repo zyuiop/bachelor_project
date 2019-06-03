@@ -7,6 +7,7 @@ import ch.epfl.lara.engine.game.actions.general._
 import ch.epfl.lara.engine.game.data.{LevelParser, LevelsManager}
 import ch.epfl.lara.engine.game.entities.PlayerState
 import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, DoorItem, InventoryHolderItem, SwitchItem}
+import ch.epfl.lara.engine.game.items.locks.{InvisibleLock, PhysicalLock}
 
 import scala.util.Try
 
@@ -37,6 +38,18 @@ abstract class Game {
 
   LevelParser.registerItemType("door") { props =>
     new DoorItem(props("name"), props("target"), props("description"))
+  }
+
+  LevelParser.registerLockType("condition") { (item, props) =>
+    new InvisibleLock(item, props("message"), props("condition"))
+  }
+
+  LevelParser.registerLockType("lock") { (item, props) =>
+    val name = props("name")
+    new PhysicalLock(item, name, props.getOrElse("helper", ""), props("code"),
+      props.getOrElse("successMessage", s"You opened the $name!"),
+      props.getOrElse("failMessage", s"Wrong code! Try again..."),
+    )
   }
 
   LevelParser.registerItemType("book") { props => new BookItem(props("name"), props.prefixed("pages")) }

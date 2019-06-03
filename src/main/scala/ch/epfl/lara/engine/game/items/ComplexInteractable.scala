@@ -21,7 +21,7 @@ trait ComplexInteractable extends Interactable with ActionInterceptor {
     5
   }
 
-  private def close(state: CharacterState): Int = {
+  protected def close(state: CharacterState): Int = {
     printClose(state.ps)
     state.stopInteracting()
     3

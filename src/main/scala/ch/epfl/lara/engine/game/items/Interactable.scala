@@ -5,7 +5,7 @@ import ch.epfl.lara.engine.game.entities.CharacterState
 /**
   * @author Louis Vialar
   */
-trait Interactable {
+trait Interactable extends Item {
   /**
     * Computes the result of the player interacting with this entity
     *

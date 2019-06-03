@@ -34,8 +34,8 @@ object RoomRegistry {
     }
   }
 
-  def apply(rooms: Seq[Room], doors: Seq[Door]): RoomRegistry = {
-    val registry = RoomRegistry(addRooms(Map(), rooms), addDoors(Map(), doors))
+  def apply(rooms: Seq[Room]): RoomRegistry = {
+    val registry = RoomRegistry(addRooms(Map(), rooms), Map())
 
     if (!registry.areDoorsValid) {
       val invalidDoors = registry.invalidDoors.map(d => s"(${d.doorType.name} from ${d.left} to ${d.right})").mkString(", \n")
