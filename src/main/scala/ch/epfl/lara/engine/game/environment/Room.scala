@@ -27,20 +27,12 @@ class Room(val id: String, val name: String, val ambient: String,
   override def updateParser(previousParser: ActionParser): ActionParser = inventory.updateParser(previousParser)
 
   def describe(): String = {
-    def describeDoors: String = {
-      GameState.level.getDoors(this).map {
-        case (pos, door) =>
-          val targetRoom = GameState.level.getRoom(door.getTargetRoom(this)).name
-          s"At the $pos there is a ${door.doorType.name} leading to $targetRoom"
-      }.mkString("\n")
-    }
-
     def describeInteracts: String = {
       if (interactable.nonEmpty) {
-        "\n" + interactable.flatMap {
-          case (name, items) =>
+        interactable.flatMap {
+          case (_, items) =>
             items.map {
-              case (direction, _) => s"At the $direction there is a $name"
+              case (direction, item) => s"At the $direction there is ${item.describe}"
             }
         }.mkString("\n")
       } else ""
@@ -48,7 +40,7 @@ class Room(val id: String, val name: String, val ambient: String,
 
     s"""You are in: $name.
        |$ambient
-       |$describeDoors $describeInteracts""".stripMargin
+       |$describeInteracts""".stripMargin
   }
 
   def handle(message: Message): Unit = {
@@ -61,6 +53,12 @@ class Room(val id: String, val name: String, val ambient: String,
       else if (m.isEmpty) None
       else Some(m.head._2)
     })
+  }
+
+  def getDoor(position: Position): Option[Item with Interactable] = {
+    val doors = interactable.values.flatMap(m => m.get(position)).filter(_.isDoor)
+    if (doors.size > 1) None
+    else doors.headOption
   }
 
   def switches: Map[String, String] = interactable.values.flatMap(_.values)

@@ -25,4 +25,8 @@ class DoorItem(val displayName: String, targetRoom: String, description: String)
 
     7
   }
+
+  override def isDoor: Boolean = true
+
+  override def describe: String = super.describe + " leading to " + GameState.level.getRoom(targetRoom).name
 }

@@ -6,7 +6,7 @@ import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.actions.general._
 import ch.epfl.lara.engine.game.data.{LevelParser, LevelsManager}
 import ch.epfl.lara.engine.game.entities.PlayerState
-import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, InventoryHolderItem, SwitchItem}
+import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, DoorItem, InventoryHolderItem, SwitchItem}
 
 import scala.util.Try
 
@@ -33,6 +33,10 @@ abstract class Game {
     val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
 
     new DescriptiveItem(props("name"), props("lore"), time)
+  }
+
+  LevelParser.registerItemType("door") { props =>
+    new DoorItem(props("name"), props("target"), props("description"))
   }
 
   LevelParser.registerItemType("book") { props => new BookItem(props("name"), props.prefixed("pages")) }

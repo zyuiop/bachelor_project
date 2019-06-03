@@ -1,10 +1,12 @@
 package ch.epfl.lara.engine.game.data
 
 import java.io.{File, PrintStream, Reader}
+
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities._
 import ch.epfl.lara.engine.game.environment._
+import ch.epfl.lara.engine.game.items.interactables.DoorItem
 import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.collection.mutable
@@ -47,6 +49,8 @@ object LevelParser extends BaseParser {
 
   private def room = "[room]" ~ properties ~ item.* ^^ {
     case _ ~ props ~ optItems =>
+      val id = props("id")
+
       val startInv = props.inventory("inv")
 
       val items = optItems filter (_.isDefined) map (_.get)
@@ -54,7 +58,21 @@ object LevelParser extends BaseParser {
       val interactables: Map[String, Map[Position, Item with Interactable]] =
         items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
 
-      new Room(props("id"), props("name"), props("ambient"), startInv, interactables)
+      new RoomBuilder(id) {
+        override def apply(v1: List[Door]): Room = {
+          val i: Map[String, Map[Position, Item with Interactable]] = interactables ++ v1.groupBy(_.doorType.name).mapValues(list => list.groupBy(door => {
+            if (door.left == id) door.leftPos
+            else door.rightPos
+          }).mapValues(_.map(door => {
+            if (door.left == id) new DoorItem(door.doorType.name, door.right, door.doorType.describe(true))
+            else new DoorItem(door.doorType.name, door.left, door.doorType.describe(false))
+          }.asInstanceOf[Item with Interactable]).head))
+
+          println("Interactables " + i)
+
+          new Room(id, props("name"), props("ambient"), startInv, i)
+        }
+      }
   }
 
   private def doorType = "[doortype]" ~ properties ^^ {
@@ -157,7 +175,7 @@ object LevelParser extends BaseParser {
   private def file = phrase(rep(room | door | doorType | routine | character | player | level)) ^^ {
     l => {
       val (types, r1) = l.partition(_.isInstanceOf[DoorType])
-      val (rooms, r2) = r1.partition(_.isInstanceOf[Room])
+      val (rooms, r2) = r1.partition(_.isInstanceOf[RoomBuilder])
       val (doors, r3) = r2.partition(_.isInstanceOf[DoorBuilder])
       val (characters, r4) = r3.partition(_.isInstanceOf[CharaBuilder])
       val (routines, r5) = r4.partition(_.isInstanceOf[RoutineDescriptor])
@@ -168,9 +186,14 @@ object LevelParser extends BaseParser {
 
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
+      val mappedDoors = doors map { case f: DoorBuilder => f(doorTypes) }
       val reg = RoomRegistry(
-        rooms.map(_.asInstanceOf[Room]),
-        doors map { case f: DoorBuilder => f(doorTypes) })
+        rooms.map(_.asInstanceOf[RoomBuilder]).map(builder => {
+          val doors = mappedDoors.filter(d => d.left == builder.roomId || d.right == builder.roomId)
+          builder(doors)
+        }),
+        mappedDoors
+        )
 
       LevelDescriptor(reg, characters.map(_.asInstanceOf[CharaBuilder].apply(reg.getRoom)),
         routines.map(_.asInstanceOf[RoutineDescriptor]), levels.head.asInstanceOf[LevelData],
@@ -183,6 +206,8 @@ object LevelParser extends BaseParser {
   private abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
 
   private abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
+
+  private abstract class RoomBuilder(val roomId: String) extends (List[Door] => Room) {}
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {

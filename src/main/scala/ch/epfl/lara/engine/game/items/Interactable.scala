@@ -13,4 +13,6 @@ trait Interactable {
     * @return the time the interaction took
     */
   def interact(state: CharacterState): Int
+
+  def isDoor: Boolean = false
 }

@@ -1,10 +1,8 @@
 package ch.epfl.lara.engine.game.actions.general
 
-import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
 import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.environment.Position
-import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
 
 import scala.util.Try
 
@@ -13,25 +11,17 @@ import scala.util.Try
   */
 case class ActionUseDoor(direction: Position) extends Action {
   override def apply(inState: CharacterState): Int = {
-    inState.getDoor(direction) match {
+    val room = inState.currentRoom
+
+    room.getDoor(direction) match {
       case Some(door) =>
-        if (door.isOpen(inState)) {
-          val (roomId, pos) = door.use(inState.currentRoom)(inState.ps)
-          val room = GameState.level.getRoom(roomId)
+        door.interact(inState)
 
-          inState.changeRoom(room)
-
-          7
-        } else {
-          inState.ps.println(s"The door is locked...")
-
-          5
-        }
+        5
       case None =>
         inState.ps.println(s"There is no door here...")
         0
     }
-
   }
 
 }
@@ -56,5 +46,5 @@ object ActionUseDoor extends ActionBuilder {
   /**
     * All the keywords that CAN trigger this builder
     */
-  override val triggeringKeywords: Set[String] = Set("use", "take", "pass", "climb", "descend", "move", "go","walk")
+  override val triggeringKeywords: Set[String] = Set("use", "take", "pass", "climb", "descend", "move", "go", "walk")
 }
