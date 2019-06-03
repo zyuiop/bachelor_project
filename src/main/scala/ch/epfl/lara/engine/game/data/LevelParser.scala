@@ -10,11 +10,12 @@ import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.parsing.combinator.RegexParsers
 
 /**
   * @author Louis Vialar
   */
-object LevelParser extends BaseParser {
+object LevelParser extends RegexParsers {
 
   import Properties._
 
@@ -40,6 +41,28 @@ object LevelParser extends BaseParser {
   def registerLockType(name: String)(builder: (Interactable, Map[String, String]) => Interactable): Unit = {
     lockTypes.put(name, builder)
   }
+
+  private def identifier: Parser[String] = {
+    def simpleIdentifier = "[a-zA-Z_][a-zA-Z0-9_]*".r ^^ { str => str }
+
+    def anyIdentifier = "[a-zA-Z0-9_]*".r ^^ { str => str }
+
+    def spacedIdentifier = """`[^`]*`""".r ^^ { str => str drop 1 dropRight 1 }
+
+    chainl1(simpleIdentifier | spacedIdentifier, spacedIdentifier | anyIdentifier, "." ^^^ { (s1: String, s2: String) => s1 + "." + s2 } )
+  }
+
+  private def shortStringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
+
+  private def longStringLiteral: Parser[String] = "\"\"\".*\"\"\"".r ^^ { str => str drop 3 dropRight 3 replace("\\n", "\n") replace("\\t", "\t") }
+
+  private def stringLiteral = longStringLiteral ||| shortStringLiteral
+
+  private def intLiteral: Parser[String] = """[0-9]+""".r ^^ (v => v)
+
+  private def keyValue = identifier ~ "=" ~! (stringLiteral | intLiteral) ^^ { case l ~ eq ~ r => (l, r) }
+
+  private def properties = keyValue.+ ^^ { l => l.toMap }
 
   private def item = "[item]" ~! properties ~ lock.* ^? {
     case _ ~ props ~ locks =>

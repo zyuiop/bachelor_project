@@ -55,6 +55,12 @@ name = "padlock"
 helper = "It has 5 digits."
 code = "12345"
 
+[lock]
+type = "lock"
+name = "padlock"
+helper = "It has 5 letters."
+code = "ABCDE"
+
 [item]
 name = "cookbook"
 type = "book"
