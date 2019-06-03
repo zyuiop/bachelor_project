@@ -10,7 +10,6 @@ import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.collection.mutable
 import scala.io.Source
-import scala.util.Random
 
 /**
   * @author Louis Vialar
@@ -203,15 +202,14 @@ object LevelParser extends BaseParser {
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
       val mappedDoors = doors.foldLeft(Map.empty[String, List[(Position, Interactable)]])((map, obj) => map ++ obj.asInstanceOf[DoorBuilder](doorTypes))
-      val reg = RoomRegistry(
-        rooms.map(_.asInstanceOf[RoomBuilder]).map(builder => {
-          builder(mappedDoors.getOrElse(builder.roomId, List()))
-        })
-      )
+      val reg = rooms.map(_.asInstanceOf[RoomBuilder]).map(builder => builder.roomId -> {
+        builder(mappedDoors.getOrElse(builder.roomId, List()))
+      }).toMap
 
-      LevelDescriptor(reg, characters.map(_.asInstanceOf[CharaBuilder].apply(reg.getRoom)),
+
+      LevelDescriptor(reg, characters.map(_.asInstanceOf[CharaBuilder].apply(reg)),
         routines.map(_.asInstanceOf[RoutineDescriptor]), levels.head.asInstanceOf[LevelData],
-        players.head.asInstanceOf[PlayerBuilder](reg.getRoom))
+        players.head.asInstanceOf[PlayerBuilder](reg))
     }
   }
 

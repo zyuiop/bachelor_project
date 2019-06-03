@@ -2,8 +2,8 @@ package ch.epfl.lara.engine.game
 
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.data.LevelDescriptor
-import ch.epfl.lara.engine.game.entities.{CharacterState, EntitiesRegistry}
-import ch.epfl.lara.engine.game.environment.RoomRegistry
+import ch.epfl.lara.engine.game.entities.EntitiesRegistry
+import ch.epfl.lara.engine.game.environment.Room
 import ch.epfl.lara.engine.game.items.Pickable
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
@@ -12,7 +12,7 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class GameState(val level: RoomRegistry, val startTime: Int, val currency: Pickable, val levelData: LevelDescriptor,
+class GameState(val level: Map[String, Room], val startTime: Int, val currency: Pickable, val levelData: LevelDescriptor,
                 val levelSuccess: ConditionExecutionContext, val levelFailure: ConditionExecutionContext) {
 
   if (GameState.instance.nonEmpty) {
@@ -44,7 +44,7 @@ object GameState {
 
   def attributes: mutable.Map[String, String] = get.attributes
 
-  def level: RoomRegistry = get.level
+  def level: Map[String, Room] = get.level
 
   def registry: EntitiesRegistry = get.registry
 }

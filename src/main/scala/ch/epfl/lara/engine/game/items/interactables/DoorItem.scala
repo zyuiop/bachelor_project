@@ -14,7 +14,7 @@ class DoorItem(val displayName: String, targetRoom: String, description: List[St
   override def interact(state: CharacterState): Int = {
     state.ps.println(description(Random.nextInt(description.size)).capitalize + ".")
 
-    val room = GameState.level.getRoom(targetRoom)
+    val room = GameState.level(targetRoom)
     val prev = state.currentRoom
 
     state.ps.println(room.describe())
@@ -30,5 +30,5 @@ class DoorItem(val displayName: String, targetRoom: String, description: List[St
 
   override def isDoor: Boolean = true
 
-  override def describe: String = super.describe + " leading to " + GameState.level.getRoom(targetRoom).name
+  override def describe: String = super.describe + " leading to " + GameState.level(targetRoom).name
 }
