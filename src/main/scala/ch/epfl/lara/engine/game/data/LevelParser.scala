@@ -10,6 +10,7 @@ import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
 
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Random
 
 /**
   * @author Louis Vialar
@@ -125,8 +126,8 @@ object LevelParser extends BaseParser {
         }
 
         Map(
-          props("left") -> List((Position.parse(props("leftPos")), condition(new DoorItem(dt.name, props("right"), dt.describe(true))))),
-          props("right") -> List((Position.parse(props("rightPos")), condition(new DoorItem(dt.name, props("left"), dt.describe(false)))))
+          props("left") -> List((Position.parse(props("leftPos")), condition(new DoorItem(dt.name, props("right"), dt.leftToRight)))),
+          props("right") -> List((Position.parse(props("rightPos")), condition(new DoorItem(dt.name, props("left"), if (dt.rightToLeft.isEmpty) dt.leftToRight else dt.rightToLeft))))
         )
   }
 
@@ -221,6 +222,8 @@ object LevelParser extends BaseParser {
   private abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
   private abstract class RoomBuilder(val roomId: String) extends (List[(Position, Item with Interactable)] => Room) {}
+
+  private case class DoorType(name: String, leftToRight: List[String], rightToLeft: List[String] = Nil)
 
   def apply(content: String): LevelDescriptor = {
     parse(file, content) match {

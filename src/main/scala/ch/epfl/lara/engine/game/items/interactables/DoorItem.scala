@@ -5,12 +5,14 @@ import ch.epfl.lara.engine.game.entities.CharacterState
 import ch.epfl.lara.engine.game.items.{Interactable, Item}
 import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
 
+import scala.util.Random
+
 /**
   * @author Louis Vialar
   */
-class DoorItem(val displayName: String, targetRoom: String, description: String) extends Item with Interactable {
+class DoorItem(val displayName: String, targetRoom: String, description: List[String]) extends Item with Interactable {
   override def interact(state: CharacterState): Int = {
-    state.ps.println(description.capitalize + ".")
+    state.ps.println(description(Random.nextInt(description.size)).capitalize + ".")
 
     val room = GameState.level.getRoom(targetRoom)
     val prev = state.currentRoom

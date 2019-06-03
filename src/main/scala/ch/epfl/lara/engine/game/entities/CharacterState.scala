@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.entities
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
-import ch.epfl.lara.engine.game.environment.{Door, Position, Room}
+import ch.epfl.lara.engine.game.environment.{Position, Room}
 import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Inventory, InventoryLike, Item, Pickable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
@@ -56,10 +56,6 @@ class CharacterState(startRoom: Room,
 
   def changeAttribute(key: String, value: String): Unit = {
     this._attributes.update(key, value)
-  }
-
-  def getDoor(position: environment.Position): Option[Door] = {
-    GameState.level.getDoors(_currentRoom).get(position)
   }
 
   def spawn(): Unit = {
