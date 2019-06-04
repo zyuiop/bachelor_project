@@ -18,7 +18,6 @@ class InventoryHolderItem(name: String, initialItems: Map[Storable, Int]) extend
     super.printContent
   }
 
-  override def printClose(implicit ps: PrintStream): Unit = super[InventoryLike].printClose
 
 
   /**

@@ -17,7 +17,7 @@ trait InventoryInterceptor extends ActionInterceptor with InventoryLike {
     5
   }
 
-  handle("drop") { (state, args) =>
+  handle("drop", "put") { (state, args) =>
     transferItem(args, state.inventory, this, "dropped", "from", state.ps)
   }
 

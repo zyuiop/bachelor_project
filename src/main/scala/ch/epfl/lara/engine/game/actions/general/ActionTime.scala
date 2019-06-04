@@ -13,7 +13,7 @@ case class ActionTime() extends Action {
   override def apply(inState: CharacterState): Int = {
     import ch.epfl.lara.engine.game.scheduler.TimeUtils._
 
-    val time = GameState.scheduler.currentTime
+    val time = GameState.scheduler.dayTime
 
     inState.ps.println("It's currently " + time.timeString)
     0

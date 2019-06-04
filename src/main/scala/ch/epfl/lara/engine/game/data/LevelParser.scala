@@ -97,13 +97,14 @@ object LevelParser extends RegexParsers {
     case _ ~ props ~ optItems =>
       val id = props("id")
 
-      val startInv = props.inventory("inv")
       new RoomBuilder(id) {
         override def apply(v1: List[(Position, Item with Interactable)]): Room = {
           val items = (optItems filter (_.isDefined) map (_.get)) ++ v1
 
           val interactables: Map[String, Map[Position, Item with Interactable]] =
             items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
+
+          val startInv = props.inventory("inv")
 
           new Room(id, props("name"), props("ambient"), startInv, interactables)
         }
