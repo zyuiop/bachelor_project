@@ -8,7 +8,7 @@ import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Item}
 import scala.io.AnsiColor
 
 /**
-  * A real lock
+  * A real lock, that needs to be unlocked using a specific code that the user should guess.
   *
   * @author Louis Vialar
   */

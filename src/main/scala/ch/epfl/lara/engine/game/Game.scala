@@ -81,14 +81,6 @@ abstract class Game {
 
   def onQuitGame = this._onQuitGame
 
-  private val systemActionsParser = ActionParser(
-    ActionSaveGame // TODO: add quit, ...
-  )
-
-  def saveGame() = ???
-
-  def loadGame() = ???
-
   /**
     * Reference to the current player state
     */
@@ -133,5 +125,5 @@ abstract class Game {
     checkLevelState
   }
 
-  val parser: ActionParser = ActionsRegistry.actionsParser union systemActionsParser
+  val parser: ActionParser = ActionsRegistry.actionsParser
 }
