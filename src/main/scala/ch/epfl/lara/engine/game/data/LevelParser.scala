@@ -6,7 +6,7 @@ import ch.epfl.lara.engine.game.entities._
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.interactables.DoorItem
 import ch.epfl.lara.engine.game.items.locks.InvisibleLock
-import ch.epfl.lara.engine.game.items.{Interactable, Item, Pickable}
+import ch.epfl.lara.engine.game.items.{Interactable, Item, Storable}
 
 import scala.collection.mutable
 import scala.io.Source
@@ -76,7 +76,7 @@ object LevelParser extends RegexParsers {
 
       (props.get("position"), item) match {
         case (Some(location), i: Interactable) => Some(Position.parse(location), i)
-        case (None, _: Pickable) => None
+        case (None, _: Storable) => None
         case (None, _) => throw new IllegalArgumentException("missing value position for item " + item + ", props = " + props)
       }
   }
@@ -207,7 +207,7 @@ object LevelParser extends RegexParsers {
       val levelSuccess = props("levelSuccess")
       val levelFailure = props("levelFailure")
 
-      LevelData(Pickable(currencyItem), levelName, startText, endText, levelSuccess, levelFailure, startTime)
+      LevelData(Storable(currencyItem), levelName, startText, endText, levelSuccess, levelFailure, startTime)
   }
 
   private def file = phrase(rep(room | door | doorType | routine | character | player | level)) ^^ {

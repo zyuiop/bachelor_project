@@ -32,7 +32,7 @@ trait InventoryLike {
     ps.println(s"You close the $name.")
   }
 
-  def getContent: Map[Pickable, Int]
+  def getContent: Map[Storable, Int]
 
   /**
     * Take an item in this inventory, returning the updated inventory
@@ -41,7 +41,7 @@ trait InventoryLike {
     * @param quantity the amount of this item to take
     * @return the updated inventory
     */
-  def take(o: Pickable, quantity: Int): InventoryLike
+  def take(o: Storable, quantity: Int): InventoryLike
 
   /**
     * Add an item to this inventory, returning the updated inventory
@@ -50,7 +50,7 @@ trait InventoryLike {
     * @param quantity the amount of this item to add
     * @return the updated inventory
     */
-  def add(o: Pickable, quantity: Int): InventoryLike
+  def add(o: Storable, quantity: Int): InventoryLike
 
   /**
     * Check if an item can be taken from this inventory
@@ -59,7 +59,7 @@ trait InventoryLike {
     * @param quantity the quantity we wish to take
     * @return true if we can take this quantity of this item
     */
-  def canTake(o: Pickable, quantity: Int): Boolean
+  def canTake(o: Storable, quantity: Int): Boolean
 
   /**
     * Transfer objects from the current inventory to an other one. This operation returns a triple, containing the
@@ -70,13 +70,13 @@ trait InventoryLike {
     * @param quantity the quantity of objects to transfer
     * @return a triple (success, source, target)
     */
-  def transferTo(target: InventoryLike, o: Pickable, quantity: Int): (Boolean, InventoryLike, InventoryLike) = {
+  def transferTo(target: InventoryLike, o: Storable, quantity: Int): (Boolean, InventoryLike, InventoryLike) = {
     if (canTake(o, quantity)) {
       (true, take(o, quantity), target.add(o, quantity))
     } else (false, this, target)
   }
 
-  def getItemByName(itemName: String): Try[Pickable] = {
+  def getItemByName(itemName: String): Try[Storable] = {
     val acceptableItems = getContent.keySet.filter(i => i.displayName == itemName || i.displayName + "s" == itemName)
 
     if (acceptableItems.isEmpty)

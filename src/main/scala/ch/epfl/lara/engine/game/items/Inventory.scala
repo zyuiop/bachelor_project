@@ -7,10 +7,10 @@ import scala.collection.mutable
   *
   * @author Louis Vialar
   */
-class Inventory(initialContent: Map[Pickable, Int], val name: String) extends InventoryLike {
+class Inventory(initialContent: Map[Storable, Int], val name: String) extends InventoryLike {
   private val content = mutable.Map(initialContent.toList: _*)
 
-  def take(o: Pickable, quantity: Int): Inventory = {
+  def take(o: Storable, quantity: Int): Inventory = {
     if (quantity < 0)
       throw new IllegalArgumentException("quantity < 0")
 
@@ -24,7 +24,7 @@ class Inventory(initialContent: Map[Pickable, Int], val name: String) extends In
     this
   }
 
-  def add(o: Pickable, quantity: Int): Inventory = {
+  def add(o: Storable, quantity: Int): Inventory = {
     if (quantity < 0)
       throw new IllegalArgumentException("quantity < 0")
 
@@ -36,9 +36,9 @@ class Inventory(initialContent: Map[Pickable, Int], val name: String) extends In
     this
   }
 
-  def canTake(o: Pickable, quantity: Int): Boolean =
+  def canTake(o: Storable, quantity: Int): Boolean =
     quantity > 0 && content.getOrElse(o, 0) >= quantity
 
-  override def getContent: Map[Pickable, Int] = content.toMap
+  override def getContent: Map[Storable, Int] = content.toMap
 }
 

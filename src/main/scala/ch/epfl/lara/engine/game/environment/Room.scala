@@ -12,7 +12,7 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
   * @author Louis Vialar
   */
 class Room(val id: String, val name: String, val ambient: String,
-           initialItems: Map[Pickable, Int] = Map(),
+           initialItems: Map[Storable, Int] = Map(),
            interactable: Map[String, Map[Position, Item with Interactable]] = Map()) extends MessageHandler with ActionInterceptor {
 
   val inventory: InventoryLike with InventoryInterceptor = new Inventory(initialItems, "floor") with InventoryInterceptor {

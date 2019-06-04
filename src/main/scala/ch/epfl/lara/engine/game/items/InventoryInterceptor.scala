@@ -8,6 +8,7 @@ import scala.util.Try
 ;
 
 /**
+  * An interceptor that handles common inventory commands (list, drop, take)
   * @author Louis Vialar
   */
 trait InventoryInterceptor extends ActionInterceptor with InventoryLike {

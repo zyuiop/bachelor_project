@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
 import ch.epfl.lara.engine.game.environment.{Position, Room}
-import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Inventory, InventoryLike, Item, Pickable}
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Inventory, InventoryLike, Item, Storable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, SystemMessage, TalkingMessage}
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 import ch.epfl.lara.engine.game.{GameState, environment}
@@ -16,7 +16,7 @@ import scala.collection.mutable
   */
 class CharacterState(startRoom: Room,
                      val name: String,
-                     startInventory: Map[Pickable, Int] = Map.empty,
+                     startInventory: Map[Storable, Int] = Map.empty,
                      startAttributes: Map[String, String] = Map.empty,
                      out: PrintStream = Console.out) extends MessageHandler with ActionInterceptor {
 

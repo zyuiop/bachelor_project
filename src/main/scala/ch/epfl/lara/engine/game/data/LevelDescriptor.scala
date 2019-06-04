@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.environment.Room
-import ch.epfl.lara.engine.game.items.Pickable
+import ch.epfl.lara.engine.game.items.Storable
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
 
 /**
@@ -55,7 +55,7 @@ case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterSta
   }
 }
 
-case class LevelData(currency: Pickable, name: String, startText: String, endText: String,
+case class LevelData(currency: Storable, name: String, startText: String, endText: String,
                      levelSuccess: String, levelFailure: String, startTime: Int)
 
 case class RoutineDescriptor(startTime: Int, runEvery: Int, message: String)

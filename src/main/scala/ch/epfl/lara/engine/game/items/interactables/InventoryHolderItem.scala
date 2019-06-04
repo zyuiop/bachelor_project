@@ -2,12 +2,12 @@ package ch.epfl.lara.engine.game.items.interactables
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.items.{Interactable, InteractableInventory, Item, Inventory, Pickable}
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Inventory, InventoryInterceptor, Storable}
 
 /**
   * @author Louis Vialar
   */
-class InventoryHolderItem(name: String, initialItems: Map[Pickable, Int]) extends Inventory(initialItems, name) with Item with Interactable with InteractableInventory {
+class InventoryHolderItem(name: String, initialItems: Map[Storable, Int]) extends Inventory(initialItems, name) with ComplexInteractable with InventoryInterceptor {
   override def printContent(implicit printStream: PrintStream): Unit = {
     printStream.println(s"In the $name you find:")
     super.printContent
@@ -17,6 +17,9 @@ class InventoryHolderItem(name: String, initialItems: Map[Pickable, Int]) extend
     ps.println(s"You open the $name. It contains: ")
     super.printContent
   }
+
+  override def printClose(implicit ps: PrintStream): Unit = super[InventoryLike].printClose
+
 
   /**
     * The name under which this item can be referenced from the command line

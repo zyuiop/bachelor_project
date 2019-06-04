@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.data
 
-import ch.epfl.lara.engine.game.items.Pickable
+import ch.epfl.lara.engine.game.items.Storable
 
 /**
   * @author Louis Vialar
@@ -19,8 +19,8 @@ object Properties {
       map.filter(_._1.startsWith(prefix + ".")).map(pair => pair._1.drop(len) -> pair._2)
     }
 
-    def inventory(prefix: String): Map[Pickable, Int] =
-      prefixed(prefix).map(pair => Pickable(pair._1) -> pair._2.toInt)
+    def inventory(prefix: String): Map[Storable, Int] =
+      prefixed(prefix).map(pair => Storable(pair._1) -> pair._2.toInt)
 
     /**
       * Extract all the values whose keys prefixed with a given string from a map, removing the prefix from the key

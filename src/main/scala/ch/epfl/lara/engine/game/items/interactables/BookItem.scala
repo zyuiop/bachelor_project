@@ -2,12 +2,12 @@ package ch.epfl.lara.engine.game.items.interactables
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.items.{ComplexInteractable, Pickable}
+import ch.epfl.lara.engine.game.items.{ComplexInteractable, Storable}
 
 /**
   * @author Louis Vialar
   */
-class BookItem(override val displayName: String, pages: Map[String, String]) extends Pickable with ComplexInteractable {
+class BookItem(override val displayName: String, pages: Map[String, String]) extends Storable with ComplexInteractable {
   handle("open", "go", "read") { (state, args) =>
     val sectionName = (if (args.head == "to") args drop 1 else args) mkString " "
 

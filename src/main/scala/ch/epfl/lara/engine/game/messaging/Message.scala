@@ -1,11 +1,12 @@
 package ch.epfl.lara.engine.game.messaging
 
 import ch.epfl.lara.engine.game.entities.CharacterState
-import ch.epfl.lara.engine.game.items.Pickable
+import ch.epfl.lara.engine.game.items.Storable
 import ch.epfl.lara.engine.game.messaging.Message.{SystemMessage, TradeRequestResult}
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 
 /**
+  * Messages are the way differente characters in the world communicate with each other.
   * @author Louis Vialar
   */
 sealed trait Message {
@@ -52,15 +53,15 @@ object Request {
   }
 
   case class InventoryTradeRequest(sentBy: CharacterState, target: CharacterState,
-                                   sentItems: Map[Pickable, Int],
-                                   requestedItems: Map[Pickable, Int]
+                                   sentItems: Map[Storable, Int],
+                                   requestedItems: Map[Storable, Int]
                                   ) extends Request {
 
 
-    private def buildItemLine(line: (Pickable, Int)): String =
+    private def buildItemLine(line: (Storable, Int)): String =
       line._2 + "\t*\t" + line._1.displayName
 
-    private def buildItemList(list: Map[Pickable, Int]): String =
+    private def buildItemList(list: Map[Storable, Int]): String =
       if (list.size == 1) buildItemLine(list.head)
       else "\n\t" + list.map(buildItemLine).mkString("\n\t")
 

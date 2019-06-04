@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.environment.{Position, Room}
-import ch.epfl.lara.engine.game.items.{InventoryLike, Pickable}
+import ch.epfl.lara.engine.game.items.{InventoryLike, Storable}
 import ch.epfl.lara.engine.game.messaging.Message.{RoomMovement, TalkingMessage, TradeRequestResult}
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
@@ -12,7 +12,7 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler, Request}
 /**
   * @author Louis Vialar
   */
-class TraderNPC(room: Room, name: String, startInventory: Map[Pickable, Int], val prices: Map[Pickable, Int])
+class TraderNPC(room: Room, name: String, startInventory: Map[Storable, Int], val prices: Map[Storable, Int])
   extends CharacterState(room, name, startInventory, Map(), new PrintStream(_ => ()))
     with NPC {
 

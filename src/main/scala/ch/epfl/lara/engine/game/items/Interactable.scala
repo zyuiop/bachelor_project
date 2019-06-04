@@ -3,6 +3,8 @@ package ch.epfl.lara.engine.game.items
 import ch.epfl.lara.engine.game.entities.CharacterState
 
 /**
+  * An item with which you can interact
+  *
   * @author Louis Vialar
   */
 trait Interactable extends Item {
