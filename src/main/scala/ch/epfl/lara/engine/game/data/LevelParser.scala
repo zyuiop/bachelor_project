@@ -262,7 +262,7 @@ object LevelParser extends RegexParsers {
   }
 
   def readLevel(directory: File): LevelDescriptor = {
-    val input = directory.listFiles().map(file => {
+    val input = directory.listFiles(file => file.getName.endsWith(".txt")).map(file => {
       val src = Source.fromFile(file)
       val ret = src.getLines().mkString("\n")
       src.close()
