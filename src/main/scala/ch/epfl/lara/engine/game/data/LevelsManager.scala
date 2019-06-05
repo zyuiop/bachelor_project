@@ -22,7 +22,7 @@ class LevelsManager {
 
   private var currentLevel = 0
 
-  def startNextLevel(implicit printStream: PrintStream): Option[PlayerState] = {
+  def startNextLevel(implicit printStream: PrintStream, imageSetter: Option[String] => Unit): Option[PlayerState] = {
     currentLevel += 1
     if (levels.length < currentLevel) {
       printStream.println()
@@ -35,7 +35,7 @@ class LevelsManager {
     }
   }
 
-  def restartLevel(implicit printStream: PrintStream): PlayerState = {
+  def restartLevel(implicit printStream: PrintStream, imageSetter: Option[String] => Unit): PlayerState = {
     val level = levels(currentLevel - 1)
 
     level.startLevel

@@ -11,7 +11,7 @@ import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 /**
   * @author Louis Vialar
   */
-class Room(val id: String, val name: String, val ambient: String,
+class Room(val id: String, val name: String, val ambient: String, val image: Option[String],
            initialItems: Map[Storable, Int] = Map(),
            interactable: Map[String, Map[Position, Item with Interactable]] = Map()) extends MessageHandler with ActionInterceptor {
 

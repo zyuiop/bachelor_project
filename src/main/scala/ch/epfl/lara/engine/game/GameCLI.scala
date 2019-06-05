@@ -9,6 +9,7 @@ import scala.io.StdIn
   */
 object GameCLI extends Game {
   override val printStream: PrintStream = Console.out
+  override implicit val imageSetter: Option[String] => Unit = _ => ()
 
   def main(args: Array[String]): Unit = {
     startGame()
@@ -27,5 +28,4 @@ object GameCLI extends Game {
 
   onFinishGame = quitGame
   onQuitGame = quitGame
-
 }

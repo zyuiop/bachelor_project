@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game
 
-import java.io.{OutputStream, PrintStream}
+import java.io.{File, FileInputStream, OutputStream, PrintStream}
 
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import scalafx.Includes._
@@ -8,7 +8,7 @@ import scalafx.application.{JFXApp, Platform}
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.control.{ScrollPane, TextField}
-import scalafx.scene.image.ImageView
+import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.input.KeyCode
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.text.{Text, TextAlignment, TextFlow}
@@ -23,9 +23,17 @@ object GameGUI extends Game with JFXApp {
     textAlignment = TextAlignment.Left
   }
 
+  private lazy val imageView = new ImageView
+
   def runOnFxThread[R](op: => R): Unit = {
     if (!Platform.isFxApplicationThread) Platform.runLater(op)
     else op
+  }
+
+
+  override implicit val imageSetter: Option[String] => Unit = _ map (i => new File(i)) filter (_.exists) match {
+    case Some(imageFile) => imageView.image = new Image(new FileInputStream(imageFile))
+    case None => imageView.image = null
   }
 
   override val printStream: PrintStream = new PrintStream(new OutputStream {
@@ -114,7 +122,7 @@ object GameGUI extends Game with JFXApp {
     scene = new Scene {
       root = new BorderPane {
         padding = Insets(5)
-        top = new ImageView
+        top = imageView
         center = new ScrollPane {
           content = textarea
           fitToWidth = true

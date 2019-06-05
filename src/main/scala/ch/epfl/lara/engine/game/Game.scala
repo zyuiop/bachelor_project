@@ -69,6 +69,7 @@ abstract class Game {
   )
 
   implicit val printStream: PrintStream
+  implicit val imageSetter: Option[String] => Unit
 
   private var _onFinishGame: () => Unit = () => ()
   private var _onQuitGame: () => Unit = () => ()

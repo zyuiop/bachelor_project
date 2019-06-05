@@ -14,9 +14,9 @@ import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
   * @author Louis Vialar
   */
 case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterState], routines: List[RoutineDescriptor],
-                           data: LevelData, playerBuilder: PrintStream => PlayerState) {
+                           data: LevelData, playerBuilder: (PrintStream, Option[String] => Unit) => PlayerState) {
 
-  def startLevel(implicit printStream: PrintStream) = {
+  def startLevel(implicit printStream: PrintStream, imageSetter: Option[String] => Unit) = {
     // Compile transition
     val success = ActionCompiler.compileValue(data.levelSuccess)
     val failure = ActionCompiler.compileValue(data.levelFailure)
@@ -38,7 +38,7 @@ case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterSta
     // Init characters
     entities.foreach(_.spawn())
 
-    val player = playerBuilder(printStream)
+    val player = playerBuilder(printStream, imageSetter)
 
     // Init player
     player.spawn()

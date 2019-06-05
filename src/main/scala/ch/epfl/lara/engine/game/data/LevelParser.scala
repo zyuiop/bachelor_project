@@ -106,7 +106,7 @@ object LevelParser extends RegexParsers {
 
           val startInv = props.inventory("inv")
 
-          new Room(id, props("name"), props("ambient"), startInv, interactables)
+          new Room(id, props("name"), props("ambient"), props.get("image"), startInv, interactables)
         }
       }
   }
@@ -189,8 +189,8 @@ object LevelParser extends RegexParsers {
         val room = rooms(props("room"))
         val inv = props.inventory("inv")
 
-        (ps: PrintStream) => {
-          new PlayerState(room, ps, inv)
+        (ps: PrintStream, imgSetter: Option[String] => Unit) => {
+          new PlayerState(room, ps, inv, imgSetter)
         }
       }
   }
@@ -239,7 +239,7 @@ object LevelParser extends RegexParsers {
 
   private abstract class DoorBuilder extends ((String => DoorType) => Map[String, List[(Position, Item with Interactable)]]) {}
 
-  private abstract class PlayerBuilder extends ((String => Room) => PrintStream => PlayerState) {}
+  private abstract class PlayerBuilder extends ((String => Room) => ((PrintStream, Option[String] => Unit) => PlayerState)) {}
 
   private abstract class CharaBuilder extends ((String => Room) => CharacterState) {}
 
