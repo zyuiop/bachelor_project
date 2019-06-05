@@ -42,6 +42,7 @@ target = "1st-floor-kitchen"
 id = "1st-floor-kitchen"
 name = "Kitchen"
 ambient = "There are peanuts everywhere..."
+image = "data/images/kitchen.jpg"
 
 [item]
 name = "door"

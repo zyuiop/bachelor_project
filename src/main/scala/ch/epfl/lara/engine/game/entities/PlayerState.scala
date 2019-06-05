@@ -38,6 +38,12 @@ class PlayerState(startRoom: Room,
     controlled.foreach(_.currentRoom_=(target))
   }
 
+  override def spawn(): Unit = {
+    super.spawn()
+
+    imageSetter(currentRoom.image)
+  }
+
   override def changeAttribute(key: String, value: String): Unit = {
     super.changeAttribute(key, value)
 

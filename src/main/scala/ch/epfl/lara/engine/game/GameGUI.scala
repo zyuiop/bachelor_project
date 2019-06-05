@@ -23,7 +23,9 @@ object GameGUI extends Game with JFXApp {
     textAlignment = TextAlignment.Left
   }
 
-  private lazy val imageView = new ImageView
+  private lazy val imageView = new ImageView {
+    preserveRatio = true
+  }
 
   def runOnFxThread[R](op: => R): Unit = {
     if (!Platform.isFxApplicationThread) Platform.runLater(op)
@@ -117,7 +119,7 @@ object GameGUI extends Game with JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "The Game"
     width = 600
-    height = 450
+    height = 600
     onCloseRequest = () => runOnFxThread(Platform.exit())
     scene = new Scene {
       root = new BorderPane {
@@ -127,6 +129,7 @@ object GameGUI extends Game with JFXApp {
           content = textarea
           fitToWidth = true
           vvalue = 1.0
+          margin = Insets(5, 0, 5, 0)
 
           // AutoScroll
           textarea.height.delegate.addListener(new ChangeListener[Number] {
@@ -135,6 +138,7 @@ object GameGUI extends Game with JFXApp {
           })
         }
         bottom = textfield
+        imageView.fitWidth <== width.subtract(padding.value.getRight + padding.value.getLeft)
       }
     }
   }
