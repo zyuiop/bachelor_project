@@ -112,8 +112,6 @@ abstract class Game {
     // Run action
     val action = state.updateParser(parser)(command split " ")
 
-    println(command + "; " + parser + "; " + action)
-
     if (action.isSuccess) {
       val time = action.get.apply(state)
       GameState.get.scheduler.addTime(time)
