@@ -12,7 +12,7 @@ import scala.collection.immutable.List
 class ParserTest extends FlatSpec with Matchers {
   "The parser" should "parse easy conditions" in {
 
-    ActionCompiler.compileValue("""("peanut" in player.inventory._names && event.type == "enters" + " " + room.name || "peanuts" in characters.`Shop Keeper`.inventory)""") should be(
+    ActionCompiler.compileValue("test program", """("peanut" in player.inventory._names && event.type == "enters" + " " + room.name || "peanuts" in characters.`Shop Keeper`.inventory)""") should be(
       (Tree.And(
         Tree.In(
           Tree.StringLiteral("peanut"),
@@ -28,7 +28,7 @@ class ParserTest extends FlatSpec with Matchers {
           )
         ))))
 
-    ActionCompiler.compileValue("""(trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItem)""") should be(
+    ActionCompiler.compileValue("test program", """(trigger.type == "InventoryTradeRequest" && ! "peanut" in trigger.content.sentItem)""") should be(
       And(
         Eq(Identifier(List("trigger", "type")), StringLiteral("InventoryTradeRequest")),
         Not(In(StringLiteral("peanut"), Identifier(List("trigger", "content", "sentItem"))))
@@ -37,13 +37,13 @@ class ParserTest extends FlatSpec with Matchers {
   }
 
   it should "parse binary conditions" in {
-    ActionCompiler.compileValue("""(true || false && false || true)""") should be(
+    ActionCompiler.compileValue("test program", """(true || false && false || true)""") should be(
       Or(BooleanLiteral(true),
         And(BooleanLiteral(false),
           Or(BooleanLiteral(false), BooleanLiteral(true)))
       ))
 
-    ActionCompiler.compileValue("""((true || false) && (false || true))""") should be(
+    ActionCompiler.compileValue("test program", """((true || false) && (false || true))""") should be(
       And(
         Or(BooleanLiteral(true), BooleanLiteral(false)),
         Or(BooleanLiteral(false), BooleanLiteral(true)))
@@ -52,13 +52,13 @@ class ParserTest extends FlatSpec with Matchers {
   }
 
   it should "parse a basic operation" in {
-    ActionCompiler.compileValue("""(1 + 2 + 3 - id)""") should be(
+    ActionCompiler.compileValue("test program", """(1 + 2 + 3 - id)""") should be(
       Sum(IntLiteral(1), Sum(IntLiteral(2), Difference(IntLiteral(3), Identifier(List("id")))))
     )
   }
 
   it should "parse a basic chain of expressions" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """
         |do "something"
         |do now "something else"
@@ -72,7 +72,7 @@ class ParserTest extends FlatSpec with Matchers {
     )
   }
   it should "parse a basic block of expressions" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """
         |{
         |do "something"
@@ -88,7 +88,7 @@ class ParserTest extends FlatSpec with Matchers {
     )
   }
   it should "parse a basic block of expressions in the middle of expressions" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """
         |do "say plop"
         |{
@@ -110,7 +110,7 @@ class ParserTest extends FlatSpec with Matchers {
 
 
   it should "parse a basic set of conditions" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """
         |do "say plop"
         |if (id == otherId && true) {
@@ -149,7 +149,7 @@ class ParserTest extends FlatSpec with Matchers {
 
 
   it should "parse a basic set of conditions with no brackets" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """
         |do "say plop"
         |if (id == otherId && true)
@@ -198,7 +198,7 @@ class ParserTest extends FlatSpec with Matchers {
   }
 
   it should "parse NPC program correctly" in {
-    ActionCompiler.compileProgram(
+    ActionCompiler.compileProgram("test program", 
       """if (time % 3600 == 0 && (lost == null || !lost)) {
         | do "go south"
         | do "go east"

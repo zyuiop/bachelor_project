@@ -49,7 +49,7 @@ object LevelParser extends RegexParsers {
 
     def spacedIdentifier = """`[^`]*`""".r ^^ { str => str drop 1 dropRight 1 }
 
-    chainl1(simpleIdentifier | spacedIdentifier, spacedIdentifier | anyIdentifier, "." ^^^ { (s1: String, s2: String) => s1 + "." + s2 } )
+    chainl1(simpleIdentifier | spacedIdentifier, spacedIdentifier | anyIdentifier, "." ^^^ { (s1: String, s2: String) => s1 + "." + s2 })
   }
 
   private def shortStringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
@@ -72,12 +72,16 @@ object LevelParser extends RegexParsers {
       if (typeParser.isEmpty)
         throw new IllegalArgumentException("unknown item type " + itemType)
 
-      val item: Item = locks.foldLeft(typeParser.get(props))((item, builder) => builder(item))
+      try {
+        val item: Item = locks.foldLeft(typeParser.get(props))((item, builder) => builder(item))
 
-      (props.get("position"), item) match {
-        case (Some(location), i: Interactable) => Some(Position.parse(location), i)
-        case (None, _: Storable) => None
-        case (None, _) => throw new IllegalArgumentException("missing value position for item " + item + ", props = " + props)
+        (props.get("position"), item) match {
+          case (Some(location), i: Interactable) => Some(Position.parse(location), i)
+          case (None, _: Storable) => None
+          case (None, _) => throw new IllegalArgumentException("missing value position for item " + item + ", props = " + props)
+        }
+      } catch {
+        case e: Exception => throw new IllegalArgumentException("Cannot parse item " + props + "!", e)
       }
   }
 
@@ -186,13 +190,16 @@ object LevelParser extends RegexParsers {
 
   private def player: Parser[PlayerBuilder] = "[player]" ~! properties ^^ {
     case _ ~ props =>
-      (rooms: String => Room) => {
+      try { (rooms: String => Room) => {
         val room = rooms(props("room"))
         val inv = props.inventory("inv")
 
         (ps: PrintStream, imgSetter: Option[String] => Unit) => {
           new PlayerState(room, ps, inv, imgSetter)
         }
+      }
+      } catch {
+        case e: Exception => throw new IllegalArgumentException("Failed to instanciate player", e)
       }
   }
 

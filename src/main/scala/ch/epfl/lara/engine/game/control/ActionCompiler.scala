@@ -12,23 +12,23 @@ import ch.epfl.lara.engine.game.control.compiler.{CompileError, Lexer, Parser}
 object ActionCompiler {
   /* parseLogicalExpression(tokens: Seq[Token]): Either[CompileError, Tree.Value] */
 
-  private def compile[A](program: String, parser: List[Token] => Either[CompileError, A]): A = {
+  private def compile[A](context: String, program: String, parser: List[Token] => Either[CompileError, A]): A = {
     val tokens = Lexer(program)
 
     if (tokens.isRight) {
       parser(tokens.right.get) match {
         case Right(code) => code
         case Left(err) =>
-          prettyPrint("parser", err, program)
+          prettyPrint(context, "parser", err, program)
       }
     }
     else {
-      prettyPrint("lexer", tokens.left.get, program)
+      prettyPrint(context, "lexer", tokens.left.get, program)
     }
   }
 
-  def compileProgram(program: String): (Expression, List[When], List[On]) =
-    compile(program, Parser.apply) match {
+  def compileProgram(context: String, program: String): (Expression, List[When], List[On]) =
+    compile(context + "'s program", program, Parser.apply) match {
       // parseIte | parseDo | block | when
       case e: When => (EmptyExpr(), e :: Nil, Nil)
       case e: On => (EmptyExpr(), Nil, e :: Nil)
@@ -43,11 +43,11 @@ object ActionCompiler {
       case code => (code, Nil, Nil)
     }
 
-  def compileValue(value: String): Value =
-    compile(value, Parser.parseValue)
+  def compileValue(context: String, value: String): Value =
+    compile("condition " + context, value, Parser.parseValue)
 
-  private def prettyPrint(phase: String, error: CompileError, code: String) = {
-    println("----------- Compilation failed at " + phase + " -----------")
+  private def prettyPrint(context: String, phase: String, error: CompileError, code: String) = {
+    println(s"----------- Compilation of '$context' failed at '$phase' -----------")
 
     println(error.err)
     println("\tat " + error.location)

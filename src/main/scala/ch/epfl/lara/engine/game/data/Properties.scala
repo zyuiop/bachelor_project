@@ -29,6 +29,6 @@ object Properties {
       * @return a list, containing only the strings for which the key s verifies `prefix`.`s` is a key of `map`
       */
     def multiVal(prefix: String): List[String] =
-      prefixed(prefix).values.toList
+      map.get(prefix).toList ::: prefixed(prefix).values.toList
   }
 }

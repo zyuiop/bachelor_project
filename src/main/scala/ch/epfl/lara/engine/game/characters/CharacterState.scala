@@ -50,7 +50,7 @@ class CharacterState(startRoom: Room,
 
   def attributes: Map[String, String] = _attributes.toMap
 
-  protected def currentRoom_=(target: Room): Unit = {
+  private[characters] def currentRoom_=(target: Room): Unit = {
     this._currentRoom = target
   }
 

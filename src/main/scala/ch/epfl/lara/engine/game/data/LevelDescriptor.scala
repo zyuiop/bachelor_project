@@ -18,8 +18,8 @@ case class LevelDescriptor(rooms: Map[String, Room], characters: List[CharacterS
 
   def startLevel(implicit printStream: PrintStream, imageSetter: Option[String] => Unit) = {
     // Compile transition
-    val success = ActionCompiler.compileValue(data.levelSuccess)
-    val failure = ActionCompiler.compileValue(data.levelFailure)
+    val success = ActionCompiler.compileValue("level success", data.levelSuccess)
+    val failure = ActionCompiler.compileValue("level failure", data.levelFailure)
 
     // Init new GameState
     val startTime = data.startTime

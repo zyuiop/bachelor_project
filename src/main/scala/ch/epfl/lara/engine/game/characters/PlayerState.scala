@@ -53,4 +53,6 @@ class PlayerState(startRoom: Room,
   override def attributes: Map[String, String] = {
     super.attributes ++ controlled.map(_.attributes).getOrElse(Map())
   }
+
+  def currentName: String = controlled.map(_.name).getOrElse(name)
 }

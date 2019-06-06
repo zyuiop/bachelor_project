@@ -39,7 +39,7 @@ abstract class Game {
   LevelParser.registerItemType("door") { props =>
     val name = props("name")
     val desc = props.multiVal("description")
-    new DoorItem(name, props("target"), if (desc.isEmpty) List(s"You go through the $name.") else desc)
+    new DoorItem(name, props("target"), if (desc.isEmpty) List(s"You go through the $name") else desc)
   }
 
   LevelParser.registerLockType("condition") { (item, props) =>

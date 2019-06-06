@@ -1,0 +1,101 @@
+[room]
+id = "outside"
+name = "Outside"
+ambient = "You should not be here."
+
+[room]
+
+id = "classroom"
+name = "Classroom"
+ambient = """You are in a dark classroom, only lit by moon rays coming through the windows. In the room, there are 5 lines rows of tables with 10 chairs in each row. The blackboard is perfectly clean."""
+
+    [item]
+    name = "door"
+    type = "door"
+    description = "You go through the door."
+    position = "West"
+    target = "hall"
+
+    [item]
+    name = "schedule"
+    type = "descriptive"
+    position = "West"
+    lore = "The room seems to be used mostly for Calculus and Algebra classes... The title reads 'MA A0 364 - Fall 2000'"
+
+[room]
+id = "hall"
+name = "Hall"
+ambient = "You arrive in a dark hall."
+
+    [item]
+    name = "door"
+    type = "door"
+    description = ""
+    position = "North"
+    target = "outside"
+
+        [lock]
+        type = "condition"
+        condition = "false"
+        message = "The door is locked..."
+
+    [item]
+    name = "door"
+    type = "door"
+    description = ""
+    position = "South"
+    target = "outside"
+
+        [lock]
+        type = "condition"
+        condition = "false"
+        message = "The door is locked..."
+
+    [item]
+    name = "door"
+    type = "door"
+    description = "You go through the door"
+    position = "East"
+    target = "classroom"
+
+    [item]
+    name = "door"
+    type = "door"
+    description = "You go through the door"
+    position = "West"
+    target = "guards-office"
+
+        [lock]
+        type = "condition"
+        condition = "self.name == characters.player.name && self.currentName != characters.player.name"
+        message = "The door is locked..."
+
+[room]
+id = "guards-office"
+name = "Guard's Office"
+ambient = "You reach a small office, lit only by the small CCTV monitoring screens."
+
+    [item]
+    name = "screen"
+    type = "descriptive"
+    lore = "The images on the screen show mostly empty dark corridors."
+    position = "South"
+
+    [item]
+    name = "bed"
+    id = "bed"
+    type = "switch"
+    position = "West"
+
+    states.0 = "raised"
+    states.1 = "lying"
+
+    transitions.lying = "You lay down on the bed."
+    transitions.raised = "You stand up."
+
+    [item]
+    name = "door"
+    type = "door"
+    description = "You go through the door"
+    position = "East"
+    target = "hall"

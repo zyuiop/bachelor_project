@@ -19,8 +19,15 @@ object Lexer extends RegexParsers {
     simpleIdentifier | spacedIdentifier
   }
 
-  def stringLiteral: Parser[StringLiteral] = positioned {
-    """"[^"]*"""".r ^^ { str => StringLiteral(str drop 1 dropRight 1) }
+  def stringLiteral: Parser[StringLiteral] = {
+    def shortStringLiteral: Parser[String] = """"[^"]*"""".r ^^ { str => str drop 1 dropRight 1 }
+
+    def longStringLiteral: Parser[String] = "\"\"\".*\"\"\"".r ^^ { str => str drop 3 dropRight 3 replace("\\n", "\n") replace("\\t", "\t") }
+
+
+    positioned {
+      (longStringLiteral ||| shortStringLiteral) ^^ { str => StringLiteral(str)}
+    }
   }
 
   def intLiteral: Parser[IntLiteral] = positioned {

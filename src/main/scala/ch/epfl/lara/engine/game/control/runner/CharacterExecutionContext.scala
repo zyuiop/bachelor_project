@@ -1,19 +1,22 @@
 package ch.epfl.lara.engine.game.control.runner
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.actions.{ActionParser, ActionsRegistry}
-import ch.epfl.lara.engine.game.control.compiler.Tree._
+import ch.epfl.lara.engine.game.actions.ActionsRegistry
 import ch.epfl.lara.engine.game.characters.CharacterState
+import ch.epfl.lara.engine.game.control.compiler.Tree._
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
 import scala.collection.mutable
+import scala.collection.immutable
 
 /**
   * @author Louis Vialar
   */
 class CharacterExecutionContext(program: Expression, triggers: List[When], interrupts: List[On], character: CharacterState) extends BaseExecutionContext with MessageHandler {
   private var currentTime = 0
+
+  private val keywords = immutable.Set("time", "totalTime", "characters", "room", "state")
 
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
     // Shortcuts for self attributes
@@ -42,7 +45,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
 
   def runNow = runTick(GameState.scheduler.currentTime)
 
-  private def runTick(currentTick: Int): Unit = {
+  private def runTick(currentTick: Int): Unit = try {
     if (stopped)
       return
 
@@ -71,6 +74,8 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
       if (currentState.nextRun <= 0)
         execute(this.currentState.stack.pop())
     }
+  } catch {
+    case e: Exception => throw new RuntimeException("Error while running code for " + character.name, e)
   }
 
   def start(): Unit = {
@@ -135,7 +140,9 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
           GameState.scheduler.runOnce(0)((_, _) => GameState.scheduler.addTime(time))
       case Set(field, value) =>
         val path = field.parts
-        if (path.length == 1 || (path.length == 3 && path.head == "characters" && path(2) == "attributes")) {
+        if ((path.length == 1 && !keywords(path.head)) // Don't allow to update a toplevel value if it's part of the environment
+          || (path.length == 4 && path.head == "characters" && path(2) == "attributes")
+        ) {
           val key = path.last
           val entity: CharacterState = if (path.length > 1) path(1) match {
             case "me" => this.character
@@ -148,7 +155,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
             case other => other.asString
           })
         } else {
-          throw new UnsupportedOperationException("cannot modify " + path)
+          throw new UnsupportedOperationException("cannot modify " + path + " (read only value)")
         }
 
       case Sequence(exprs) =>

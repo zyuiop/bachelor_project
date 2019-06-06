@@ -10,7 +10,7 @@ import ch.epfl.lara.engine.game.items.{Interactable, Item}
   * @author Louis Vialar
   */
 class InvisibleLock(item: Item with Interactable, message: String, condition: String) extends Lock(item) {
-  private val _condition = new ConditionExecutionContext(ActionCompiler.compileValue(condition))
+  private val _condition = new ConditionExecutionContext(ActionCompiler.compileValue("lock of " + item.displayName, condition))
 
   /**
     * Checks if the lock is still locked
@@ -18,7 +18,7 @@ class InvisibleLock(item: Item with Interactable, message: String, condition: St
     * @param state the character accessing the item
     * @return the time the interaction takes
     */
-  override def isLocked(state: CharacterState): Boolean = _condition.checkCondition(_condition.characterEnv(state))
+  override def isLocked(state: CharacterState): Boolean = !_condition.checkCondition(_condition.characterEnv(state))
 
   /**
     * The interaction ran when the lock is still locked

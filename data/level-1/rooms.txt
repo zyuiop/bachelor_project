@@ -1,101 +1,76 @@
 [room]
-id = "outside"
-name = "Outside"
-ambient = "You should not be here."
+
+id = "lab-control"
+name = "Laboratory Control Room"
+ambient = """You wake up in a small dark room. All the walls are white, and slightly lit by a small light bulb hanging from the ceiling."""
+
+[item]
+
+name = "computer"
+type = "descriptive"
+lore = "You look at the computer, and see a lot of lines and digits moving really quickly. It seems this computer monitors signals but you can't really tell what these signals are."
+position = "East"
+
+[item]
+
+name = "glass"
+type = "descriptive"
+lore = "Through the glass, you can see an other small room. As there is no light in this room, there is not a lot of things you can see..."
+position = "West"
+
+[item]
+
+name = "calendar"
+type = "descriptive"
+lore = "The calendar is open on the November 2028 page."
+position = "North"
+
+[item]
+
+name = "door"
+type = "door"
+description = "The door opens with a soft sound. You cross it, and it closes."
+position = "West"
+target = "lab-portal-room"
+
+[lock]
+
+type = "condition"
+condition = """characters.Scientist.attributes.step != null && characters.Scientist.attributes.step == 3"""
+message = "The door doesn't open."
 
 [room]
 
-id = "classroom"
-name = "Classroom"
-ambient = """You are in a dark classroom, only lit by moon rays coming through the windows. In the room, there are 5 lines rows of tables with 10 chairs in each row. The blackboard is perfectly clean."""
+id = "lab-portal-room"
+name = "Experiment Room"
+ambient = "The room is smaller than the control room, and almost empty. When you enter, a small red light is turned on."
 
-    [item]
-    name = "door"
-    type = "door"
-    description = "You go through the door."
-    position = "West"
-    target = "hall"
+[item]
 
-    [item]
-    name = "schedule"
-    type = "descriptive"
-    position = "West"
-    lore = "The room seems to be used mostly for Calculus and Algebra classes... The title reads 'MA A0 364 - Fall 2000'"
+name = "chair"
+id = "chair"
+position = "Center"
+type = "switch"
 
-[room]
-id = "hall"
-name = "Hall"
-ambient = "You arrive in a dark hall."
+states.0 = "raised"
+states.1 = "seated"
 
-    [item]
-    name = "door"
-    type = "door"
-    description = ""
-    position = "North"
-    target = "outside"
+transitions.seated = "You seat on the chair."
+transitions.raised = "You stand up."
 
-        [lock]
-        type = "condition"
-        condition = "false"
-        message = "The door is locked..."
+[item]
 
-    [item]
-    name = "door"
-    type = "door"
-    description = ""
-    position = "South"
-    target = "outside"
+name = "door"
+type = "door"
+description = "Uh-oh, this should not happen"
+position = "East"
+target = "lab-control"
 
-        [lock]
-        type = "condition"
-        condition = "false"
-        message = "The door is locked..."
+[lock]
 
-    [item]
-    name = "door"
-    type = "door"
-    description = "You go through the door"
-    position = "East"
-    target = "classroom"
+type = "condition"
+condition = "self.name != characters.player.name"
+message = "The door doesn't open."
 
-    [item]
-    name = "door"
-    type = "door"
-    description = "You go through the door"
-    position = "West"
-    target = "guards-office"
 
-        [lock]
-        type = "condition"
-        condition = "self.name == characters.player.name && self.currentName != characters.player.name"
-        message = "The door is locked..."
 
-[room]
-id = "guards-office"
-name = "Guard's Office"
-ambient = "You reach a small office, lit only by the small CCTV monitoring screens."
-
-    [item]
-    name = "screen"
-    type = "descriptive"
-    lore = "The images on the screen show mostly empty dark corridors."
-    position = "South"
-
-    [item]
-    name = "bed"
-    id = "bed"
-    type = "switch"
-    position = "West"
-
-    states.0 = "raised"
-    states.1 = "lying"
-
-    transitions.lying = "You lay down on the bed."
-    transitions.raised = "You stand up."
-
-    [item]
-    name = "door"
-    type = "door"
-    description = "You go through the door"
-    position = "East"
-    target = "hall"

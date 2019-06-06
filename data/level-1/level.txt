@@ -1,18 +1,10 @@
 [level]
 
-name = "1 - The Past"
+name = "Intro"
 currency = "coin"
-levelFailure = "characters.player.attributes.captured != null && characters.player.attributes.captured"
-startTime = "23:00:00"
-levelSuccess = """rooms.`guards-office`.switches.bed == "lying""""
-startText = """After about one minute, you finally stop falling and land on the ground. The chair has disappeared. You open your eyes..."""
-endText = """You quickly fall asleep..."""
-
-[routine]
-
-start = "23:05:00"
-repeat = 90000000
-message = "Tip: you can control other characters"
+levelFailure = "totalTime > 86400"
+startTime = "6:00:00"
+levelSuccess = """characters.`System`.attributes.done == true"""
 
 [room]
 id = "hidden"
@@ -25,5 +17,6 @@ type = "descriptive"
 lore = "It's an old photo of your mom and your dad, taken when they were still at college together. They are both smiling. Your dad stands on the left, and has blonde hair with blue eyes."
 
 [player]
-room = "classroom"
+
+room = "lab-control"
 inv.`photo given by mom` = 1
