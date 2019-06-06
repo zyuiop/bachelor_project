@@ -12,21 +12,21 @@ import scala.collection.mutable
 /**
   * @author Louis Vialar
   */
-class CharacterExecutionContext(program: Expression, triggers: List[When], interrupts: List[On], entity: CharacterState) extends BaseExecutionContext with MessageHandler {
+class CharacterExecutionContext(program: Expression, triggers: List[When], interrupts: List[On], character: CharacterState) extends BaseExecutionContext with MessageHandler {
   private var currentTime = 0
 
   private def env(additionnal: Map[String, Environment] = Map()): Environment = MapEnvironment(
     // Shortcuts for self attributes
-    entity.attributes.mapValues(ValueEnvironment) ++
+    character.attributes.mapValues(ValueEnvironment) ++
       // Actual env, overrides self attributes if same name
       Map(
         "time" -> ValueEnvironment(Scheduler.timeToDayTime(currentTime).toString),
         "totalTime" -> ValueEnvironment(currentTime.toString),
         "characters" -> PassByNameEnvironment(() => MapEnvironment(
-          GameState.registry.getCharacters(entity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
-            .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
+          GameState.registry.getCharacters(character.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
+            .toMap + ("me" -> ObjectMappingEnvironment(character)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
         )),
-        "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
+        "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(character.currentRoom)),
         "state" -> PassByNameEnvironment(() => ObjectMappingEnvironment(GameState.get))
       ) ++ additionnal)
 
@@ -125,8 +125,8 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
       case Do(act, immediate, blocking) =>
         // Compile action
         val command = resolve(act).asString.split(" ")
-        val action = entity.updateParser(ActionsRegistry.actionsParser)(command).get
-        val time = action(entity)
+        val action = character.updateParser(ActionsRegistry.actionsParser)(command).get
+        val time = action(character)
 
         if (!immediate)
           suspendFor(time)
@@ -138,10 +138,10 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
         if (path.length == 1 || (path.length == 3 && path.head == "characters" && path(2) == "attributes")) {
           val key = path.last
           val entity: CharacterState = if (path.length > 1) path(1) match {
-            case "me" => this.entity
+            case "me" => this.character
             case "player" => GameState.registry.player
-            case other => GameState.registry.getCharacters(this.entity.currentRoom).find(_.name == other).get
-          } else this.entity // Shortcut
+            case other => GameState.registry.getCharacters(this.character.currentRoom).find(_.name == other).get
+          } else this.character // Shortcut
 
           entity.changeAttribute(key, resolve(value) match {
             case NullValue => null

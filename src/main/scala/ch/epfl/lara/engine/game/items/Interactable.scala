@@ -9,7 +9,7 @@ import ch.epfl.lara.engine.game.characters.CharacterState
   */
 trait Interactable extends Item {
   /**
-    * Computes the result of the player interacting with this entity
+    * Computes the result of the player interacting with this item
     *
     * @param state the state of the player interacting
     * @return the time the interaction took

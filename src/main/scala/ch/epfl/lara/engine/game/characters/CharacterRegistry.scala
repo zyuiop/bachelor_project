@@ -10,7 +10,7 @@ import scala.collection.mutable
   */
 class CharacterRegistry {
   /**
-    * Returns the first entity that is an instance of [[PlayerState]]
+    * Returns the first character that is an instance of [[PlayerState]]
     */
   def player: CharacterState = characters.filter(_.isInstanceOf[PlayerState]).head
 

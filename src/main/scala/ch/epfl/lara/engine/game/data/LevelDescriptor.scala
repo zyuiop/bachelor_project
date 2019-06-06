@@ -13,7 +13,7 @@ import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
 /**
   * @author Louis Vialar
   */
-case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterState], routines: List[RoutineDescriptor],
+case class LevelDescriptor(rooms: Map[String, Room], characters: List[CharacterState], routines: List[RoutineDescriptor],
                            data: LevelData, playerBuilder: (PrintStream, Option[String] => Unit) => PlayerState) {
 
   def startLevel(implicit printStream: PrintStream, imageSetter: Option[String] => Unit) = {
@@ -36,7 +36,7 @@ case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterSta
     }
 
     // Init characters
-    entities.foreach(_.spawn())
+    characters.foreach(_.spawn())
 
     val player = playerBuilder(printStream, imageSetter)
 

@@ -13,7 +13,7 @@ class SwitchItem(states: Seq[String], stateTransitions: Map[String, String], val
   def currentState: String = _currentState
 
   /**
-    * Computes the result of the player interacting with this entity
+    * Computes the result of the player interacting with this item
     *
     * @param state the state of the player interacting
     * @return the time the interaction took

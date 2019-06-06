@@ -47,7 +47,7 @@ class Room(val id: String, val name: String, val ambient: String, val image: Opt
   }
 
   /**
-    * Handles a message, forwarding it to all the entities in the room
+    * Handles a message, forwarding it to all the characters in the room
     * @param message the message to handle
     */
   def handle(message: Message): Unit = {
