@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.items.locks
 
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.items.{Interactable, Item}
 
 /**

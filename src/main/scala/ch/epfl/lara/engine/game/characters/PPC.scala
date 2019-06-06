@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.entities
+package ch.epfl.lara.engine.game.characters
 
 import ch.epfl.lara.engine.game.messaging.Message
 import ch.epfl.lara.engine.game.messaging.Message.{ReleasedControl, TakenControl}

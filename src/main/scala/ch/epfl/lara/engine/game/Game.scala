@@ -5,7 +5,7 @@ import java.io.PrintStream
 import ch.epfl.lara.engine.game.actions._
 import ch.epfl.lara.engine.game.actions.general._
 import ch.epfl.lara.engine.game.data.{LevelParser, LevelsManager}
-import ch.epfl.lara.engine.game.entities.PlayerState
+import ch.epfl.lara.engine.game.characters.PlayerState
 import ch.epfl.lara.engine.game.items.interactables.{BookItem, DescriptiveItem, DoorItem, InventoryHolderItem, SwitchItem}
 import ch.epfl.lara.engine.game.items.locks.{InvisibleLock, PhysicalLock}
 

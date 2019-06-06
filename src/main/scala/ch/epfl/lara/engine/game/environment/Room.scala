@@ -51,7 +51,7 @@ class Room(val id: String, val name: String, val ambient: String, val image: Opt
     * @param message the message to handle
     */
   def handle(message: Message): Unit = {
-    GameState.registry.getEntities(this).foreach(_ ! message)
+    GameState.registry.getCharacters(this).foreach(_ ! message)
   }
 
   /**

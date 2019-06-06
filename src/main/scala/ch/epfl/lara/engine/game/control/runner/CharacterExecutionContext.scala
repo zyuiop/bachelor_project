@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.control.runner
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{ActionParser, ActionsRegistry}
 import ch.epfl.lara.engine.game.control.compiler.Tree._
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
@@ -23,7 +23,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
         "time" -> ValueEnvironment(Scheduler.timeToDayTime(currentTime).toString),
         "totalTime" -> ValueEnvironment(currentTime.toString),
         "characters" -> PassByNameEnvironment(() => MapEnvironment(
-          GameState.registry.getEntities(entity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
+          GameState.registry.getCharacters(entity.currentRoom).map(state => (state.name, ObjectMappingEnvironment(state)))
             .toMap + ("me" -> ObjectMappingEnvironment(entity)) + ("player" -> ObjectMappingEnvironment(GameState.registry.player))
         )),
         "room" -> PassByNameEnvironment(() => ObjectMappingEnvironment(entity.currentRoom)),
@@ -140,7 +140,7 @@ class CharacterExecutionContext(program: Expression, triggers: List[When], inter
           val entity: CharacterState = if (path.length > 1) path(1) match {
             case "me" => this.entity
             case "player" => GameState.registry.player
-            case other => GameState.registry.getEntities(this.entity.currentRoom).find(_.name == other).get
+            case other => GameState.registry.getCharacters(this.entity.currentRoom).find(_.name == other).get
           } else this.entity // Shortcut
 
           entity.changeAttribute(key, resolve(value) match {

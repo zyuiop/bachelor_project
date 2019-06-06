@@ -5,7 +5,7 @@ import java.io.PrintStream
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.control.ActionCompiler
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
-import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
+import ch.epfl.lara.engine.game.characters.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.environment.Room
 import ch.epfl.lara.engine.game.items.Storable
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
@@ -31,7 +31,7 @@ case class LevelDescriptor(rooms: Map[String, Room], entities: List[CharacterSta
     routines.foreach { case RoutineDescriptor(start, every, message) =>
       val msg = SystemMessage(message)
       state.scheduler.runRegular(if (start >= startTime) start - startTime else 24 * 3600 - start - startTime, every)(_ => {
-        state.registry.entities.foreach(_ ! msg)
+        state.registry.characters.foreach(_ ! msg)
       })
     }
 

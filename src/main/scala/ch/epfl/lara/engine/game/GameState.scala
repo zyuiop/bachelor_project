@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game
 
 import ch.epfl.lara.engine.game.control.runner.ConditionExecutionContext
 import ch.epfl.lara.engine.game.data.LevelDescriptor
-import ch.epfl.lara.engine.game.entities.EntitiesRegistry
+import ch.epfl.lara.engine.game.characters.CharacterRegistry
 import ch.epfl.lara.engine.game.environment.Room
 import ch.epfl.lara.engine.game.items.Storable
 import ch.epfl.lara.engine.game.scheduler.Scheduler
@@ -24,7 +24,7 @@ class GameState(val level: Map[String, Room], val startTime: Int, val currency: 
   GameState.instance = Some(this)
 
   val scheduler: Scheduler = new Scheduler(startTime)
-  val registry: EntitiesRegistry = new EntitiesRegistry
+  val registry: CharacterRegistry = new CharacterRegistry
 
   def isLevelComplete: Boolean = levelSuccess.checkCondition()
 
@@ -43,5 +43,5 @@ object GameState {
 
   def level: Map[String, Room] = get.level
 
-  def registry: EntitiesRegistry = get.registry
+  def registry: CharacterRegistry = get.registry
 }

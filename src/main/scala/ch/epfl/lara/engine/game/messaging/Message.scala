@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.messaging
 
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.items.Storable
 import ch.epfl.lara.engine.game.messaging.Message.{SystemMessage, TradeRequestResult}
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest

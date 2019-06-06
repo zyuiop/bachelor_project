@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.data
 
 import java.io.{File, FileFilter, PrintStream}
 
-import ch.epfl.lara.engine.game.entities.PlayerState
+import ch.epfl.lara.engine.game.characters.PlayerState
 
 /**
   * @author Louis Vialar

@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.entities
+package ch.epfl.lara.engine.game.characters
 
 import java.io.PrintStream
 
@@ -59,11 +59,11 @@ class CharacterState(startRoom: Room,
   }
 
   def spawn(): Unit = {
-    GameState.registry.addEntity(this)
+    GameState.registry.addCharacter(this)
   }
 
   def despawn(): Unit = {
-    GameState.registry.removeEntity(this)
+    GameState.registry.removeCharacter(this)
   }
 
   def startInteracting(interactWith: ComplexInteractable): Unit = interacts.push(interactWith)

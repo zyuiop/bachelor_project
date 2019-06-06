@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
-import ch.epfl.lara.engine.game.entities.{CharacterState, PlayerState}
+import ch.epfl.lara.engine.game.characters.{CharacterState, PlayerState}
 import ch.epfl.lara.engine.game.items.InventoryLike
 import ch.epfl.lara.engine.game.messaging.Request.InventoryTradeRequest
 
@@ -14,7 +14,7 @@ import scala.util.Try
 case class ActionGive(objectName: String, quantity: Int, characterName: String) extends Action {
   override def apply(inState: CharacterState): Int = {
     val characters =
-      GameState.registry.getEntities(inState.currentRoom)
+      GameState.registry.getCharacters(inState.currentRoom)
         .filter(_.name.toLowerCase.startsWith(characterName.toLowerCase))
 
     if (characters.isEmpty) {

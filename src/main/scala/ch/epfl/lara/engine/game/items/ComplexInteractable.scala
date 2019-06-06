@@ -3,7 +3,7 @@ package ch.epfl.lara.engine.game.items
 import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 
 /**
   * An item with which you interact during a long time, using multiple commands

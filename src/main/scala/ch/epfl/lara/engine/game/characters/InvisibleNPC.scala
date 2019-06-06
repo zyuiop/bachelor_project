@@ -1,4 +1,4 @@
-package ch.epfl.lara.engine.game.entities
+package ch.epfl.lara.engine.game.characters
 import ch.epfl.lara.engine.game.environment.Room
 import ch.epfl.lara.engine.game.messaging.Message.SystemMessage
 

@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.control.runner
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.control.compiler.Tree
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.scheduler.Scheduler
 
 /**
@@ -17,7 +17,7 @@ class ConditionExecutionContext(program: Tree.Value) extends BaseExecutionContex
       "time" -> ValueEnvironment(Scheduler.timeToDayTime(currentTime).toString),
       "totalTime" -> ValueEnvironment(currentTime.toString),
       "characters" -> PassByNameEnvironment(() => MapEnvironment(
-        GameState.registry.entities.map(state => (state.name, ObjectMappingEnvironment(state))).toMap +
+        GameState.registry.characters.map(state => (state.name, ObjectMappingEnvironment(state))).toMap +
           ("player" -> ObjectMappingEnvironment(GameState.registry.player))
       )),
       "rooms" -> PassByNameEnvironment(() =>

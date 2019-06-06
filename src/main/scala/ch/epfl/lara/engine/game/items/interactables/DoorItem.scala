@@ -1,7 +1,7 @@
 package ch.epfl.lara.engine.game.items.interactables
 
 import ch.epfl.lara.engine.game.GameState
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.items.{Interactable, Item}
 import ch.epfl.lara.engine.game.messaging.Message.RoomMovement
 

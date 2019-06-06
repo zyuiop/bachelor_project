@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.items.locks
 
 import java.io.PrintStream
 
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 import ch.epfl.lara.engine.game.items.{ComplexInteractable, Interactable, Item}
 
 import scala.io.AnsiColor

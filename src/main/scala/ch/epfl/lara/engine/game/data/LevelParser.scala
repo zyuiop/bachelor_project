@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.data
 
 import java.io.{File, PrintStream, Reader}
 
-import ch.epfl.lara.engine.game.entities._
+import ch.epfl.lara.engine.game.characters._
 import ch.epfl.lara.engine.game.environment._
 import ch.epfl.lara.engine.game.items.interactables.DoorItem
 import ch.epfl.lara.engine.game.items.locks.InvisibleLock

@@ -1,6 +1,6 @@
 package ch.epfl.lara.engine.game.items
 
-import ch.epfl.lara.engine.game.entities.CharacterState
+import ch.epfl.lara.engine.game.characters.CharacterState
 
 /**
   * An item with which you can interact

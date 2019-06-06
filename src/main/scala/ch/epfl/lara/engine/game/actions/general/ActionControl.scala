@@ -2,7 +2,7 @@ package ch.epfl.lara.engine.game.actions.general
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{Action, ActionBuilder}
-import ch.epfl.lara.engine.game.entities.{CharacterState, PPC, PlayerState}
+import ch.epfl.lara.engine.game.characters.{CharacterState, PPC, PlayerState}
 
 import scala.util.Try
 
@@ -23,7 +23,7 @@ case class ActionControl(characterName: String) extends Action {
     }
 
     val characters =
-      GameState.registry.getEntities(inState.currentRoom)
+      GameState.registry.getCharacters(inState.currentRoom)
         .filter(_.name.toLowerCase.startsWith(characterName.toLowerCase))
 
     if (characters.isEmpty) {
