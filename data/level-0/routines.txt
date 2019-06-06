@@ -1,0 +1,20 @@
+[character]
+
+name = "System"
+room = "lab-portal-room"
+position = "Center"
+type = "invisible"
+
+[programStart]
+
+start := false
+when (characters.player.attributes.ready == true && !start) {
+    start := true
+    do blocking "wait 10"
+    do blocking "say The light starts to blink, and the floor shakes."
+    do blocking "wait 10"
+    do blocking "say A very bright light suddenly surrounds you, as you start falling endlessly..."
+    done := true
+}
+
+[programEnd]

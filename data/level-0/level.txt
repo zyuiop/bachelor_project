@@ -1,0 +1,22 @@
+[level]
+
+name = "Intro"
+currency = "coin"
+levelFailure = "totalTime > 86400"
+startTime = "6:00:00"
+levelSuccess = """characters.`System`.attributes.done == true"""
+
+[room]
+id = "hidden"
+name = ""
+ambient = ""
+
+[item]
+name = "photo given by mom"
+type = "descriptive"
+lore = "It's an old photo of your mom and your dad, taken when they were still at college together. They are both smiling. Your dad stands on the left, and has blonde hair with blue eyes."
+
+[player]
+
+room = "lab-control"
+inv.`photo given by mom` = 1

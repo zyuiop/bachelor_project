@@ -1,0 +1,55 @@
+[character]
+
+name = "Scientist"
+room = "lab-control"
+position = "Center"
+type = "NPC"
+
+[programStart]
+
+do blocking "say Okay, so let's recap"
+do blocking "wait 10"
+do blocking "say You came here to to meet your father who disappeared 22 years ago, to ask him to come to your wedding that is, correct me if I'm wrong, in june 2029. Is that right?"
+
+step := 1
+
+on (TalkingMessage) {
+  lc := trigger.content.toLowerCase
+  if ("yes" in lc || "indeed" in lc || "absolutely" in lc || "understood" in lc) {
+    if (step == 1) {
+      do blocking "say All right. I guess that's enough, after all you were the only voluntary to participate in this experiment..."
+      do blocking "say Of course, I should warn you that time travel is very dangerous and that our machine was only tested with flies and chipmunks so far, so it's a bit hard to confirm it will send you back in time in one piece."
+      do blocking "say Is that still good for you?"
+      step := 2
+    } else if (step == 2) {
+      do blocking "say Hmmm, I see you're not the kind of person that gets intimidated by this kind of things... Well, okay then, you can go in the experiment room."
+      step := 3
+    }
+  }
+}
+
+on (RoomMovement) {
+  if (trigger.sentBy.name == characters.player.name && step == 3) {
+    do blocking "go West"
+    do blocking "wait 10"
+    do blocking "say Alright, now sit on this chair please."
+    step := 4
+  }
+}
+
+when (room.switches.chair == "seated" && step == 4) {
+  step := 5
+  do blocking "say Good, now wait, I just have to make sure you won't escape during the experiment (laughs)"
+  do blocking """say Just kidding, I just have to tie you, because if you move too much, well, some "problems" may happen"""
+  do blocking "wait 50"
+  do blocking "say And here... it... is! Great! Stay here! (laughs) Oooh, I'm so funny today!"
+  do blocking "say Anyway, sorry about that. I'll send you back in November 2000, when your father was still a master student at EPFL, so that you can investigate about him and talk to him"
+  do blocking "say Don't forget to note if anything goes wrong while you're there. And when you want to come back, well, you'll have to find the return portal."
+  do blocking "say I don't exactly know where it will be, but it should be less than 500m away from the place where you'll appear."
+  do blocking "say Good luck!"
+  do blocking "go East"
+  step := 6
+  characters.player.attributes.ready := true
+}
+
+[programEnd]
