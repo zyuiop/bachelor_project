@@ -13,22 +13,10 @@ import scala.util.Random
 class DoorItem(val displayName: String, targetRoom: String, description: List[String]) extends Item with Interactable {
   override def interact(state: CharacterState): Int = {
     state.ps.println(description(Random.nextInt(description.size)).capitalize + ".")
-
     val room = GameState.level(targetRoom)
-    val prev = state.currentRoom
-
-    state.ps.println(room.describe())
-
-    room ! RoomMovement(state, entering = true)
-
-    state.currentRoom = room
-
-    prev ! RoomMovement(state, entering = false)
-
+    state.changeRoom(room)
     7
   }
-
-  override def isDoor: Boolean = true
 
   override def describe: String = super.describe + " leading to " + GameState.level(targetRoom).name
 }

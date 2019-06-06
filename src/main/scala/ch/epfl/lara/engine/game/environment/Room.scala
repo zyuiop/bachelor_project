@@ -4,7 +4,7 @@ import java.io.PrintStream
 
 import ch.epfl.lara.engine.game.GameState
 import ch.epfl.lara.engine.game.actions.{ActionInterceptor, ActionParser}
-import ch.epfl.lara.engine.game.items.interactables.SwitchItem
+import ch.epfl.lara.engine.game.items.interactables.{DoorItem, SwitchItem}
 import ch.epfl.lara.engine.game.items._
 import ch.epfl.lara.engine.game.messaging.{Message, MessageHandler}
 
@@ -26,6 +26,9 @@ class Room(val id: String, val name: String, val ambient: String, val image: Opt
 
   override def updateParser(previousParser: ActionParser): ActionParser = inventory.updateParser(previousParser)
 
+  /**
+    * Returns a string that describes the room and its content
+    */
   def describe(): String = {
     def describeInteracts: String = {
       if (interactable.nonEmpty) {
@@ -43,26 +46,44 @@ class Room(val id: String, val name: String, val ambient: String, val image: Opt
        |$describeInteracts""".stripMargin
   }
 
+  /**
+    * Handles a message, forwarding it to all the entities in the room
+    * @param message the message to handle
+    */
   def handle(message: Message): Unit = {
     GameState.registry.getEntities(this).foreach(_ ! message)
   }
 
-  def getInteractableItem(name: String, position: Option[Position] = None): Option[Item with Interactable] = {
+  /**
+    * Get an interactable by its name
+    * @param name the name of the item
+    * @return
+    */
+  def getInteractableItem(name: String): Option[Interactable] = {
     interactable.get(name.toLowerCase).flatMap(m => {
-      if (m.size > 1) position.flatMap(p => m.get(p))
+      if (m.size > 1) None
       else if (m.isEmpty) None
       else Some(m.head._2)
     })
   }
 
-  def getDoor(position: Position): Option[Item with Interactable] = {
-    val doors = interactable.values.flatMap(m => m.get(position)).filter(_.isDoor)
+  /**
+    * Get a door at a given position
+    * @param position the position at which the door should be
+    * @return
+    */
+  def getDoor(position: Position): Option[Interactable] = {
+    val doors = interactable.values.flatMap(m => m.get(position)).filter(_.underlying.isInstanceOf[DoorItem])
     if (doors.size > 1) None
     else doors.headOption
   }
 
+  /**
+    * Get the values of all the switches in the room
+    * @return
+    */
   def switches: Map[String, String] = interactable.values.flatMap(_.values)
-    .filter(_.isInstanceOf[SwitchItem]).map(_.asInstanceOf[SwitchItem])
+    .filter(_.underlying.isInstanceOf[SwitchItem]).map(_.underlying.asInstanceOf[SwitchItem])
     .map(switch => switch.name -> switch.currentState)
     .toMap
 

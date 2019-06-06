@@ -12,7 +12,15 @@ abstract class Lock(val locked: Item with Interactable) extends Item with Intera
 
   override def describe: String = locked.describe
 
-  override def isDoor: Boolean = locked.isDoor
+  override def underlying: Interactable = {
+    var underlying = locked.underlying
+
+    while (underlying != underlying.underlying) {
+      underlying = underlying.underlying
+    }
+
+    underlying
+  }
 
   override def interact(state: CharacterState): Int = {
     if (isLocked(state)) interactLocked(state)

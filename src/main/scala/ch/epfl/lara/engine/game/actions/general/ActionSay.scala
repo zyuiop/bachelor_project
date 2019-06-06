@@ -11,7 +11,7 @@ import scala.util.Try
   */
 case class ActionSay(what: String) extends Action {
   override def apply(inState: CharacterState): Int = {
-    inState.currentRoom ! TalkingMessage(inState, what)
+    inState.talk(what)
 
     1 + what.split(" ").length / 3
   }

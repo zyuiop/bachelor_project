@@ -178,6 +178,7 @@ object LevelParser extends RegexParsers {
           val program = prog.map(_._2).getOrElse("")
 
           if (kind == "ppc") new PPC(cstate, program)
+          else if (kind == "invisible") new InvisibleNPC(cstate, program)
           else new ProgrammedNPC(cstate, program)
         }
       }

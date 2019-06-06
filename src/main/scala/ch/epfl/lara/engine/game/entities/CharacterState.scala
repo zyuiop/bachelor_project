@@ -36,7 +36,7 @@ class CharacterState(startRoom: Room,
 
   def currentRoom: Room = _currentRoom
 
-  def changeRoom(room: Room) = {
+  def changeRoom(room: Room): Unit = {
     ps.println(room.describe())
 
     val prev = currentRoom
@@ -50,7 +50,7 @@ class CharacterState(startRoom: Room,
 
   def attributes: Map[String, String] = _attributes.toMap
 
-  def currentRoom_=(target: Room): Unit = {
+  protected def currentRoom_=(target: Room): Unit = {
     this._currentRoom = target
   }
 
@@ -111,6 +111,8 @@ class CharacterState(startRoom: Room,
 
     currentInteract.foldRight(parser)((i, p) => i.updateParser(p))
   }
+
+  def talk(message: String) = currentRoom ! TalkingMessage(this, message)
 }
 
 

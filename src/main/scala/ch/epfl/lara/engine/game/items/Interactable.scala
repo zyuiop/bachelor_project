@@ -16,5 +16,10 @@ trait Interactable extends Item {
     */
   def interact(state: CharacterState): Int
 
-  def isDoor: Boolean = false
+  /**
+    * Returns the actual item, in case of multi-layered items (for example, locks).<br>
+    *   This method usually returns `this` but if the item wraps an other item, it will actually return the first item that
+    *   doesn't wrap another item
+    */
+  def underlying: Interactable = this
 }
