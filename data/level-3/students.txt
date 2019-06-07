@@ -1,0 +1,64 @@
+[character]
+
+name = "Student A"
+room = "classroom-a"
+position = "Center"
+type = "NPC"
+
+[programStart]
+
+when (characters.player.currentRoom.id != characters.me.currentRoom.id) {
+    do "wait 1"
+}
+
+found := false
+
+on (RoomMovement) {
+  if (trigger.sentBy.name == characters.player.name) {
+    if (trigger.entering && (found == null || !found)) {
+      found := true
+
+      do now "say (whispering) ...did you see Thomas and Alice"
+      do "wait 10"
+      do now "say (whispering) Because they are really cute together! I heard he's taking her on a date tonight!"
+      characters.player.attributes.knows_date := true
+      do "wait 10"
+      do now "say (whispering) Uuurrrrgh, your not funny!"
+    }
+  }
+}
+
+[programEnd]
+
+[character]
+
+name = "Student B"
+room = "classroom-a"
+position = "Center"
+type = "NPC"
+
+[programStart]
+
+when (characters.player.currentRoom.id != characters.me.currentRoom.id) {
+    do "wait 1"
+}
+
+found := false
+
+on (RoomMovement) {
+  if (trigger.sentBy.name == characters.player.name) {
+    if (trigger.entering && (found == null || !found)) {
+      found := true
+
+      do "wait 10"
+      do now "say (whispering) Hmmm well not recently why?"
+      do "wait 10"
+      do now "say (whispering) Am I supposed to care?"
+      do "wait 10"
+      do now "say (whispering) I usually am but I'm trying to listen to the course right now"
+
+    }
+  }
+}
+
+[programEnd]

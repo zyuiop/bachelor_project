@@ -106,7 +106,7 @@ object LevelParser extends RegexParsers {
           val items = (optItems filter (_.isDefined) map (_.get)) ++ v1
 
           val interactables: Map[String, Map[Position, Item with Interactable]] =
-            items.groupBy(_._2.displayName).mapValues(_.groupBy(_._1).mapValues(_.head._2))
+            items.groupBy(_._2.displayName.toLowerCase).mapValues(_.groupBy(_._1).mapValues(_.head._2))
 
           val startInv = props.inventory("inv")
 
@@ -233,7 +233,13 @@ object LevelParser extends RegexParsers {
 
       val doorTypes = types.map { case t: DoorType => t.name -> t } toMap
 
-      val mappedDoors = doors.foldLeft(Map.empty[String, List[(Position, Interactable)]])((map, obj) => map ++ obj.asInstanceOf[DoorBuilder](doorTypes))
+      val mappedDoors = doors.foldLeft(Map.empty[String, List[(Position, Interactable)]])((map, obj) => {
+        map ++ obj.asInstanceOf[DoorBuilder](doorTypes).map {
+          case (k, v) if map.contains(k) =>
+            (k, v ++ map(k))
+          case (k, v) => (k, v)
+        }
+      })
       val reg = rooms.map(_.asInstanceOf[RoomBuilder]).map(builder => builder.roomId -> {
         builder(mappedDoors.getOrElse(builder.roomId, List()))
       }).toMap

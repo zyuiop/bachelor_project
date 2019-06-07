@@ -1,0 +1,186 @@
+[room]
+id = "outside"
+name = "Outside"
+ambient = "You go outside. It's cold, and it's raining."
+
+[doortype]
+name = "door"
+leftToRight.0 = "you go through the door"
+
+[door]
+left = "corridor"
+right = "classroom-a"
+leftPos = "West"
+rightPos = "East"
+doorType = "door"
+
+[door]
+left = "corridor"
+right = "classroom-b"
+leftPos = "North"
+rightPos = "South"
+doorType = "door"
+
+[door]
+left = "corridor"
+right = "toilets"
+leftPos = "North-East"
+rightPos = "West"
+doorType = "door"
+
+[room]
+id = "classroom-a"
+name = "Classroom"
+ambient = "You are in a medium-sized classroom. A course is taking place here, probably Calculus. There are around 70 students."
+
+[room]
+id = "classroom-b"
+name = "Classroom"
+ambient = "There are a few students talking. It seems that they are in break-time, and that the course will resume shortly."
+
+inv.diary = 1
+
+    [item]
+    name = "diary"
+    type = "book"
+
+    pages.cover = "Thomas' Diary - School Year 2000-2001"
+    pages.scribbles = "Locker no.: 209"
+    pages.calendar = """December 20th: End of 1st semester\nJanuary 14th-28th: Exams\nMarch 9th: Alice's birthday\nApril 17th: Two years anniversary <3\nMay 4th: My birthday\nJune 5th: End of second semester\nJune 19th-July 4th: Exams"""
+
+[room]
+id = "toilets"
+name = "Toilets"
+ambient = "You are in the toilets. They are rather clean, the cleaners probably came here recently."
+
+    [item]
+    name = "door"
+    type = "door"
+    target = "toilets-cab1"
+    position = "North-West"
+
+    [item]
+    name = "door"
+    type = "door"
+    target = "toilets-cab2"
+    position = "North"
+
+        [lock]
+
+        type = "condition"
+        condition = "false"
+        message = "The door is locked... There is probably someone inside."
+
+    [item]
+    name = "door"
+    type = "door"
+    target = "toilets-cab3"
+    position = "North-East"
+
+[room]
+id = "toilets-cab1"
+name = "Cabin 1"
+ambient = "The toilets are clean. "
+
+    [item]
+    name = "toilets"
+    type = "descriptive"
+    lore = "You use the toilets."
+    position = "Center"
+
+    [item]
+    name = "scribbles"
+    type = "descriptive"
+    lore = "There are scribbles on the door: 'Make love not war', 'Did anyone see my dog?'"
+    position = "South"
+
+    [item]
+    name = "door"
+    type = "door"
+    target = "toilets"
+    position = "South"
+
+[room]
+id = "toilets-cab2"
+name = "Cabin 2"
+ambient = "The cabin is busy."
+[room]
+id = "toilets-cab3"
+name = "Cabin 3"
+ambient = "The toilets are clean."
+
+inv.`concert ticket` = 1
+
+    [item]
+    name = "toilets"
+    type = "descriptive"
+    lore = "You use the toilets."
+    position = "Center"
+
+    [item]
+    name = "scribbles"
+    type = "descriptive"
+    lore = "There are scribbles on the wall: 'My teacher is the best!', 'Thomas ❤ Alice'"
+    position = "West"
+
+    [item]
+    name = "door"
+    type = "door"
+    target = "toilets"
+    position = "South"
+
+[room]
+id = "corridor"
+name = "Corridor"
+ambient = "The corridor is quite large, but still crowded."
+
+        [item]
+        name = "door"
+        type = "door"
+        position = "South"
+        target = "outside"
+
+            [lock]
+            type = "condition"
+            condition = """characters.player.attributes.knows_date != null && characters.player.attributes.knows_date && rooms.corridor.switches.noticeboard == "seen" && "photo" in characters.player.inventory.content"""
+            message = "Hmmm, there is probably nothing to find outside, I should focus on this area..."
+
+
+        [item]
+        name = "photo"
+        type = "descriptive"
+        lore = "It's a recent photo of your mom and your dad. They are both smiling. Your dad stands on the left, and has blonde hair with blue eyes."
+
+
+        [item]
+        name = "locker"
+        type = "inventory"
+
+        position = "East"
+        inv.photo = 1
+        inv.textbooks = 5
+
+            [lock]
+            type = "lock"
+            name = "padlock"
+            helper = "It has 6 digits."
+            code = "041799"
+
+            [lock]
+            type = "condition"
+            message = "You don't know what locker to look into..."
+            condition = """"diary" in characters.player.inventory.getContent"""
+
+        [item]
+        name = "noticeboard"
+        type = "switch"
+        infinite = "false"
+        position = "West"
+
+        id = "noticeboard"
+
+        states.0 = "not_seen"
+        states.1 = "seen"
+
+        transitions.not_seen = "."
+        transitions.seen = "You look at the noticeboard, and see a lot of posters for a Musical concert tonight."

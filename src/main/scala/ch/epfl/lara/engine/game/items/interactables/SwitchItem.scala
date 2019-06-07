@@ -7,7 +7,7 @@ import ch.epfl.lara.engine.game.messaging.Message.SwitchChangeState
 /**
   * @author Louis Vialar
   */
-class SwitchItem(states: Seq[String], stateTransitions: Map[String, String], val name: String, override val displayName: String, val interactTime: Int = 3) extends Item with Interactable {
+class SwitchItem(states: Seq[String], stateTransitions: Map[String, String], val name: String, override val displayName: String, val interactTime: Int = 3, val isInfinite: Boolean = true) extends Item with Interactable {
   private var _currentState = states.head
 
   def currentState: String = _currentState
@@ -20,7 +20,7 @@ class SwitchItem(states: Seq[String], stateTransitions: Map[String, String], val
     */
   override def interact(state: CharacterState): Int = {
     val nextStateIndex = states.indexOf(currentState) + 1
-    val nextState = if (nextStateIndex >= states.size) states.head else states(nextStateIndex)
+    val nextState = if (nextStateIndex >= states.size) (if (isInfinite) states.head else states.last) else states(nextStateIndex)
     val transition = stateTransitions(nextState)
 
     state.ps.println(transition)

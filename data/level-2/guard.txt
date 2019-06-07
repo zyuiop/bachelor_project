@@ -36,19 +36,4 @@ on (RoomMovement) {
   }
 }
 
-when (room.switches.chair == "seated" && step == 4) {
-  step := 5
-  do blocking "say Good, now wait, I just have to make sure you won't escape during the experiment (laughs)"
-  do blocking """say Just kidding, I just have to tie you, because if you move too much, well, some "problems" may happen"""
-  do blocking "wait 50"
-  do blocking "say And here... it... is! Great! Stay here! (laughs) Oooh, I'm so funny today!"
-  do blocking "say Anyway, sorry about that. I'll send you back in November 2000, when your father was still a master student at EPFL, so that you can investigate about him and talk to him"
-  do blocking "say Don't forget to note if anything goes wrong while you're there. And when you want to come back, well, you'll have to find the return portal."
-  do blocking "say I don't exactly know where it will be, but it should be less than 500m away from the place where you'll appear."
-  do blocking "say Good luck!"
-  do blocking "go East"
-  step := 6
-  characters.player.attributes.ready := true
-}
-
 [programEnd]

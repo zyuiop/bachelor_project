@@ -1,12 +1,12 @@
 [level]
 
-name = "1 - The Past"
+name = "1 - Finding clues"
 currency = "coin"
-levelFailure = "(characters.player.attributes.captured != null && characters.player.attributes.captured) || totalTime > 108000"
-startTime = "23:00:00"
-levelSuccess = """rooms.`guards-office`.switches.bed == "lying""""
-startText = """After about one minute, you finally stop falling and land on the ground. The chair has disappeared. You open your eyes..."""
-endText = """You quickly fall asleep..."""
+levelFailure = "totalTime > 68400"
+startTime = "09:00:00"
+levelSuccess = """characters.player.currentRoom.id == "outside""""
+startText = "After a good night of sleep, you decide to go to the main building to try to discover more info about your father Thomas."
+endText = "You go outside and decide to wait until the concert begins..."
 
 [routine]
 
@@ -25,5 +25,5 @@ type = "descriptive"
 lore = "It's an old photo of your mom and your dad, taken when they were still at college together. They are both smiling. Your dad stands on the left, and has blonde hair with blue eyes."
 
 [player]
-room = "classroom"
+room = "corridor"
 inv.`photo given by mom` = 1

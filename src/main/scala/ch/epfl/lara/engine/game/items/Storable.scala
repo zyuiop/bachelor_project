@@ -7,15 +7,16 @@ package ch.epfl.lara.engine.game.items
 trait Storable extends Item {
   // Register the item
   Storable.registry.put(displayName, this)
+
+  override def toString: String = displayName
+
 }
 
 object Storable {
   // The regstry of all storable items
   private val registry: collection.mutable.Map[String, Storable] = collection.mutable.Map()
 
-  case class SimpleStorable(displayName: String) extends Storable {
-    override def toString: String = displayName
-  }
+  case class SimpleStorable(displayName: String) extends Storable
 
   def apply(name: String): Storable = {
     registry.getOrElse(name, SimpleStorable(name))

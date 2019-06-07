@@ -22,9 +22,7 @@ case class ActionInteract(objectName: String) extends Action {
         .orElse(
           inState.inventory.getItemByName(objectName.toLowerCase).toOption.flatMap {
             case i: Interactable => Some(i)
-            case _ =>
-              inState.ps.println("item is not an interactable")
-              None
+            case _ => None
           }
         )
 

@@ -4,7 +4,7 @@ package ch.epfl.lara.engine.game.environment
   * @author Louis Vialar
   */
 sealed trait Position {
-  val name: String = this.getClass.getCanonicalName
+
 }
 
 case object North extends Position
@@ -18,8 +18,6 @@ case object West extends Position
 case object Center extends Position
 
 case class CompoundPosition(first: Position, second: Position) extends Position {
-  override val name: String = first.name + "-" + second.name
-
   private def orientationList(orientation: Position): List[Position] = orientation match {
     case CompoundPosition(first, second) => orientationList(first) ++ orientationList(second)
     case _ => List(orientation)
@@ -33,6 +31,8 @@ case class CompoundPosition(first: Position, second: Position) extends Position 
   }
 
   override def hashCode(): Int = orientationList.hashCode()
+
+  override def toString: String = first.toString + "-" + second.toString
 }
 
 object Position {

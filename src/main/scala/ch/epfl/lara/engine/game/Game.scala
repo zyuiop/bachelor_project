@@ -26,8 +26,9 @@ abstract class Game {
     val states = props.multiVal("states") // map states.<stateName> = transition to this state
     val transitions = props.prefixed("transitions") // map states.<stateName> = transition to this state
     val time = props.get("time").flatMap(t => Try(t.toInt).toOption).getOrElse(3)
+    val infinite = props.get("infinite").forall(_.toLowerCase == "true")
 
-    new SwitchItem(states, transitions, props("id"), props("name"), time)
+    new SwitchItem(states, transitions, props("id"), props("name"), time, infinite)
   }
 
   LevelParser.registerItemType("descriptive") { props =>
